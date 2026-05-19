@@ -1,0 +1,45 @@
+import type { ActiveCapture } from '@acp-devtools/core';
+import { useDiscoveryStore } from '../store/discoveryStore';
+
+const POLL_INTERVAL_MS = 2500;
+
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+
+interface ActiveResponse {
+    captures: ActiveCapture[];
+}
+
+async function fetchActive(): Promise<ActiveCapture[]> {
+    const res = await fetch('/api/active', { headers: { accept: 'application/json' } });
+    if (!res.ok) throw new Error(`discovery: HTTP ${res.status}`);
+    const body = (await res.json()) as ActiveResponse;
+    return body.captures ?? [];
+}
+
+async function tick(): Promise<void> {
+    const store = useDiscoveryStore.getState();
+    try {
+        const captures = await fetchActive();
+        store.setCaptures(captures);
+    } catch (err) {
+        store.setError(err instanceof Error ? err.message : String(err));
+    }
+}
+
+export function startDiscoveryPolling(): () => void {
+    void tick();
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = setInterval(() => {
+        void tick();
+    }, POLL_INTERVAL_MS);
+    return () => {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+    };
+}
+
+export function refreshActive(): Promise<void> {
+    return tick();
+}

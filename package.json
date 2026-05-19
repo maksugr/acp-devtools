@@ -1,0 +1,59 @@
+{
+    "name": "acp-devtools-monorepo",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Visual debugger / inspector for the Agent Client Protocol (ACP)",
+    "type": "module",
+    "author": "Roman Ponomarev <maksugr@gmail.com> (https://github.com/maksugr)",
+    "license": "MIT",
+    "homepage": "https://github.com/maksugr/acp-devtools#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/maksugr/acp-devtools.git"
+    },
+    "bugs": {
+        "url": "https://github.com/maksugr/acp-devtools/issues"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "tsc -b packages/core packages/cli",
+        "clean": "tsc -b --clean packages/core packages/cli && rimraf packages/*/dist",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write \"**/*.{ts,js,json,md}\" --ignore-path .gitignore",
+        "format:check": "prettier --check \"**/*.{ts,js,json,md}\" --ignore-path .gitignore",
+        "typecheck": "tsc -b packages/core packages/cli --noEmit && tsc --noEmit --project packages/ui",
+        "dev:proxy": "npm run build && node packages/cli/dist/index.js proxy",
+        "dev:ui": "npm --workspace @acp-devtools/ui run dev",
+        "dev:replay": "npm run build && node packages/cli/dist/index.js replay",
+        "dev:fixture": "npm run build && node packages/cli/dist/index.js replay /tmp/webstorm-acp.db --session 18 --ws-port 3737",
+        "build:ui": "npm --workspace @acp-devtools/ui run build",
+        "mock-agent": "node examples/mock-agent.js",
+        "ws-client": "node examples/ws-client.js",
+        "prepare": "simple-git-hooks",
+        "precommit": "npm run lint && npm run typecheck && npm test"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.17.0",
+        "@types/node": "^22.10.0",
+        "eslint": "^9.17.0",
+        "globals": "^17.6.0",
+        "prettier": "^3.4.2",
+        "rimraf": "^6.0.1",
+        "simple-git-hooks": "^2.13.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.2",
+        "typescript-eslint": "^8.18.0",
+        "vitest": "^2.1.8"
+    },
+    "simple-git-hooks": {
+        "pre-commit": "npm run precommit"
+    }
+}

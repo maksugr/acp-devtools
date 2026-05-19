@@ -1,0 +1,52 @@
+{
+    "name": "acp-devtools",
+    "version": "0.1.0",
+    "description": "Visual debugger / inspector for the Agent Client Protocol (ACP) — Wireshark for AI coding agents",
+    "type": "module",
+    "main": "./dist/index.js",
+    "bin": {
+        "acp-devtools": "./dist/index.js"
+    },
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "keywords": [
+        "acp",
+        "agent-client-protocol",
+        "ai",
+        "agent",
+        "debugger",
+        "inspector",
+        "devtools",
+        "proxy",
+        "zed",
+        "jetbrains"
+    ],
+    "author": "Roman Ponomarev <maksugr@gmail.com> (https://github.com/maksugr)",
+    "license": "MIT",
+    "homepage": "https://github.com/maksugr/acp-devtools#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/maksugr/acp-devtools.git",
+        "directory": "packages/cli"
+    },
+    "bugs": {
+        "url": "https://github.com/maksugr/acp-devtools/issues"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "scripts": {
+        "build": "tsc -b",
+        "clean": "rimraf dist *.tsbuildinfo"
+    },
+    "dependencies": {
+        "@acp-devtools/core": "0.1.0",
+        "commander": "^12.1.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.0"
+    }
+}

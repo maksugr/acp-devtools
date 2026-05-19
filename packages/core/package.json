@@ -1,0 +1,54 @@
+{
+    "name": "@acp-devtools/core",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Core ACP proxy, parser, and types for acp-devtools",
+    "type": "module",
+    "author": "Roman Ponomarev <maksugr@gmail.com> (https://github.com/maksugr)",
+    "license": "MIT",
+    "homepage": "https://github.com/maksugr/acp-devtools#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/maksugr/acp-devtools.git",
+        "directory": "packages/core"
+    },
+    "bugs": {
+        "url": "https://github.com/maksugr/acp-devtools/issues"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./acp": {
+            "types": "./dist/acp/index.d.ts",
+            "import": "./dist/acp/index.js"
+        },
+        "./proxy": {
+            "types": "./dist/proxy/index.d.ts",
+            "import": "./dist/proxy/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc -b",
+        "clean": "rimraf dist *.tsbuildinfo"
+    },
+    "dependencies": {
+        "@agentclientprotocol/sdk": "^0.22.1",
+        "better-sqlite3": "^12.10.0",
+        "ws": "^8.20.1"
+    },
+    "devDependencies": {
+        "@types/better-sqlite3": "^7.6.13",
+        "@types/node": "^22.10.0",
+        "@types/ws": "^8.18.1"
+    }
+}
