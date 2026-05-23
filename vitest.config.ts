@@ -2,7 +2,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     test: {
-        environment: 'node',
+        // jsdom provides window/document/localStorage for UI store + url-state
+        // tests. Core node-only tests (better-sqlite3, ws server) still work
+        // because jsdom just layers DOM globals on top of node.
+        environment: 'jsdom',
         include: ['packages/*/src/**/*.test.ts'],
         coverage: {
             reporter: ['text', 'html'],

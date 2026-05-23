@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import type { ActiveCapture } from '@acp-devtools/core';
+import type { SavedSession } from '../api/sessions';
 
 interface DiscoveryState {
     captures: ActiveCapture[];
+    savedSessions: SavedSession[];
     selectedUrl: string | null;
     lastFetchAt: number | null;
     lastError: string | null;
 
     setCaptures: (captures: ActiveCapture[]) => void;
+    setSavedSessions: (sessions: SavedSession[]) => void;
     setSelected: (url: string | null) => void;
     setError: (msg: string | null) => void;
 }
@@ -33,11 +36,13 @@ function persistSelected(url: string | null): void {
 
 export const useDiscoveryStore = create<DiscoveryState>((set) => ({
     captures: [],
+    savedSessions: [],
     selectedUrl: loadSelected(),
     lastFetchAt: null,
     lastError: null,
 
     setCaptures: (captures) => set({ captures, lastFetchAt: Date.now(), lastError: null }),
+    setSavedSessions: (savedSessions) => set({ savedSessions }),
     setSelected: (url) => {
         persistSelected(url);
         set({ selectedUrl: url });

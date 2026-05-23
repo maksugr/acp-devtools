@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
+const tokenColor = (name) => `rgb(var(--${name}) / <alpha-value>)`;
+
 export default {
     content: ['./index.html', './src/**/*.{ts,tsx}'],
+    darkMode: 'class',
     theme: {
         extend: {
             fontFamily: {
@@ -10,31 +13,31 @@ export default {
             },
             colors: {
                 surface: {
-                    base: '#0a0d12',
-                    elev: '#10151c',
-                    row: '#141a23',
-                    rowHover: '#1a2130',
-                    sticky: '#0d1118',
+                    base: tokenColor('surface-base'),
+                    elev: tokenColor('surface-elev'),
+                    row: tokenColor('surface-row'),
+                    rowHover: tokenColor('surface-row-hover'),
+                    sticky: tokenColor('surface-sticky'),
                 },
                 line: {
-                    DEFAULT: '#1f2734',
-                    strong: '#2c374a',
-                    grid: '#161c26',
+                    DEFAULT: tokenColor('line'),
+                    strong: tokenColor('line-strong'),
+                    grid: tokenColor('line-grid'),
                 },
                 ink: {
-                    primary: '#e6ebf2',
-                    secondary: '#9aa3b3',
-                    muted: '#5b6478',
-                    dim: '#3d4555',
+                    primary: tokenColor('ink-primary'),
+                    secondary: tokenColor('ink-secondary'),
+                    muted: tokenColor('ink-muted'),
+                    dim: tokenColor('ink-dim'),
                 },
                 accent: {
-                    out: '#3df0d0',
-                    in: '#ff9d3f',
-                    error: '#ff3d75',
-                    note: '#a47cff',
-                    info: '#6fb8ff',
-                    warn: '#f5d76e',
-                    ok: '#7cf08c',
+                    out: tokenColor('accent-out'),
+                    in: tokenColor('accent-in'),
+                    error: tokenColor('accent-error'),
+                    note: tokenColor('accent-note'),
+                    info: tokenColor('accent-info'),
+                    warn: tokenColor('accent-warn'),
+                    ok: tokenColor('accent-ok'),
                 },
             },
             boxShadow: {
@@ -42,7 +45,7 @@ export default {
             },
             animation: {
                 'pulse-soft': 'pulse-soft 2.4s ease-in-out infinite',
-                'scan': 'scan 1.6s linear infinite',
+                scan: 'scan 1.6s linear infinite',
                 'enter-row': 'enter-row 240ms cubic-bezier(.2,.7,.2,1)',
             },
             keyframes: {
@@ -50,7 +53,7 @@ export default {
                     '0%, 100%': { opacity: '0.55' },
                     '50%': { opacity: '1' },
                 },
-                'scan': {
+                scan: {
                     '0%': { transform: 'translateX(-100%)' },
                     '100%': { transform: 'translateX(120%)' },
                 },

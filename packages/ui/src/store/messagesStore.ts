@@ -1,7 +1,9 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { CapturedMessage, SessionRecord, WsEvent } from '@acp-devtools/core';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error';
+export type DetailTab = 'tree' | 'raw' | 'meta';
 
 export interface Filters {
     directions: Set<CapturedMessage['direction']>;
@@ -9,6 +11,15 @@ export interface Filters {
     search: string;
     hideBoilerplate: boolean;
     showStreams: boolean;
+}
+
+export interface Playback {
+    /** When non-null, messages with seq > value are hidden from view. */
+    cap: number | null;
+    /** Auto-advance is running. */
+    playing: boolean;
+    /** Playback speed multiplier (1 = real-time by timestamp). */
+    speed: number;
 }
 
 interface MessagesState {
@@ -19,6 +30,8 @@ interface MessagesState {
     selectedSeq: number | null;
     replayDone: boolean;
     filters: Filters;
+    playback: Playback;
+    detailTab: DetailTab;
     /**
      * Highest seq the user wanted to "clear past". Subsequent replay events
      * with seq <= this are dropped, so reconnect/backlog re-delivery does not
@@ -34,6 +47,10 @@ interface MessagesState {
     toggleKind: (kind: CapturedMessage['kind']) => void;
     toggleStreams: () => void;
     setHideBoilerplate: (v: boolean) => void;
+    setPlaybackCap: (cap: number | null) => void;
+    setPlaying: (playing: boolean) => void;
+    setPlaybackSpeed: (speed: number) => void;
+    setDetailTab: (tab: DetailTab) => void;
     clear: () => void;
 }
 
@@ -63,7 +80,16 @@ function isStreamChunk(m: CapturedMessage): boolean {
     return params?.update?.sessionUpdate === 'agent_message_chunk';
 }
 
-export const useMessagesStore = create<MessagesState>((set) => ({
+interface PersistedFilters {
+    directions: CapturedMessage['direction'][];
+    kinds: CapturedMessage['kind'][];
+    hideBoilerplate: boolean;
+    showStreams: boolean;
+}
+
+export const useMessagesStore = create<MessagesState>()(
+    persist<MessagesState, [], [], { filters: PersistedFilters }>(
+        (set) => ({
     session: null,
     messages: [],
     connection: 'idle',
@@ -71,6 +97,8 @@ export const useMessagesStore = create<MessagesState>((set) => ({
     selectedSeq: null,
     replayDone: false,
     filters: initialFilters,
+    playback: { cap: null, playing: false, speed: 1 },
+    detailTab: 'tree',
     clearedUpToSeq: null,
 
     handleEvent: (event) => {
@@ -79,14 +107,21 @@ export const useMessagesStore = create<MessagesState>((set) => ({
                 set((state) => {
                     const sameSession =
                         state.session !== null && state.session.id === event.session.id;
+                    // Fresh mount: state.session is still null but selectedSeq /
+                    // clearedUpToSeq / playback may have been hydrated from the
+                    // URL. Treat the very first session.start as part of that
+                    // hydration so we do NOT stomp on a shareable link.
+                    const isInitial = state.session === null;
+                    const keepUserState = sameSession || isInitial;
                     return {
                         session: event.session,
                         messages: [],
-                        selectedSeq: null,
+                        selectedSeq: keepUserState ? state.selectedSeq : null,
                         replayDone: false,
-                        // Preserve the clear watermark for reconnects to the SAME session
-                        // so backlog replay does not resurrect cleared messages.
-                        clearedUpToSeq: sameSession ? state.clearedUpToSeq : null,
+                        clearedUpToSeq: keepUserState ? state.clearedUpToSeq : null,
+                        playback: keepUserState
+                            ? state.playback
+                            : { ...state.playback, cap: null, playing: false },
                     };
                 });
                 return;
@@ -130,26 +165,77 @@ export const useMessagesStore = create<MessagesState>((set) => ({
     toggleStreams: () =>
         set((s) => ({ filters: { ...s.filters, showStreams: !s.filters.showStreams } })),
     setHideBoilerplate: (v) => set((s) => ({ filters: { ...s.filters, hideBoilerplate: v } })),
+    setPlaybackCap: (cap) =>
+        set((s) => ({ playback: { ...s.playback, cap } })),
+    setPlaying: (playing) =>
+        set((s) => ({ playback: { ...s.playback, playing } })),
+    setPlaybackSpeed: (speed) =>
+        set((s) => ({ playback: { ...s.playback, speed } })),
+    setDetailTab: (tab) => set({ detailTab: tab }),
     clear: () =>
         set((state) => {
-            const lastSeq = state.messages.length > 0
-                ? state.messages[state.messages.length - 1]!.seq
-                : state.clearedUpToSeq;
+            const lastSeq =
+                state.messages.length > 0
+                    ? state.messages[state.messages.length - 1]!.seq
+                    : state.clearedUpToSeq;
             return {
                 messages: [],
                 selectedSeq: null,
                 clearedUpToSeq: lastSeq,
             };
         }),
-}));
+    }),
+        {
+            name: 'acp.messages.v1',
+            partialize: (state) => ({
+                filters: {
+                    directions: [...state.filters.directions],
+                    kinds: [...state.filters.kinds],
+                    hideBoilerplate: state.filters.hideBoilerplate,
+                    showStreams: state.filters.showStreams,
+                },
+            }),
+            merge: (persistedRaw, current) => {
+                const persisted = persistedRaw as { filters?: PersistedFilters } | undefined;
+                if (!persisted?.filters) return current;
+                return {
+                    ...current,
+                    filters: {
+                        ...current.filters,
+                        directions: new Set(persisted.filters.directions),
+                        kinds: new Set(persisted.filters.kinds),
+                        hideBoilerplate: persisted.filters.hideBoilerplate,
+                        showStreams: persisted.filters.showStreams,
+                    },
+                };
+            },
+        },
+    ),
+);
 
-export function applyFilters(messages: CapturedMessage[], filters: Filters): CapturedMessage[] {
+export function applyFilters(
+    messages: CapturedMessage[],
+    filters: Filters,
+    playbackCap: number | null = null,
+): CapturedMessage[] {
     const q = filters.search.trim().toLowerCase();
     return messages.filter((m) => {
+        if (playbackCap !== null && m.seq > playbackCap) return false;
         if (!filters.directions.has(m.direction)) return false;
-        if (!filters.kinds.has(m.kind)) return false;
+
+        // STREAM chip is an independent gate for `agent_message_chunk` runs
+        // (they ARE notifications under the hood, but they have their own UX
+        // and shouldn't disappear just because the user dimmed the
+        // "notification" chip — that chip targets non-stream notifications
+        // like tool_call/plan/availability updates).
+        const stream = isStreamChunk(m);
+        if (stream) {
+            if (!filters.showStreams) return false;
+        } else if (!filters.kinds.has(m.kind)) {
+            return false;
+        }
+
         if (filters.hideBoilerplate && m.method && BOILERPLATE_METHODS.has(m.method)) return false;
-        if (!filters.showStreams && isStreamChunk(m)) return false;
         if (q && !m.raw.toLowerCase().includes(q)) return false;
         return true;
     });

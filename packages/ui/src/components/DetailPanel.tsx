@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { CapturedMessage } from '@acp-devtools/core';
 import { cn } from '../lib/cn';
 import {
@@ -9,17 +8,23 @@ import {
     formatTimeMs,
 } from '../lib/format';
 import { JsonTree } from './JsonTree';
+import { useMessagesStore, type DetailTab } from '../store/messagesStore';
 
 interface DetailPanelProps {
     message: CapturedMessage | null;
     latencyMs?: number;
     pairedRequest?: CapturedMessage | null;
+    onJumpToPaired?: ((seq: number) => void) | undefined;
 }
 
-type Tab = 'tree' | 'raw' | 'meta';
-
-export function DetailPanel({ message, latencyMs, pairedRequest }: DetailPanelProps) {
-    const [tab, setTab] = useState<Tab>('tree');
+export function DetailPanel({
+    message,
+    latencyMs,
+    pairedRequest,
+    onJumpToPaired,
+}: DetailPanelProps) {
+    const tab = useMessagesStore((s) => s.detailTab);
+    const setTab = useMessagesStore((s) => s.setDetailTab);
 
     if (!message) {
         return (
@@ -63,10 +68,23 @@ export function DetailPanel({ message, latencyMs, pairedRequest }: DetailPanelPr
                         <Field label="latency" value={`+${formatLatency(latencyMs)}`} accent />
                     )}
                     {pairedRequest && (
-                        <Field
-                            label="paired"
-                            value={`seq ${pairedRequest.seq} ${pairedRequest.method ?? ''}`}
-                        />
+                        <button
+                            type="button"
+                            onClick={
+                                onJumpToPaired
+                                    ? () => onJumpToPaired(pairedRequest.seq)
+                                    : undefined
+                            }
+                            className="inline-flex items-baseline gap-1 transition-colors hover:text-ink-primary"
+                            title="jump to paired message"
+                        >
+                            <span className="text-[10px] uppercase tracking-widest text-ink-muted">
+                                paired
+                            </span>
+                            <span className="text-ink-primary underline decoration-line-strong decoration-dotted underline-offset-4">
+                                seq {pairedRequest.seq} {pairedRequest.method ?? ''}
+                            </span>
+                        </button>
                     )}
                 </div>
             </header>
@@ -148,10 +166,12 @@ function TabButton({
     children,
     active,
     onClick,
+    tab: _tab,
 }: {
     children: React.ReactNode;
     active: boolean;
     onClick: () => void;
+    tab?: DetailTab;
 }) {
     return (
         <button

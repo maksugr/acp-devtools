@@ -1,4 +1,5 @@
 import type { ActiveCapture } from '@acp-devtools/core';
+import { fetchSavedSessions } from './sessions';
 import { useDiscoveryStore } from '../store/discoveryStore';
 
 const POLL_INTERVAL_MS = 2500;
@@ -19,8 +20,12 @@ async function fetchActive(): Promise<ActiveCapture[]> {
 async function tick(): Promise<void> {
     const store = useDiscoveryStore.getState();
     try {
-        const captures = await fetchActive();
+        const [captures, sessions] = await Promise.all([
+            fetchActive(),
+            fetchSavedSessions().catch(() => store.savedSessions),
+        ]);
         store.setCaptures(captures);
+        store.setSavedSessions(sessions);
     } catch (err) {
         store.setError(err instanceof Error ? err.message : String(err));
     }

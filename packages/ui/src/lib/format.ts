@@ -16,6 +16,34 @@ export function formatTimeMs(ts: number): string {
     return `${formatTime(ts)}.${String(ms).padStart(3, '0')}`;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function isSameDay(a: Date, b: Date): boolean {
+    return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+    );
+}
+
+/**
+ * Time when today, contextual date prefix otherwise. Examples:
+ *   today        → `14:06`
+ *   this year    → `May 20 14:06`
+ *   other year   → `2026-05-20 14:06`
+ */
+export function formatDateTime(ts: number, now: number = Date.now()): string {
+    const date = new Date(ts);
+    const today = new Date(now);
+    if (isSameDay(date, today)) return formatTime(ts);
+    if (date.getFullYear() === today.getFullYear()) {
+        return `${MONTHS[date.getMonth()]} ${date.getDate()} ${formatTime(ts)}`;
+    }
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${date.getFullYear()}-${m}-${d} ${formatTime(ts)}`;
+}
+
 export function formatBytes(n: number): string {
     if (n < 1024) return `${n} B`;
     if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
@@ -54,6 +82,22 @@ export function directionArrow(d: CapturedMessage['direction']): string {
 export function shortMethod(method: string | undefined): string {
     if (!method) return '—';
     return method;
+}
+
+/** Short "duration ago" string: 47s · 12m · 2h03m · 3d05h. */
+export function formatAge(fromTs: number, now: number = Date.now()): string {
+    const seconds = Math.max(0, Math.round((now - fromTs) / 1000));
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+        const remMin = minutes % 60;
+        return `${hours}h${String(remMin).padStart(2, '0')}m`;
+    }
+    const days = Math.floor(hours / 24);
+    const remHours = hours % 24;
+    return `${days}d${String(remHours).padStart(2, '0')}h`;
 }
 
 export function percentile(sorted: number[], p: number): number {

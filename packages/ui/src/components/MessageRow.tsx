@@ -14,6 +14,7 @@ import { extractTextPreview, isUserPrompt } from '../lib/acpText';
 interface MessageRowProps {
     message: CapturedMessage;
     selected: boolean;
+    paired?: boolean;
     latencyMs?: number;
     onSelect: (seq: number) => void;
 }
@@ -54,7 +55,13 @@ function kindAccent(kind: CapturedMessage['kind']): string {
     }
 }
 
-function MessageRowImpl({ message, selected, latencyMs, onSelect }: MessageRowProps) {
+function MessageRowImpl({
+    message,
+    selected,
+    paired = false,
+    latencyMs,
+    onSelect,
+}: MessageRowProps) {
     const isOut = message.direction === 'editor-to-agent';
     const isError = message.kind === 'error';
     const tone = latencyMs !== undefined ? latencyTone(latencyMs) : null;
@@ -70,6 +77,7 @@ function MessageRowImpl({ message, selected, latencyMs, onSelect }: MessageRowPr
                 'border-b border-line-grid/70 transition-colors',
                 'hover:bg-surface-rowHover',
                 selected ? 'bg-surface-rowHover ring-1 ring-inset ring-accent-out/40' : '',
+                paired && !selected ? 'bg-accent-out/[0.04] ring-1 ring-inset ring-accent-out/15' : '',
                 isError ? 'bg-accent-error/[0.06]' : '',
             )}
         >
