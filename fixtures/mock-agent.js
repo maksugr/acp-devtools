@@ -6,8 +6,8 @@
 // `session/update` notification per prompt. Frames are newline-delimited
 // JSON-RPC 2.0, per the ACP wire format.
 //
-// Run directly (`node examples/mock-agent.js`) or through the proxy:
-//   node packages/cli/dist/index.js proxy node examples/mock-agent.js
+// Run directly (`node fixtures/mock-agent.js`) or through the proxy:
+//   node packages/cli/dist/index.js proxy node fixtures/mock-agent.js
 //
 // Then paste JSON-RPC lines into stdin to observe the round trip.
 

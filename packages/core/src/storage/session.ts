@@ -8,6 +8,12 @@ export interface SessionRecord {
     agentCommand: string | null;
     startedAt: number;
     endedAt: number | null;
+    /**
+     * Human-readable client identifier extracted from the first `initialize`
+     * request's `params.clientInfo.title` — e.g. `"Zed"` or
+     * `"WebStorm 2026.1.2"`. Null until the first frame is seen.
+     */
+    clientName: string | null;
 }
 
 export interface StartSessionOptions {
@@ -92,13 +98,14 @@ export class Session {
             agentCommand: options.agentCommand ?? null,
             startedAt,
             endedAt: null,
+            clientName: null,
         });
     }
 
     static load(db: SqliteDatabase, sessionId: number): Session {
         const row = db
             .prepare(
-                `SELECT id, name, agent_command, started_at, ended_at FROM sessions WHERE id = ?`,
+                `SELECT id, name, agent_command, started_at, ended_at, client_name FROM sessions WHERE id = ?`,
             )
             .get(sessionId) as
             | {
@@ -107,6 +114,7 @@ export class Session {
                   agent_command: string | null;
                   started_at: number;
                   ended_at: number | null;
+                  client_name: string | null;
               }
             | undefined;
         if (!row) throw new Error(`session ${sessionId} not found`);
@@ -116,13 +124,14 @@ export class Session {
             agentCommand: row.agent_command,
             startedAt: row.started_at,
             endedAt: row.ended_at,
+            clientName: row.client_name,
         });
     }
 
     static latest(db: SqliteDatabase): Session {
         const row = db
             .prepare(
-                `SELECT id, name, agent_command, started_at, ended_at FROM sessions ORDER BY id DESC LIMIT 1`,
+                `SELECT id, name, agent_command, started_at, ended_at, client_name FROM sessions ORDER BY id DESC LIMIT 1`,
             )
             .get() as
             | {
@@ -131,6 +140,7 @@ export class Session {
                   agent_command: string | null;
                   started_at: number;
                   ended_at: number | null;
+                  client_name: string | null;
               }
             | undefined;
         if (!row) throw new Error('database has no sessions');
@@ -140,7 +150,20 @@ export class Session {
             agentCommand: row.agent_command,
             startedAt: row.started_at,
             endedAt: row.ended_at,
+            clientName: row.client_name,
         });
+    }
+
+    /**
+     * Persist a detected client name on the session row. Called once when the
+     * first `initialize` request is seen by the proxy. Subsequent calls
+     * overwrite — the latest title wins.
+     */
+    setClientName(name: string): void {
+        this.db
+            .prepare(`UPDATE sessions SET client_name = ? WHERE id = ?`)
+            .run(name, this.info.id);
+        this.info = { ...this.info, clientName: name };
     }
 
     record(message: CapturedMessage): void {

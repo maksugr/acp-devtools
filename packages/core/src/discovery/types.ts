@@ -24,4 +24,10 @@ export interface ActiveCapture {
     saveTo: string | null;
     /** Unix milliseconds when the proxy started. */
     startedAt: number;
+    /**
+     * Human-readable client identifier from the first `initialize.params.clientInfo.title`
+     * — e.g. `"Zed"`, `"WebStorm 2026.1.2"`. Populated by the proxy a few ms after
+     * the editor sends its first frame; null before then.
+     */
+    clientName?: string | null;
 }

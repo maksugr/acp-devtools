@@ -15,16 +15,16 @@ import {
 
 describe('formatBytes', () => {
     it('shows raw bytes under 1 KB', () => {
-        expect(formatBytes(0)).toBe('0 B');
-        expect(formatBytes(1023)).toBe('1023 B');
+        expect(formatBytes(0)).toBe('0B');
+        expect(formatBytes(1023)).toBe('1023B');
     });
     it('shows KB with one decimal', () => {
-        expect(formatBytes(1024)).toBe('1.0 KB');
-        expect(formatBytes(15_872)).toBe('15.5 KB');
+        expect(formatBytes(1024)).toBe('1.0KB');
+        expect(formatBytes(15_872)).toBe('15.5KB');
     });
     it('shows MB with one decimal', () => {
-        expect(formatBytes(1024 * 1024)).toBe('1.0 MB');
-        expect(formatBytes(5 * 1024 * 1024 + 512 * 1024)).toBe('5.5 MB');
+        expect(formatBytes(1024 * 1024)).toBe('1.0MB');
+        expect(formatBytes(5 * 1024 * 1024 + 512 * 1024)).toBe('5.5MB');
     });
 });
 

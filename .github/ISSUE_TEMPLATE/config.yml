@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+    - name: Question or discussion
+      url: https://github.com/maksugr/acp-devtools/discussions
+      about: For open-ended questions, ideas, or "is this the right way to ...?" — use Discussions instead of Issues.
+    - name: ACP spec questions
+      url: https://github.com/zed-industries/agent-client-protocol/issues
+      about: For questions about the protocol itself, ask the spec maintainers (Zed Industries).

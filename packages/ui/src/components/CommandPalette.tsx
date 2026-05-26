@@ -249,7 +249,9 @@ function buildCommands(onClose: () => void): Command[] {
         });
     }
     for (const s of discState.savedSessions.slice(0, 25)) {
-        const label = s.name ?? shortAgentName(s.agent_command ?? '');
+        const agent = shortAgentName(s.agent_command ?? '');
+        const label =
+            s.name ?? (s.client_name ? `${s.client_name} · ${agent}` : agent);
         cmds.push({
             id: `switch.saved.${s.id}`,
             label: `Open saved #${s.id} · ${label} (${s.message_count} msg)`,

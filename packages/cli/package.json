@@ -39,14 +39,20 @@
         "node": ">=20"
     },
     "scripts": {
-        "build": "tsc -b",
-        "clean": "rimraf dist *.tsbuildinfo"
+        "build": "tsup",
+        "embed-ui": "node scripts/embed-ui.mjs",
+        "clean": "rimraf dist *.tsbuildinfo",
+        "prepublishOnly": "node scripts/check-dist.mjs"
     },
     "dependencies": {
-        "@acp-devtools/core": "0.1.0",
-        "commander": "^12.1.0"
+        "@agentclientprotocol/sdk": "^0.22.1",
+        "better-sqlite3": "^12.10.0",
+        "commander": "^12.1.0",
+        "ws": "^8.20.1"
     },
     "devDependencies": {
-        "@types/node": "^22.10.0"
+        "@acp-devtools/core": "0.1.0",
+        "@types/node": "^22.10.0",
+        "tsup": "^8.5.1"
     }
 }

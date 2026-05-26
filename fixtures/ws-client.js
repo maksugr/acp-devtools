@@ -2,9 +2,9 @@
 // Tiny WebSocket subscriber that prints every acp-devtools event it receives.
 //
 // Usage:
-//   node examples/ws-client.js                        # auto-discover the newest live capture
-//   node examples/ws-client.js <url>                  # explicit url
-//   node examples/ws-client.js <url> <timeout-ms>     # url + exit after N ms
+//   node fixtures/ws-client.js                        # auto-discover the newest live capture
+//   node fixtures/ws-client.js <url>                  # explicit url
+//   node fixtures/ws-client.js <url> <timeout-ms>     # url + exit after N ms
 //
 // With no URL, the script reads ~/.acp-devtools/active/ (or whatever
 // ACP_DEVTOOLS_HOME points at) and connects to the most recent live capture.

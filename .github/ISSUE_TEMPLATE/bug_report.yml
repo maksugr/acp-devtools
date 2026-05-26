@@ -1,0 +1,60 @@
+name: Bug report
+description: Something broke or behaves unexpectedly
+labels: [bug]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thanks for filing a bug. The single most useful thing you can attach
+              is the output of `acp-devtools doctor` — it shows your Node version,
+              binary path, captures.db state, and detected IDE configs.
+
+    - type: textarea
+      id: summary
+      attributes:
+          label: What happened?
+          description: A clear, concise description of the bug.
+          placeholder: When I do X, the inspector shows Y instead of Z.
+      validations:
+          required: true
+
+    - type: textarea
+      id: reproduction
+      attributes:
+          label: Reproduction steps
+          description: Exact commands and clicks to reproduce.
+          placeholder: |
+              1. `acp-devtools proxy npx -y @zed-industries/claude-code-acp`
+              2. Open Zed, send "hello"
+              3. Observe ...
+      validations:
+          required: true
+
+    - type: textarea
+      id: doctor
+      attributes:
+          label: "`acp-devtools doctor` output"
+          description: Paste the full output. Sensitive paths (user names, env tokens) can be redacted.
+          render: text
+      validations:
+          required: true
+
+    - type: input
+      id: agent
+      attributes:
+          label: ACP agent
+          description: Which agent is on the other side of the proxy?
+          placeholder: '@zed-industries/claude-code-acp 0.16.2'
+
+    - type: input
+      id: editor
+      attributes:
+          label: Editor / IDE
+          description: Name and version.
+          placeholder: 'WebStorm 2026.1.2'
+
+    - type: textarea
+      id: extra
+      attributes:
+          label: Anything else
+          description: Logs, screenshots, a captured session export — whatever helps.

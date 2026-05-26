@@ -56,7 +56,13 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
     let label: string;
     if (overrideUrl) label = '?ws override';
     else if (currentCapture) label = captureLabel(currentCapture);
-    else if (currentSaved) label = `#${currentSaved.id} · ${currentSaved.name ?? shortAgentName(currentSaved.agent_command ?? '')}`;
+    else if (currentSaved)
+        label = `#${currentSaved.id} · ${
+            currentSaved.name ??
+            (currentSaved.client_name
+                ? `${currentSaved.client_name} · ${shortAgentName(currentSaved.agent_command ?? '')}`
+                : shortAgentName(currentSaved.agent_command ?? ''))
+        }`;
     else if (totalCount === 0) label = 'no captures';
     else label = 'pick capture';
 
@@ -131,7 +137,10 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
                                                 : `pid ${c.pid}`}
                                         </span>
                                         <span className="text-ink-muted"> · </span>
-                                        {c.sessionName ?? shortAgentName(c.agentCommand)}
+                                        {c.sessionName ??
+                                            (c.clientName
+                                                ? `${c.clientName} · ${shortAgentName(c.agentCommand)}`
+                                                : shortAgentName(c.agentCommand))}
                                     </span>
                                     <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
                                         {formatAge(c.startedAt)}
@@ -181,7 +190,10 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
                                         <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-primary">
                                             <span className="text-accent-note">#{s.id}</span>
                                             <span className="text-ink-muted"> · </span>
-                                            {s.name ?? shortAgentName(s.agent_command ?? '')}
+                                            {s.name ??
+                                                (s.client_name
+                                                    ? `${s.client_name} · ${shortAgentName(s.agent_command ?? '')}`
+                                                    : shortAgentName(s.agent_command ?? ''))}
                                         </span>
                                         <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
                                             {s.message_count}msg · {formatAge(s.started_at)}

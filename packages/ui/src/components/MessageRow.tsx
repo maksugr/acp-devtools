@@ -6,6 +6,7 @@ import {
     directionLabel,
     formatBytes,
     formatLatency,
+    formatRpcId,
     formatTimeMs,
     latencyTone,
 } from '../lib/format';
@@ -138,9 +139,16 @@ function MessageRowImpl({
                     </span>
                 )}
             </span>
-            <span className="w-20 shrink-0 text-right text-ink-muted">
+            <span
+                className="w-20 shrink-0 text-right text-ink-muted"
+                title={
+                    message.rpcId !== undefined && message.rpcId !== null
+                        ? `id:${String(message.rpcId)}`
+                        : undefined
+                }
+            >
                 {message.rpcId !== undefined && message.rpcId !== null
-                    ? `id:${message.rpcId}`
+                    ? `id:${formatRpcId(message.rpcId)}`
                     : ''}
             </span>
             <span className="w-20 shrink-0 text-right text-ink-muted">

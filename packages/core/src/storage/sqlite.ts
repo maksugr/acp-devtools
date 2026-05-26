@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 
 export type SqliteDatabase = Database.Database;
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS sessions (
@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     name          TEXT,
     agent_command TEXT,
     started_at    INTEGER NOT NULL,
-    ended_at      INTEGER
+    ended_at      INTEGER,
+    client_name   TEXT
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -31,6 +32,15 @@ CREATE INDEX IF NOT EXISTS idx_messages_session_seq ON messages(session_id, seq)
 CREATE INDEX IF NOT EXISTS idx_messages_session_rpc ON messages(session_id, rpc_id);
 `;
 
+interface ColumnInfo {
+    name: string;
+}
+
+function hasColumn(db: SqliteDatabase, table: string, column: string): boolean {
+    const cols = db.pragma(`table_info(${table})`) as ColumnInfo[];
+    return cols.some((c) => c.name === column);
+}
+
 /**
  * Open (or create) the acp-devtools session database and run schema migrations.
  *
@@ -47,6 +57,11 @@ export function openDatabase(path: string): SqliteDatabase {
     db.pragma('foreign_keys = ON');
     db.pragma('synchronous = NORMAL');
     db.exec(SCHEMA_SQL);
+    // CREATE TABLE IF NOT EXISTS doesn't add new columns to an existing table,
+    // so older databases need an in-place ALTER for each post-v1 column.
+    if (!hasColumn(db, 'sessions', 'client_name')) {
+        db.exec(`ALTER TABLE sessions ADD COLUMN client_name TEXT`);
+    }
     db.pragma(`user_version = ${SCHEMA_VERSION}`);
     return db;
 }

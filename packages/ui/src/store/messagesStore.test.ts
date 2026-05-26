@@ -16,6 +16,7 @@ const sessionFixture = (overrides: Partial<SessionRecord> = {}): SessionRecord =
     agentCommand: 'mock',
     startedAt: 1_700_000_000_000,
     endedAt: null,
+    clientName: null,
     ...overrides,
 });
 

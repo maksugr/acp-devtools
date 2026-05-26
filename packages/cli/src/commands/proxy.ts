@@ -1,6 +1,5 @@
 import { mkdirSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import type { Command } from 'commander';
 import {
     AcpProxy,
@@ -9,8 +8,11 @@ import {
     type SessionRecord,
     Session,
     WsBroadcaster,
+    defaultCapturesDbPath,
+    listAgents,
     openDatabase,
     removeActiveFile,
+    resolveAgent,
     writeActiveFile,
 } from '@acp-devtools/core';
 
@@ -23,17 +25,7 @@ interface ProxyCommandOptions {
     wsPort: string;
     wsHost: string;
     ws: boolean;
-}
-
-function defaultSessionDbPath(): string {
-    // One shared SQLite file across all proxy processes — session ids are then
-    // globally unique within a user's machine and the UI can show #N as a
-    // stable monotonic counter. SQLite WAL + busy_timeout (set in openDatabase)
-    // handles concurrent writers comfortably for typical ACP message rates.
-    return join(
-        process.env.ACP_DEVTOOLS_HOME ?? join(homedir(), '.acp-devtools'),
-        'captures.db',
-    );
+    agent?: string;
 }
 
 const DIRECTION_LABEL: Record<CapturedMessage['direction'], string> = {
@@ -51,12 +43,19 @@ function formatPretty(msg: CapturedMessage): string {
 }
 
 export function registerProxyCommand(program: Command): void {
+    const knownAgentList = listAgents()
+        .map((a) => a.shortName)
+        .join(', ');
     program
         .command('proxy')
         .description('Run an ACP agent through a capturing proxy')
         .passThroughOptions()
-        .argument('<agent>', 'agent executable (e.g. "goose")')
+        .argument('[agent]', 'agent executable (e.g. "goose"); optional when --agent is set')
         .argument('[agent-args...]', 'arguments forwarded to the agent')
+        .option(
+            '--agent <name>',
+            `preset for a known ACP agent (${knownAgentList})`,
+        )
         .option('--log <mode>', 'message log format: json | pretty | none', 'none')
         .option('--cwd <dir>', 'working directory for the agent')
         .option(
@@ -72,7 +71,36 @@ export function registerProxyCommand(program: Command): void {
         )
         .option('--ws-host <host>', 'WebSocket bind address', '127.0.0.1')
         .option('--no-ws', 'disable the WebSocket server')
-        .action(async (agent: string, agentArgs: string[], opts: ProxyCommandOptions) => {
+        .action(async (agentArg: string | undefined, agentArgsArg: string[], opts: ProxyCommandOptions) => {
+            let agent: string;
+            let agentArgs: string[];
+            if (opts.agent) {
+                try {
+                    const def = resolveAgent(opts.agent);
+                    agent = def.command;
+                    agentArgs = [...def.args];
+                    if (agentArg !== undefined) {
+                        agentArgs.push(agentArg, ...agentArgsArg);
+                    }
+                } catch (err) {
+                    process.stderr.write(
+                        `acp-devtools: ${err instanceof Error ? err.message : String(err)}\n`,
+                    );
+                    process.exit(2);
+                    return;
+                }
+            } else if (agentArg !== undefined) {
+                agent = agentArg;
+                agentArgs = agentArgsArg;
+            } else {
+                process.stderr.write(
+                    `acp-devtools: no agent specified.\n` +
+                        `  Pass an agent command (\`acp-devtools proxy npx -y @zed-industries/claude-code-acp\`)\n` +
+                        `  or use --agent <name> with one of: ${knownAgentList}.\n`,
+                );
+                process.exit(2);
+                return;
+            }
             if (!['json', 'pretty', 'none'].includes(opts.log)) {
                 process.stderr.write(`acp-devtools: invalid --log value "${opts.log}"\n`);
                 process.exit(2);
@@ -103,7 +131,7 @@ export function registerProxyCommand(program: Command): void {
             let session: Session | null = null;
             let resolvedSaveTo: string | null = null;
             if (opts.save) {
-                resolvedSaveTo = opts.saveTo ?? defaultSessionDbPath();
+                resolvedSaveTo = opts.saveTo ?? defaultCapturesDbPath();
                 mkdirSync(dirname(resolvedSaveTo), { recursive: true });
                 const db = openDatabase(resolvedSaveTo);
                 const startOptions: Parameters<typeof Session.start>[1] = {
@@ -124,14 +152,16 @@ export function registerProxyCommand(program: Command): void {
                       agentCommand: [agent, ...agentArgs].join(' '),
                       startedAt: Date.now(),
                       endedAt: null,
+                      clientName: null,
                   };
             broadcaster?.publishSessionStart(sessionInfo);
 
             // Publish discovery descriptor so the UI can attach without
             // hard-coding a port. Best-effort cleanup on every exit path.
             let discoveryWritten = false;
+            let discoveryRecord: ActiveCapture | null = null;
             if (broadcaster && boundUrl !== null) {
-                const record: ActiveCapture = {
+                discoveryRecord = {
                     version: 1,
                     pid: process.pid,
                     host: opts.wsHost,
@@ -142,9 +172,10 @@ export function registerProxyCommand(program: Command): void {
                     sessionDbId: session?.info.id ?? null,
                     saveTo: resolvedSaveTo,
                     startedAt: sessionInfo.startedAt,
+                    clientName: null,
                 };
                 try {
-                    writeActiveFile(record);
+                    writeActiveFile(discoveryRecord);
                     discoveryWritten = true;
                 } catch (err) {
                     const message = err instanceof Error ? err.message : String(err);
@@ -170,6 +201,28 @@ export function registerProxyCommand(program: Command): void {
                 process.stderr.write(`acp-devtools: spawned ${agent} (pid ${pid})\n`);
             });
 
+            let clientDetected = false;
+            const detectClient = (msg: CapturedMessage) => {
+                if (clientDetected) return;
+                if (msg.direction !== 'editor-to-agent' || msg.method !== 'initialize') return;
+                const payload = msg.payload as { params?: { clientInfo?: { title?: unknown; name?: unknown } } } | null;
+                const info = payload?.params?.clientInfo;
+                const title = typeof info?.title === 'string' ? info.title : null;
+                const name = typeof info?.name === 'string' ? info.name : null;
+                const clientName = title ?? name;
+                if (!clientName) return;
+                clientDetected = true;
+                session?.setClientName(clientName);
+                if (discoveryWritten && discoveryRecord) {
+                    discoveryRecord = { ...discoveryRecord, clientName };
+                    try {
+                        writeActiveFile(discoveryRecord);
+                    } catch {
+                        // best-effort; UI will keep the placeholder label
+                    }
+                }
+            };
+
             proxy.on('message', (msg) => {
                 if (opts.log === 'json') {
                     process.stderr.write(JSON.stringify(msg) + '\n');
@@ -178,6 +231,7 @@ export function registerProxyCommand(program: Command): void {
                 }
                 session?.record(msg);
                 broadcaster?.publishMessage(msg);
+                detectClient(msg);
             });
 
             proxy.on('error', (err) => {

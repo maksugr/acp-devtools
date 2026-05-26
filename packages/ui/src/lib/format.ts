@@ -45,9 +45,9 @@ export function formatDateTime(ts: number, now: number = Date.now()): string {
 }
 
 export function formatBytes(n: number): string {
-    if (n < 1024) return `${n} B`;
-    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-    return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+    if (n < 1024) return `${n}B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)}KB`;
+    return `${(n / (1024 * 1024)).toFixed(1)}MB`;
 }
 
 export function formatLatency(ms: number): string {
@@ -82,6 +82,21 @@ export function directionArrow(d: CapturedMessage['direction']): string {
 export function shortMethod(method: string | undefined): string {
     if (!method) return '—';
     return method;
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Compact representation of a JSON-RPC id. Numeric IDs (WebStorm, mock-agent)
+ * already fit; UUID strings (Zed) collapse to the first 8 hex chars + ellipsis
+ * so the timeline column stays one line. The full id stays visible in the
+ * row's `title` tooltip and in the DetailPanel.
+ */
+export function formatRpcId(id: string | number): string {
+    const s = String(id);
+    if (UUID_RE.test(s)) return s.slice(0, 8) + '…';
+    if (s.length > 12) return s.slice(0, 10) + '…';
+    return s;
 }
 
 /** Short "duration ago" string: 47s · 12m · 2h03m · 3d05h. */

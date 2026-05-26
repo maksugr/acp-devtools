@@ -5,6 +5,7 @@ export interface SavedSession {
     started_at: number;
     ended_at: number | null;
     message_count: number;
+    client_name: string | null;
 }
 
 interface SessionsResponse {

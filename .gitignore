@@ -27,7 +27,11 @@ Thumbs.db
 !.env.example
 
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 *.sqlite-journal
 
 plan.md

@@ -1,0 +1,42 @@
+name: Feature request
+description: Suggest a new capability or improvement
+labels: [enhancement]
+body:
+    - type: textarea
+      id: problem
+      attributes:
+          label: What problem does this solve?
+          description: Describe the situation that pushed you to ask for this.
+          placeholder: |
+              When debugging a slow Claude Code session, I keep wanting to see
+              per-method latency aggregated across the whole capture, but right
+              now I have to compute it manually from the timeline.
+      validations:
+          required: true
+
+    - type: textarea
+      id: proposal
+      attributes:
+          label: Proposed solution
+          description: How would you like ACP Devtools to handle this?
+          placeholder: |
+              A "Performance" tab next to Timeline showing a table of methods
+              with p50/p99/max latency and total payload size.
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: Alternatives considered
+          description: What workaround do you use today? What other shapes did you reject?
+
+    - type: checkboxes
+      id: scope
+      attributes:
+          label: Roughly where in the stack?
+          options:
+              - label: UI / inspector
+              - label: Proxy / capture
+              - label: Storage / replay
+              - label: New CLI command
+              - label: Plugin / extensibility
+              - label: Documentation
