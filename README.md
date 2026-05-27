@@ -1,8 +1,10 @@
 # ACP Devtools
 
 A transparent stdio proxy between your editor and an ACP coding agent that
-captures every JSON-RPC frame, stores sessions in SQLite, and streams them to
-a local web inspector. Wireshark, scoped to AI coding agents.
+captures every JSON-RPC frame, stores sessions in SQLite, and streams them
+to a local web inspector. See every request, response, and notification on
+a clickable timeline; replay or diff old sessions; validate captures
+against the official ACP schema.
 
 > **Status (2026-05-26):** installs from source today. v0.1.0 ships to npm
 > soon; the source flow below produces the exact same `acp-devtools` binary.
@@ -34,8 +36,9 @@ of that stdio pipe.
 
 ## What you'll see
 
-The inspector is a Wireshark-style timeline plus a JSON detail panel.
-Captured frames stream in live; clicking one expands its payload.
+The inspector is a vertical timeline of every captured frame plus a JSON
+detail panel. Frames stream in live; clicking a row expands its payload
+on the right.
 
 ```
  ◢◣◢◣ acp.devtools  v0.1.0   SESSION #21 · alive 12m · idle 4s    ● LIVE  ⌘K

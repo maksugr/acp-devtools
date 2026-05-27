@@ -1,7 +1,7 @@
 {
     "name": "acp-devtools",
     "version": "0.1.0",
-    "description": "Visual debugger / inspector for the Agent Client Protocol (ACP) — Wireshark for AI coding agents",
+    "description": "Visual debugger and inspector for the Agent Client Protocol (ACP) — capture every JSON-RPC frame between your editor and your coding agent, replay sessions, validate against the spec.",
     "type": "module",
     "main": "./dist/index.js",
     "bin": {

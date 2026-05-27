@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+    <!--
+        Two triangles pointing at each other = editor ⇄ agent traffic, the
+        whole reason acp-devtools exists. Background is the UI's light-mode
+        surface-row (#e6eaf0) so the icon reads cleanly on browser tab bars
+        and reverse-contrasts the dark-mode UI it serves. Triangles use the
+        light-mode accent values for sufficient contrast at 16×16.
+    -->
+    <rect width="64" height="64" rx="12" fill="#e6eaf0" />
+    <path d="M14 18 L30 32 L14 46 Z" fill="#0ea789" />
+    <path d="M50 18 L34 32 L50 46 Z" fill="#c35a08" />
+</svg>

@@ -127,7 +127,7 @@ export function IdeSnippets() {
                         auto-proxies <span className="font-mono">@zed-industries/claude-code-acp</span>{' '}
                         when launched with no args.
                     </p>
-                    <PathHint isPlaceholder={isPlaceholder} resolved={resolvedPath} />
+                    <PathHint isPlaceholder={isPlaceholder} />
                 </div>
             )}
 
@@ -147,7 +147,7 @@ export function IdeSnippets() {
                         See <span className="font-mono">examples/jetbrains-config.md</span> if the
                         agent-servers page is not where the search suggests.
                     </p>
-                    <PathHint isPlaceholder={isPlaceholder} resolved={resolvedPath} />
+                    <PathHint isPlaceholder={isPlaceholder} />
                 </div>
             )}
 
@@ -157,10 +157,9 @@ export function IdeSnippets() {
 
 interface PathHintProps {
     isPlaceholder: boolean;
-    resolved: string;
 }
 
-function PathHint({ isPlaceholder, resolved }: PathHintProps) {
+function PathHint({ isPlaceholder }: PathHintProps) {
     if (isPlaceholder) {
         return (
             <div className="mt-3 rounded border border-line border-dashed bg-surface-elev/40 px-3 py-2 font-sans text-[11px] leading-relaxed text-ink-secondary">

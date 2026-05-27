@@ -1,0 +1,24 @@
+{
+    "name": "ACP Devtools",
+    "short_name": "ACP Devtools",
+    "description": "Visual debugger for Agent Client Protocol traffic — inspect every JSON-RPC frame between your editor and your coding agent.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0a0d12",
+    "theme_color": "#0a0d12",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "type": "image/svg+xml",
+            "sizes": "any",
+            "purpose": "any"
+        },
+        {
+            "src": "/favicon.svg",
+            "type": "image/svg+xml",
+            "sizes": "any",
+            "purpose": "maskable"
+        }
+    ]
+}

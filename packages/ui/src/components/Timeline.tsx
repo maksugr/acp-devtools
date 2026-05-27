@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import type { CapturedMessage } from '@acp-devtools/core';
 import { applyFilters, buildRequestIndex, useMessagesStore } from '../store/messagesStore';
@@ -41,12 +41,11 @@ export function Timeline() {
     }, [selectedSeq, responseToRequest]);
 
     const virtuoso = useRef<VirtuosoHandle | null>(null);
-    const [atBottom, setAtBottom] = useState(false);
 
     // Switching to a different session: pin scroll back at the top so that
-    // streaming backlog does not drag the view around. Virtuoso will then
-    // report `atBottom = false`, which keeps `followOutput` quiet until the
-    // user explicitly scrolls down (live-tail opt-in).
+    // streaming backlog does not drag the view around. Virtuoso's
+    // `followOutput` reads its own `isAtBottom` state, which keeps the live
+    // tail quiet until the user explicitly scrolls down (live-tail opt-in).
     const sessionId = useMessagesStore((s) => s.session?.id ?? null);
     const replayDone = useMessagesStore((s) => s.replayDone);
     const prevSessionIdRef = useRef<number | null>(sessionId);
@@ -109,7 +108,6 @@ export function Timeline() {
                     className="flex-1 bg-surface-base"
                     totalCount={grouped.length}
                     itemContent={renderEntry}
-                    atBottomStateChange={setAtBottom}
                     atBottomThreshold={STICK_BOTTOM_THRESHOLD_PX}
                     initialTopMostItemIndex={Math.max(0, grouped.length - 1)}
                     followOutput={(isAtBottom) => (isAtBottom ? 'auto' : false)}

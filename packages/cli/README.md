@@ -1,8 +1,9 @@
 # ACP Devtools
 
-> Wireshark for AI coding agents — a transparent stdio proxy that captures
-> every JSON-RPC frame between your editor and an ACP coding agent, plus a
-> live web inspector.
+> Visual debugger and inspector for the Agent Client Protocol (ACP) — a
+> transparent stdio proxy that captures every JSON-RPC frame between your
+> editor and your coding agent, plus a live web inspector with replay and
+> schema validation.
 
 ## Install
 
