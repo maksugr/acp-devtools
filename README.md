@@ -222,8 +222,8 @@ inspector picks it up within 2.5s.
 
 ## CLI reference
 
-One binary, eleven subcommands. Every UI control has a CLI equivalent — the
-inspector is one frontend among others, not a hard dependency. Run any
+One binary, thirteen subcommands. Every UI control has a CLI equivalent —
+the inspector is one frontend among others, not a hard dependency. Run any
 command with `--help` for the full flag listing.
 
 | Group | Commands |
@@ -231,6 +231,7 @@ command with `--help` for the full flag listing.
 | **Capture** | `proxy` |
 | **Inspect** | `ui`, `replay`, `inspect`, `search`, `stats` |
 | **Manage data** | `list`, `export`, `import`, `delete` |
+| **Mock** | `mock-agent`, `mock-editor` |
 | **Setup** | `doctor` |
 
 ### `proxy [agent] [args…]`
@@ -261,15 +262,19 @@ acp-devtools proxy --save-to /tmp/session.db \
 | `--ws-host <host>` | `127.0.0.1` | WebSocket bind address |
 | `--no-ws` | — | disable the WebSocket server entirely |
 
-### `replay <path>`
+### `replay [path]`
 
 Streams a saved session to the inspector over WebSocket. Accepts either a
 SQLite database from `--save-to` or a `.json` file produced by `export`
-(auto-detected by extension).
+(auto-detected by extension). The path defaults to the shared
+`~/.acp-devtools/captures.db`, so calling `replay` with no arguments
+streams the latest live-captured session.
 
 ```bash
-acp-devtools replay /tmp/session.db --ws-port 3737
-acp-devtools replay /tmp/capture.json --ws-port 3737      # imported JSON
+acp-devtools replay --ws-port 3737                        # default DB, latest
+acp-devtools replay --session 21 --ws-port 3737           # default DB, specific session
+acp-devtools replay /tmp/session.db --ws-port 3737        # custom DB
+acp-devtools replay /tmp/capture.json --ws-port 3737      # JSON export from a teammate
 ```
 
 Flags: `--session <id>` (SQLite only; default: latest), `--ws-port <port>`,
@@ -305,15 +310,18 @@ Sample output:
 Live captures don't appear here — they're process descriptors, not database
 rows. Use `acp-devtools doctor` to see them.
 
-### `export <db>`
+### `export [db]`
 
 Writes one session as a self-contained JSON file — metadata plus every
 captured frame, losslessly. Useful for attaching to GitHub issues, offline
-analysis with `jq`, or building per-agent fixtures.
+analysis with `jq`, or building per-agent fixtures. `[db]` defaults to the
+shared `~/.acp-devtools/captures.db`.
 
 ```bash
-acp-devtools export ~/.acp-devtools/captures.db --session 21 > capture.json
-acp-devtools export /tmp/session.db -o capture.json
+acp-devtools export                                  # latest session, JSON to stdout
+acp-devtools export --session 21 -o capture.json     # specific session
+acp-devtools export --session 21 > capture.json      # equivalent via shell redirect
+acp-devtools export /tmp/session.db -o capture.json  # custom DB path
 ```
 
 Flags: `--session <id>` (default: latest), `-o, --output <file>`,
@@ -535,7 +543,7 @@ Every inspector action is a CLI invocation. A typical no-UI loop:
 acp-devtools list --limit 10
 
 # 3. Inspect a specific session offline — dump it as JSON, query with jq.
-acp-devtools export ~/.acp-devtools/captures.db --session 23 -o /tmp/s23.json
+acp-devtools export --session 23 -o /tmp/s23.json
 jq '.messages | map(select(.method == "session/prompt")) | length' /tmp/s23.json
 # → 4
 
@@ -547,7 +555,7 @@ acp-devtools inspect 23 --format jsonl | jq 'select(.method == "fs/read_text_fil
 acp-devtools search session/cancel --limit 10
 
 # 6. Share a session with a teammate.
-acp-devtools export ~/.acp-devtools/captures.db --session 23 -o capture.json
+acp-devtools export --session 23 -o capture.json
 # email / Slack / gist / GitHub-issue-attach the resulting JSON
 
 # 7. Receive someone's capture — load it into your own database.
@@ -562,6 +570,146 @@ For interactive inspection without a browser the inspector still helps —
 `acp-devtools ui` serves a local-only web UI on `127.0.0.1` that you can
 point any browser at. But nothing requires it: `list` / `export` / `jq` /
 `sqlite3 ~/.acp-devtools/captures.db` is enough for most debugging.
+
+### `mock-agent [--session N | --script FILE]`
+
+Pretends to be an ACP agent by replaying a previously-recorded session.
+Reads JSON-RPC frames from stdin (a real editor or a pipe of recorded
+frames), writes recorded agent responses to stdout. Response `id`s are
+patched to match whatever id the live editor actually sent.
+
+Reads directly from `~/.acp-devtools/captures.db` by default — no need to
+`export` first. Use `--session N` to pick a specific row, `--script FILE`
+to load a teammate's JSON export instead.
+
+**When you'd use it:**
+
+- **Building an IDE plugin.** You're writing an ACP client for VS Code,
+  Sublime, your custom editor. Every test against the real Claude Code
+  costs tokens and waits on the network. Wire your editor at mock-agent
+  → instant, free, deterministic responses for every dev cycle.
+- **CI for the editor side.** Record one good session, replay it in CI
+  on every PR to confirm your plugin still parses agent responses
+  correctly — no API key required, no flakiness.
+- **Offline / conference demos.** Run the inspector and your editor
+  side-by-side on stage with no network. mock-agent plays back recorded
+  conversations on cue.
+- **Reproducing a user-reported bug.** User attaches their `capture.json`
+  to an issue. Wire mock-agent at that file → your editor walks through
+  the exact same conversation that triggered the bug, locally.
+- **Comparing IDE behaviours.** Same script, two IDEs: see who handles
+  edge cases like `_meta.proxyConfig` or interleaved notifications
+  correctly.
+
+**How to run:**
+
+```bash
+# Pipe-test without an IDE (verifies mock emits exactly what was recorded):
+acp-devtools inspect 23 --dir out --format raw --no-preview > /tmp/editor.jsonl
+acp-devtools mock-agent --session 23 < /tmp/editor.jsonl > /tmp/got.jsonl
+diff /tmp/got.jsonl <(acp-devtools inspect 23 --dir in --format raw --no-preview)
+# → no diff: mock emitted exactly the recorded agent side
+```
+
+To use as a real IDE agent, point your `agent_servers` at it (Zed example,
+JetBrains is analogous):
+
+```jsonc
+{
+    "agent_servers": {
+        "MockAgent": {
+            "type": "custom",
+            "command": "acp-devtools",
+            "args": ["mock-agent", "--session", "23"]
+        }
+    }
+}
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--session <id>` | — | session id in `--db` (default: latest) |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--script <file>` | — | JSON export from `acp-devtools export`; mutually exclusive with `--session` (use when somebody hands you a JSON file outside your DB) |
+| `--log <mode>` | `none` | echo every wire frame to stderr (`json`, `pretty`, `none`) |
+| `--realtime` | — | respect the recording's timestamps so playback feels live (good for demos; off by default for CI speed) |
+| `--save-to <file>` | — | persist the editor↔mock conversation to a SQLite DB; visible in `acp-devtools list` afterwards |
+| `--session-name <name>` | — | label stored with the saved session |
+
+Limitations (v1 record-replay only): strict in-order playback. If the
+real editor sends frames in a different order than the recording, the
+mock breaks. Response ids are substituted with the wire's actual id;
+notifications carry no id and need no patching. For conditional matching
+(regex on method, multiple responses per request), see plan.md item #1
+"YAML DSL" — deferred until there's a concrete use case.
+
+### `mock-editor [--session N | --script FILE] <agent> [args…]`
+
+Pretends to be an editor by replaying the editor side of a recorded
+session against a real (or fixture) ACP agent. Spawns the agent as a
+child process, feeds it the scripted requests in order, captures its
+responses. No IDE required.
+
+Reads directly from `~/.acp-devtools/captures.db` by default. Use
+`--session N` for a specific row or `--script FILE` for a JSON export.
+
+**When you'd use it:**
+
+- **Building your own ACP agent.** You're writing a Goose-like agent.
+  Want to verify it speaks the protocol correctly without firing up
+  Zed / WebStorm every time. Record once against a known-good reference,
+  replay editor side against your code → fast feedback loop, no GUI in
+  the loop.
+- **Regression testing.** Record a baseline session against agent v1.
+  When you ship v2, replay the same editor side through `mock-editor
+  --save-to /tmp/v2.db your-agent-v2`. Export both, `diff` — anything
+  that changed surfaces as a delta. Catches behavioural regressions
+  before the user sees them.
+- **CI integration tests.** Drop a few canonical `*.json` recordings into
+  your repo. On every PR, run `mock-editor` against each. Fail the build
+  if `stats --json` diverges (latency p99 doubled, error count went up).
+- **Backward-compat checks.** Replay an old client's traffic (e.g. a
+  recording from protocolVersion=1) against a new agent → confirms the
+  agent still handles legacy editors.
+- **Bug repro for the agent side.** A user reports a crash with a weird
+  prompt shape. They send you their `capture.json`. Replay through your
+  agent locally, attach a debugger.
+
+**How to run:**
+
+```bash
+# Quick smoke — replay the latest captured session against a fixture agent
+acp-devtools mock-editor --log pretty node fixtures/mock-agent.js
+
+# Replay a specific session
+acp-devtools mock-editor --session 23 your-agent
+
+# Regression flow — baseline vs new build, captured to a separate DB
+acp-devtools mock-editor --session 23 \
+    --save-to /tmp/v2.db --session-name v2-regression \
+    /path/to/your-agent-v2
+
+# Compare what changed
+acp-devtools export --session 23 -o /tmp/baseline.json
+acp-devtools export /tmp/v2.db -o /tmp/v2.json
+diff <(jq -S '.messages | map({direction, kind, method})' /tmp/baseline.json) \
+     <(jq -S '.messages | map({direction, kind, method})' /tmp/v2.json)
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--session <id>` | — | session id in `--db` (default: latest) |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--script <file>` | — | JSON export from `acp-devtools export`; mutually exclusive with `--session` |
+| `--cwd <dir>` | inherit | working directory for the agent process |
+| `--log <mode>` | `none` | echo every wire frame to stderr (`json`, `pretty`, `none`) |
+| `--realtime` | — | respect the recording's timestamps (otherwise replay is instant) |
+| `--save-to <file>` | — | persist the mock↔agent conversation to a SQLite DB for later inspect / diff |
+| `--session-name <name>` | — | label stored with the saved session |
+
+The agent inherits the current environment; pass anything special via the
+shell (`FOO=bar acp-devtools mock-editor …`). Signals (SIGINT, SIGTERM)
+are forwarded to the child agent.
 
 ### `doctor`
 

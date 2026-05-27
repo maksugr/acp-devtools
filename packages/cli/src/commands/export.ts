@@ -2,6 +2,7 @@ import { writeFileSync } from 'node:fs';
 import type { Command } from 'commander';
 import {
     Session,
+    defaultCapturesDbPath,
     exportSession,
     openDatabase,
     serializeExport,
@@ -18,7 +19,11 @@ export function registerExportCommand(program: Command): void {
     program
         .command('export')
         .description('Export a recorded session as self-contained JSON (suitable for sharing and for mock-replay)')
-        .argument('<db>', 'path to a SQLite session database')
+        .argument(
+            '[db]',
+            'path to a SQLite session database',
+            defaultCapturesDbPath(),
+        )
         .option('--session <id>', 'session id to export (default: latest)')
         .option('-o, --output <file>', 'write to a file instead of stdout')
         .option('--no-pretty', 'emit compact JSON (no indent, single line)')

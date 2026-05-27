@@ -5,6 +5,7 @@ import {
     Session,
     type SessionRecord,
     WsBroadcaster,
+    defaultCapturesDbPath,
     openDatabase,
     parseExport,
 } from '@acp-devtools/core';
@@ -73,9 +74,13 @@ export function registerReplayCommand(program: Command): void {
     program
         .command('replay')
         .description(
-            'Serve a recorded session over WebSocket for replay in the UI. Accepts a SQLite database or a JSON export (auto-detected by extension).',
+            'Serve a recorded session over WebSocket for replay in the UI. Accepts a SQLite database or a JSON export (auto-detected by extension). Defaults to the shared captures.db, latest session.',
         )
-        .argument('<path>', 'path to a SQLite session database or a `.json` export file')
+        .argument(
+            '[path]',
+            'path to a SQLite session database or a `.json` export file',
+            defaultCapturesDbPath(),
+        )
         .option('--session <id>', 'session id to replay (SQLite only; default: latest)')
         .option('--ws-port <port>', 'WebSocket port', '3737')
         .option('--ws-host <host>', 'WebSocket bind address', '127.0.0.1')

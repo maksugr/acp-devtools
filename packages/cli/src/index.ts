@@ -7,6 +7,8 @@ import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
 import { registerInspectCommand } from './commands/inspect.js';
 import { registerListCommand } from './commands/list.js';
+import { registerMockAgentCommand } from './commands/mock-agent.js';
+import { registerMockEditorCommand } from './commands/mock-editor.js';
 import { registerProxyCommand } from './commands/proxy.js';
 import { registerReplayCommand } from './commands/replay.js';
 import { registerSearchCommand } from './commands/search.js';
@@ -26,6 +28,8 @@ const KNOWN_SUBCOMMANDS = new Set([
     'inspect',
     'search',
     'stats',
+    'mock-agent',
+    'mock-editor',
     'help',
     '-h',
     '--help',
@@ -88,6 +92,8 @@ registerListCommand(program);
 registerInspectCommand(program);
 registerSearchCommand(program);
 registerStatsCommand(program);
+registerMockAgentCommand(program);
+registerMockEditorCommand(program);
 
 program.parseAsync([process.argv[0]!, process.argv[1]!, ...expanded]).catch((err) => {
     process.stderr.write(`acp-devtools: ${err instanceof Error ? err.message : String(err)}\n`);
