@@ -13,6 +13,13 @@ export interface SessionSummary {
     message_count: number;
     client_name: string | null;
     imported_at: number | null;
+    client_version: string | null;
+    client_platform: string | null;
+    agent_name: string | null;
+    agent_version: string | null;
+    protocol_version: number | null;
+    current_mode: string | null;
+    current_model: string | null;
 }
 
 /**
@@ -32,7 +39,11 @@ export function listSessionsSummary(dbPath: string, limit = 200): SessionSummary
                 // a freshly imported session whose source had an old
                 // `started_at` would sink into the middle of the picker, even
                 // though the user just added it.
-                `SELECT s.id, s.name, s.agent_command, s.started_at, s.ended_at, s.client_name, s.imported_at,
+                `SELECT s.id, s.name, s.agent_command, s.started_at, s.ended_at,
+                    s.client_name, s.imported_at,
+                    s.client_version, s.client_platform,
+                    s.agent_name, s.agent_version, s.protocol_version,
+                    s.current_mode, s.current_model,
                     (SELECT COUNT(*) FROM messages WHERE session_id = s.id) AS message_count
                  FROM sessions s
                  ORDER BY COALESCE(s.imported_at, s.started_at) DESC
@@ -42,6 +53,36 @@ export function listSessionsSummary(dbPath: string, limit = 200): SessionSummary
     } finally {
         db.close();
     }
+}
+
+/**
+ * Find sessions whose stored client metadata matches the given client name
+ * (case-insensitive substring). Useful for MCP tools like
+ * `find_sessions_by_client('WebStorm')` — relies on Phase C structured
+ * columns being populated (by the proxy live, or by `backfill-metadata`
+ * for older captures).
+ *
+ * `limit` is the cap on **results** returned, not the pre-filter pool.
+ * A small limit (e.g. 3 from an MCP caller) used to bypass any WebStorm
+ * session if the three newest happened to be Zed — fixed by fetching a
+ * generous pool first, then trimming.
+ */
+const FIND_BY_CLIENT_POOL_SIZE = 500;
+
+export function findSessionsByClient(
+    dbPath: string,
+    needle: string,
+    limit = 200,
+): SessionSummary[] {
+    const pool = listSessionsSummary(dbPath, FIND_BY_CLIENT_POOL_SIZE);
+    const lower = needle.toLowerCase();
+    const matches = pool.filter((s) => {
+        const candidates = [s.client_name, s.client_version, s.client_platform].filter(
+            (v): v is string => typeof v === 'string',
+        );
+        return candidates.some((c) => c.toLowerCase().includes(lower));
+    });
+    return matches.slice(0, limit);
 }
 
 export interface InsertImportResult {

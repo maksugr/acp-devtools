@@ -39,6 +39,14 @@ interface MessagesState {
     clearedUpToSeq: number | null;
 
     handleEvent: (event: WsEvent) => void;
+    /**
+     * Append multiple messages in a single `set()` call so subscribers only
+     * fire once per batch — the WS layer accumulates incoming `message`
+     * events and flushes them on requestAnimationFrame, turning O(N)
+     * re-renders per WS burst into ~one per frame. Messages already
+     * suppressed by `clearedUpToSeq` are dropped.
+     */
+    appendMessages: (msgs: CapturedMessage[]) => void;
     setConnection: (status: ConnectionStatus, error?: string | null) => void;
     select: (seq: number | null) => void;
     setSearch: (q: string) => void;
@@ -165,6 +173,17 @@ export const useMessagesStore = create<MessagesState>()(
     setPlaybackSpeed: (speed) =>
         set((s) => ({ playback: { ...s.playback, speed } })),
     setDetailTab: (tab) => set({ detailTab: tab }),
+    appendMessages: (msgs) => {
+        if (msgs.length === 0) return;
+        set((state) => {
+            const filtered =
+                state.clearedUpToSeq !== null
+                    ? msgs.filter((m) => m.seq > state.clearedUpToSeq!)
+                    : msgs;
+            if (filtered.length === 0) return state;
+            return { messages: [...state.messages, ...filtered] };
+        });
+    },
     clear: () =>
         set((state) => {
             const lastSeq =

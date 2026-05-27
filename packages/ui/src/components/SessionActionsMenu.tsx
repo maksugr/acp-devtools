@@ -31,7 +31,6 @@ export function SessionActionsMenu({ onImportResult }: SessionActionsMenuProps) 
 
     const session = useMessagesStore((s) => s.session);
     const messageCount = useMessagesStore((s) => s.messages.length);
-    const clear = useMessagesStore((s) => s.clear);
 
     const exportable = session !== null && messageCount > 0;
 
@@ -62,11 +61,6 @@ export function SessionActionsMenu({ onImportResult }: SessionActionsMenuProps) 
             downloadSessionExport(state.session, state.messages);
         }
     };
-    const onClearClick = () => {
-        setOpen(false);
-        clear();
-    };
-
     const onFilePicked = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         // Reset so picking the same filename twice still re-fires `change`.
@@ -103,7 +97,7 @@ export function SessionActionsMenu({ onImportResult }: SessionActionsMenuProps) 
             <button
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                title="Session actions — import file · export · clear"
+                title="Session actions — import file · export"
                 aria-haspopup="menu"
                 aria-expanded={open}
                 aria-label="session actions"
@@ -121,7 +115,7 @@ export function SessionActionsMenu({ onImportResult }: SessionActionsMenuProps) 
             {open && (
                 <div
                     role="menu"
-                    className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[180px] overflow-hidden rounded-sm border border-line bg-surface-elev p-1 font-mono text-[11px] uppercase tracking-widest shadow-lg"
+                    className="absolute right-0 top-[calc(100%+6px)] z-50 w-max overflow-hidden rounded-sm border border-line bg-surface-elev p-1 font-mono text-[11px] uppercase tracking-widest shadow-lg"
                 >
                     <MenuItem
                         icon="↑"
@@ -136,12 +130,6 @@ export function SessionActionsMenu({ onImportResult }: SessionActionsMenuProps) 
                         disabled={!exportable}
                         title="Download this session as self-contained JSON."
                         disabledTitle="Nothing to export yet — wait for the first message."
-                    />
-                    <MenuItem
-                        icon="×"
-                        label="clear"
-                        onClick={onClearClick}
-                        title="Hide current messages from view. They come back when you reopen the session — nothing is deleted from disk."
                     />
                 </div>
             )}

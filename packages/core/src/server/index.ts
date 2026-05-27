@@ -3,6 +3,7 @@ export {
     listSessionsSummary,
     insertImportedSession,
     deleteSession,
+    findSessionsByClient,
     type SessionSummary,
     type InsertImportResult,
 } from './queries.js';

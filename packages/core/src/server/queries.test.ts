@@ -6,7 +6,12 @@ import { openDatabase, type SqliteDatabase } from '../storage/sqlite.js';
 import { Session } from '../storage/session.js';
 import type { CapturedMessage } from '../acp/types.js';
 import { exportSessionFromParts } from '../storage/export.js';
-import { deleteSession, insertImportedSession, listSessionsSummary } from './queries.js';
+import {
+    deleteSession,
+    findSessionsByClient,
+    insertImportedSession,
+    listSessionsSummary,
+} from './queries.js';
 
 let tmp: string;
 let dbPath: string;
@@ -206,6 +211,82 @@ describe('insertImportedSession', () => {
         db = openDatabase(dbPath);
         expect(listSessionsSummary(dbPath)[0]?.name).toBe('preserved label');
         expect(result.id).toBeGreaterThan(0);
+    });
+});
+
+describe('findSessionsByClient', () => {
+    it('returns empty list for a missing db', () => {
+        expect(findSessionsByClient(join(tmp, 'nope.db'), 'Zed')).toEqual([]);
+    });
+
+    it('returns empty list when no session matches', () => {
+        const s = Session.start(db, { agentCommand: 'mock' });
+        s.setClientName('Zed');
+        expect(findSessionsByClient(dbPath, 'WebStorm')).toEqual([]);
+    });
+
+    it('matches client_name case-insensitively', () => {
+        const a = Session.start(db, { agentCommand: 'a' });
+        a.setClientName('WebStorm 2026.1.2');
+        const b = Session.start(db, { agentCommand: 'b' });
+        b.setClientName('Zed');
+
+        expect(findSessionsByClient(dbPath, 'webstorm').map((r) => r.id)).toEqual([a.info.id]);
+        expect(findSessionsByClient(dbPath, 'ZED').map((r) => r.id)).toEqual([b.info.id]);
+    });
+
+    it('also matches against client_version and client_platform', () => {
+        const a = Session.start(db, { agentCommand: 'a' });
+        // setMetadataFrom with platform populates client_platform.
+        a.setMetadataFrom({
+            protocolVersion: 1,
+            client: { name: 'JetBrains.WebStorm', title: null, version: null, platform: 'intellij' },
+            agent: { name: null, version: null, authMethods: 0 },
+            clientCapabilities: {
+                fsReadTextFile: false,
+                fsWriteTextFile: false,
+                terminal: false,
+                authTerminal: false,
+                authGateway: false,
+            },
+            agentCapabilities: { prompt: false, loadSession: false },
+            runtime: {
+                currentMode: null,
+                modeChanges: 0,
+                currentModel: null,
+                modelChanges: 0,
+                availableCommands: [],
+            },
+            extensions: { jetbrainsProxyConfig: null },
+        });
+        expect(findSessionsByClient(dbPath, 'intellij').map((r) => r.id)).toEqual([a.info.id]);
+    });
+
+    it('does NOT use `limit` as a pre-filter cap (regression for MCP find-by-client bug)', () => {
+        // Bug: callers passing a small limit (e.g. MCP tool's default 50)
+        // used to fetch ONLY that many newest sessions then filter — so a
+        // WebStorm match buried at id=#2 was invisible to
+        // `find_sessions_by_client("WebStorm", limit=3)` if the three
+        // newest were Zed. Fix: pool size is independent of `limit`.
+        const webstorm = Session.start(db, { agentCommand: 'old' });
+        webstorm.setClientName('WebStorm 2026.1.2');
+        // Add a bunch of newer Zed sessions on top.
+        for (let i = 0; i < 5; i++) {
+            const zed = Session.start(db, { agentCommand: `zed-${i}` });
+            zed.setClientName('Zed');
+        }
+        // Even with limit=2, the WebStorm match must still come back.
+        expect(findSessionsByClient(dbPath, 'WebStorm', 2).map((r) => r.id)).toEqual([
+            webstorm.info.id,
+        ]);
+    });
+
+    it('caps result count by `limit` after filtering', () => {
+        for (let i = 0; i < 5; i++) {
+            const s = Session.start(db, { agentCommand: `web-${i}` });
+            s.setClientName('WebStorm 2026.1.2');
+        }
+        expect(findSessionsByClient(dbPath, 'WebStorm', 2)).toHaveLength(2);
     });
 });
 

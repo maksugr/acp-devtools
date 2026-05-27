@@ -1,13 +1,19 @@
 import type { Command } from 'commander';
 import {
+    asciiSparkline,
+    buildPairIndex,
+    buildPerformanceInsights,
+    buildPerMethodStats,
     type CapturedMessage,
+    defaultCapturesDbPath,
+    type MethodStats,
+    openDatabase,
+    percentile as corePercentile,
+    type PerformanceInsight,
     Session,
     type SessionRecord,
-    defaultCapturesDbPath,
-    openDatabase,
     validateAcpMessage,
 } from '@acp-devtools/core';
-import { buildPairIndex } from './inspect.js';
 
 interface StatsCommandOptions {
     db: string;
@@ -37,18 +43,13 @@ export interface SessionStats {
         mean: number | null;
     };
     perMethod: MethodStats[];
+    insights: PerformanceInsight[];
 }
 
-export interface MethodStats {
-    method: string;
-    kind: 'request' | 'notification';
-    count: number;
-    /** Number of latency samples (only request rows have a paired response). */
-    sampleSize: number;
-    p50: number | null;
-    p99: number | null;
-    totalLatencyMs: number | null;
-}
+export { type MethodStats };
+
+// Re-export so existing `import { percentile } from './stats.js'` still works.
+export const percentile = corePercentile;
 
 export function registerStatsCommand(program: Command): void {
     program
@@ -146,7 +147,8 @@ export function computeStats(info: SessionRecord, messages: CapturedMessage[]): 
         }
     }
 
-    const perMethod = buildPerMethod(messages, pairs);
+    const perMethod = buildPerMethodStats(messages);
+    const insights = buildPerformanceInsights(messages, perMethod);
 
     return {
         sessionId: info.id,
@@ -175,84 +177,8 @@ export function computeStats(info: SessionRecord, messages: CapturedMessage[]): 
             mean: latencies.length ? Math.round(mean(latencies)) : null,
         },
         perMethod,
+        insights,
     };
-}
-
-function buildPerMethod(
-    messages: CapturedMessage[],
-    pairs: ReturnType<typeof buildPairIndex>,
-): MethodStats[] {
-    type Bucket = { count: number; latencies: number[] };
-    const reqByMethod = new Map<string, Bucket>();
-    const ntfByMethod = new Map<string, Bucket>();
-
-    for (const m of messages) {
-        if (!m.method) continue;
-        if (m.kind === 'request') {
-            let b = reqByMethod.get(m.method);
-            if (!b) {
-                b = { count: 0, latencies: [] };
-                reqByMethod.set(m.method, b);
-            }
-            b.count += 1;
-            const p = pairs.get(m.seq);
-            if (p) b.latencies.push(p.latencyMs);
-        } else if (m.kind === 'notification') {
-            let b = ntfByMethod.get(m.method);
-            if (!b) {
-                b = { count: 0, latencies: [] };
-                ntfByMethod.set(m.method, b);
-            }
-            b.count += 1;
-        }
-    }
-
-    const out: MethodStats[] = [];
-    for (const [method, bucket] of reqByMethod) {
-        bucket.latencies.sort((a, b) => a - b);
-        out.push({
-            method,
-            kind: 'request',
-            count: bucket.count,
-            sampleSize: bucket.latencies.length,
-            p50: bucket.latencies.length ? percentile(bucket.latencies, 50) : null,
-            p99: bucket.latencies.length ? percentile(bucket.latencies, 99) : null,
-            totalLatencyMs: bucket.latencies.length
-                ? bucket.latencies.reduce((acc, x) => acc + x, 0)
-                : null,
-        });
-    }
-    for (const [method, bucket] of ntfByMethod) {
-        out.push({
-            method,
-            kind: 'notification',
-            count: bucket.count,
-            sampleSize: 0,
-            p50: null,
-            p99: null,
-            totalLatencyMs: null,
-        });
-    }
-    // Most-called methods first; ties broken by request-kind preferred.
-    out.sort((a, b) => b.count - a.count || (a.kind === 'request' ? -1 : 1));
-    return out;
-}
-
-/**
- * Linear-interpolation percentile — matches `packages/ui/src/lib/format.ts`
- * so the inspector StatsBar and `acp-devtools stats` agree to the millisecond
- * on the same data.
- */
-export function percentile(sortedAsc: number[], p: number): number {
-    if (sortedAsc.length === 0) return 0;
-    const rank = (p / 100) * (sortedAsc.length - 1);
-    const lo = Math.floor(rank);
-    const hi = Math.ceil(rank);
-    const a = sortedAsc[lo];
-    const b = sortedAsc[hi];
-    if (a === undefined || b === undefined) return a ?? 0;
-    if (lo === hi) return a;
-    return a + (b - a) * (rank - lo);
 }
 
 function mean(xs: number[]): number {
@@ -335,6 +261,11 @@ function renderStats(s: SessionStats, byMethod: boolean): string {
         lines.push(`mean   ${formatLatency(l.mean!)}\n`);
     }
 
+    if (s.insights.length > 0) {
+        lines.push('\n');
+        lines.push(renderInsights(s.insights));
+    }
+
     if (byMethod && s.perMethod.length > 0) {
         lines.push('\n');
         lines.push(renderPerMethod(s.perMethod));
@@ -343,8 +274,41 @@ function renderStats(s: SessionStats, byMethod: boolean): string {
     return lines.join('');
 }
 
+const INSIGHT_GLYPH: Record<PerformanceInsight['kind'], string> = {
+    hotspot: '!',
+    'long-tail': '~',
+    outlier: '*',
+    busiest: '#',
+    errors: 'x',
+};
+
+const INSIGHT_LABEL: Record<PerformanceInsight['kind'], string> = {
+    hotspot: 'HOTSPOT  ',
+    'long-tail': 'LONG TAIL',
+    outlier: 'OUTLIER  ',
+    busiest: 'BUSIEST  ',
+    errors: 'ERRORS   ',
+};
+
+function renderInsights(insights: PerformanceInsight[]): string {
+    const lines: string[] = ['INSIGHTS\n'];
+    for (const i of insights) {
+        lines.push(`  ${INSIGHT_GLYPH[i.kind]}  ${INSIGHT_LABEL[i.kind]}  ${i.summary}\n`);
+        if (i.detail) lines.push(`                    ${i.detail}\n`);
+    }
+    return lines.join('');
+}
+
 function renderPerMethod(rows: MethodStats[]): string {
-    type Cell = { method: string; kind: string; count: string; p50: string; p99: string; total: string };
+    type Cell = {
+        method: string;
+        kind: string;
+        count: string;
+        p50: string;
+        p99: string;
+        total: string;
+        dist: string;
+    };
     const cells: Cell[] = rows.map((r) => ({
         method: r.method,
         kind: r.kind === 'request' ? 'req' : 'ntf',
@@ -352,6 +316,7 @@ function renderPerMethod(rows: MethodStats[]): string {
         p50: r.p50 !== null ? formatLatency(r.p50) : '—',
         p99: r.p99 !== null ? formatLatency(r.p99) : '—',
         total: r.totalLatencyMs !== null ? formatLatency(r.totalLatencyMs) : '—',
+        dist: r.latencies.length > 0 ? asciiSparkline(r.latencies, 8) : '',
     }));
     const widths = {
         method: Math.max(6, ...cells.map((c) => c.method.length)),
@@ -360,6 +325,7 @@ function renderPerMethod(rows: MethodStats[]): string {
         p50: Math.max(5, ...cells.map((c) => c.p50.length)),
         p99: Math.max(5, ...cells.map((c) => c.p99.length)),
         total: Math.max(5, ...cells.map((c) => c.total.length)),
+        dist: 8,
     };
     widths.method = Math.min(40, widths.method);
 
@@ -375,6 +341,8 @@ function renderPerMethod(rows: MethodStats[]): string {
         'P99'.padStart(widths.p99) +
         '  ' +
         'TOTAL'.padStart(widths.total) +
+        '  ' +
+        'DIST'.padEnd(widths.dist) +
         '\n';
 
     const lines = [header];
@@ -392,6 +360,8 @@ function renderPerMethod(rows: MethodStats[]): string {
                 c.p99.padStart(widths.p99) +
                 '  ' +
                 c.total.padStart(widths.total) +
+                '  ' +
+                c.dist.padEnd(widths.dist) +
                 '\n',
         );
     }

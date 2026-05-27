@@ -10,6 +10,7 @@ interface ListCommandOptions {
     limit: string;
     imported?: boolean;
     saved?: boolean;
+    client?: string;
     json?: boolean;
 }
 
@@ -23,6 +24,10 @@ export function registerListCommand(program: Command): void {
         .option('--limit <n>', 'maximum rows to show', '50')
         .option('--imported', 'only show imported sessions')
         .option('--saved', 'only show non-imported (live-captured) saved sessions')
+        .option(
+            '--client <substring>',
+            'only show sessions whose client name/version/platform matches (case-insensitive)',
+        )
         .option('--json', 'emit machine-readable JSON instead of a table')
         .action((opts: ListCommandOptions) => {
             const limit = Number(opts.limit);
@@ -33,6 +38,15 @@ export function registerListCommand(program: Command): void {
             let rows = listSessionsSummary(opts.db, limit);
             if (opts.imported) rows = rows.filter((r) => r.imported_at !== null);
             if (opts.saved) rows = rows.filter((r) => r.imported_at === null);
+            if (opts.client) {
+                const needle = opts.client.toLowerCase();
+                rows = rows.filter((r) => {
+                    const fields = [r.client_name, r.client_version, r.client_platform].filter(
+                        (v): v is string => typeof v === 'string',
+                    );
+                    return fields.some((f) => f.toLowerCase().includes(needle));
+                });
+            }
 
             if (opts.json) {
                 process.stdout.write(JSON.stringify(rows, null, 2) + '\n');

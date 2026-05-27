@@ -29,6 +29,13 @@ const savedSession = (overrides: Partial<SavedSession> = {}): SavedSession => ({
     message_count: 5,
     client_name: null,
     imported_at: null,
+    client_version: null,
+    client_platform: null,
+    agent_name: null,
+    agent_version: null,
+    protocol_version: null,
+    current_mode: null,
+    current_model: null,
     ...overrides,
 });
 

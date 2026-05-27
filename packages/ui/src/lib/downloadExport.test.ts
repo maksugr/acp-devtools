@@ -11,6 +11,14 @@ const session: SessionRecord = {
     startedAt: 1_700_000_000_000,
     endedAt: 1_700_000_010_000,
     importedAt: null,
+    clientVersion: null,
+    clientPlatform: null,
+    agentName: null,
+    agentVersion: null,
+    protocolVersion: null,
+    currentMode: null,
+    currentModel: null,
+    agentCapabilitiesJson: null,
 };
 
 const message: CapturedMessage = {

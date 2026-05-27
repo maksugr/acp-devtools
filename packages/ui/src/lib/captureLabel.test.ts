@@ -88,6 +88,14 @@ const session = (overrides: Partial<SessionRecord> = {}): SessionRecord => ({
     endedAt: null,
     clientName: null,
     importedAt: null,
+    clientVersion: null,
+    clientPlatform: null,
+    agentName: null,
+    agentVersion: null,
+    protocolVersion: null,
+    currentMode: null,
+    currentModel: null,
+    agentCapabilitiesJson: null,
     ...overrides,
 });
 

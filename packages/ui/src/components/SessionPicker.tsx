@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
 import { refreshSavedSessions } from '../api/discovery';
 import { captureLabel, shortAgentName } from '../lib/captureLabel';
+import { formatAge } from '../lib/format';
 import {
     deleteSession as apiDeleteSession,
     isReplayUrl,
@@ -126,7 +127,7 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
                                         onSelect(c.url);
                                         setOpen(false);
                                     }}
-                                    title={`${c.agentCommand} · ${c.url}${c.saveTo ? ` · ${c.saveTo}` : ''}`}
+                                    title={`${c.agentCommand} · ${c.url}${c.saveTo ? ' · saved to local store' : ' · not persisted'}`}
                                     className={cn(
                                         'flex w-full items-baseline gap-3 border-b border-line-grid/70 px-3 py-2 text-left transition-colors hover:bg-surface-rowHover',
                                         c.url === activeUrl ? 'bg-surface-rowHover' : '',
@@ -167,7 +168,7 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
                     {savedRegular.length === 0 && (
                         <div className="px-3 py-3 text-center font-mono text-[11px] text-ink-muted">
                             {savedSessions.length === 0
-                                ? 'captures.db is empty'
+                                ? 'no saved sessions yet'
                                 : savedImported.length > 0
                                   ? 'no live-captured sessions yet'
                                   : 'all saved sessions are currently live'}
@@ -290,12 +291,7 @@ function SavedRow({ s, activeUrl, onPick }: SavedRowProps) {
                             : shortAgentName(s.agent_command ?? ''))}
                 </span>
                 <span
-                    className={cn(
-                        'shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted transition-opacity',
-                        // Fade stats while hovered so the trash overlay does
-                        // not look like it bleeds into the text.
-                        'group-hover:opacity-30',
-                    )}
+                    className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted transition-colors group-hover:text-ink-secondary"
                 >
                     {s.message_count}msg · {formatAge(s.started_at)}
                 </span>
@@ -304,12 +300,15 @@ function SavedRow({ s, activeUrl, onPick }: SavedRowProps) {
                 type="button"
                 onClick={onDelete}
                 aria-label={`delete session #${s.id} forever`}
-                title="Delete this session from captures.db forever"
+                title="Delete this session permanently"
                 className={cn(
-                    'absolute right-2 top-1/2 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-sm border border-line bg-surface-elev text-[12px] leading-none text-ink-muted transition-colors',
-                    // Overlay the stats area on hover instead of taking its
-                    // own slot — that's why the row uses plain `px-3` padding.
-                    'group-hover:flex hover:border-accent-error/60 hover:bg-accent-error/10 hover:text-accent-error',
+                    // Hidden until the row is hovered; once revealed the
+                    // button rests on a translucent (70%) bg so it stays
+                    // unobtrusive in the list. Direct hover lifts to fully
+                    // solid bg-surface-rowHover + accent so it reads as
+                    // clickable.
+                    'absolute right-2 top-1/2 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-sm border border-line bg-surface-elev/70 text-[12px] leading-none text-ink-muted transition-colors',
+                    'group-hover:flex hover:border-accent-error/70 hover:bg-surface-rowHover hover:text-accent-error',
                 )}
             >
                 <span aria-hidden>×</span>
@@ -318,11 +317,3 @@ function SavedRow({ s, activeUrl, onPick }: SavedRowProps) {
     );
 }
 
-function formatAge(startedAt: number): string {
-    const delta = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
-    if (delta < 60) return `${delta}s`;
-    const m = Math.floor(delta / 60);
-    if (m < 60) return `${m}m`;
-    const h = Math.floor(m / 60);
-    return `${h}h${m % 60}m`;
-}

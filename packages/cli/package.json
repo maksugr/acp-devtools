@@ -46,9 +46,11 @@
     },
     "dependencies": {
         "@agentclientprotocol/sdk": "^0.22.1",
+        "@modelcontextprotocol/sdk": "^1.29.0",
         "better-sqlite3": "^12.10.0",
         "commander": "^12.1.0",
-        "ws": "^8.20.1"
+        "ws": "^8.20.1",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@acp-devtools/core": "0.1.0",

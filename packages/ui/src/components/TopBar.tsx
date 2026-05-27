@@ -26,6 +26,16 @@ interface TopBarProps {
      * not have to wire it.
      */
     onImportResult?: (message: string, tone: TopBarToastTone) => void;
+    /**
+     * Opens the side drawer with derived session metadata (client/agent
+     * capabilities, runtime state). Wired at App level.
+     */
+    onOpenInfo?: () => void;
+    /**
+     * Opens the full-screen perf dashboard (table + insights + waterfall
+     * timeline). Wired at App level.
+     */
+    onOpenPerf?: () => void;
 }
 
 export function TopBar({
@@ -36,6 +46,8 @@ export function TopBar({
     isImported = false,
     onPickCapture,
     onImportResult,
+    onOpenInfo,
+    onOpenPerf,
 }: TopBarProps) {
     const connection = useMessagesStore((s) => s.connection);
     const session = useMessagesStore((s) => s.session);
@@ -77,7 +89,7 @@ export function TopBar({
                             : formatAge(session.startedAt, now);
                         const idleMs = lastEventTs !== null ? now - lastEventTs : null;
                         const showIdle = !frozen && idleMs !== null && idleMs > 5000;
-                        const startedIso = new Date(session.startedAt).toISOString();
+                        const startedFriendly = formatDateTime(session.startedAt, now);
                         const modeLabel = isImported
                             ? 'IMPORTED'
                             : isReplay
@@ -103,13 +115,13 @@ export function TopBar({
                                     title={
                                         session.agentCommand
                                             ? `session #${session.id} · ${session.agentCommand}`
-                                            : 'session id assigned in ~/.acp-devtools/captures.db'
+                                            : 'persisted session id'
                                     }
                                 >
                                     {primary}
                                 </span>
                                 <span className="text-ink-muted">·</span>
-                                <span title={`session started at ${startedIso}`}>
+                                <span title={`session started at ${startedFriendly}`}>
                                     {formatDateTime(session.startedAt, now)}
                                 </span>
                                 {durationLabel && (
@@ -132,9 +144,10 @@ export function TopBar({
                                         <span className="text-ink-muted">·</span>
                                         <span
                                             className="text-ink-dim"
-                                            title={`time since the most recent ACP frame · last event ${new Date(
+                                            title={`time since the most recent ACP frame · last event ${formatDateTime(
                                                 lastEventTs!,
-                                            ).toISOString()}`}
+                                                now,
+                                            )}`}
                                         >
                                             idle {formatAge(lastEventTs!, now)}
                                         </span>
@@ -161,9 +174,33 @@ export function TopBar({
                     />
                 </div>
                 <div className="flex items-center gap-1.5">
+                    {onOpenInfo && session && (
+                        <button
+                            type="button"
+                            onClick={onOpenInfo}
+                            className="inline-flex h-7 items-center rounded-sm border border-line bg-surface-row px-3 font-mono text-[10px] uppercase tracking-widest text-ink-secondary transition-colors hover:bg-surface-rowHover hover:text-ink-primary"
+                            title="Show session info — client/agent capabilities, runtime state"
+                            aria-label="Open session info panel"
+                        >
+                            info
+                        </button>
+                    )}
+                    {onOpenPerf && session && (
+                        <button
+                            type="button"
+                            onClick={onOpenPerf}
+                            className="inline-flex h-7 items-center rounded-sm border border-line bg-surface-row px-3 font-mono text-[10px] uppercase tracking-widest text-ink-secondary transition-colors hover:bg-surface-rowHover hover:text-ink-primary"
+                            title="Show performance dashboard — per-method latency stats and waterfall timeline"
+                            aria-label="Open performance dashboard"
+                        >
+                            perf
+                        </button>
+                    )}
                     <SessionActionsMenu
                         {...(onImportResult ? { onImportResult } : {})}
                     />
+                </div>
+                <div className="flex items-center gap-1.5">
                     <ThemeToggle />
                 </div>
             </div>
@@ -231,7 +268,7 @@ function ConnectionPill({
                 : 'bg-ink-dim';
     const allowRetry = status === 'idle' || status === 'closed' || status === 'error';
     const titleBase = isReplay
-        ? 'serving a recorded session from captures.db'
+        ? 'serving a recorded session from the local store'
         : 'connected to a live proxy capture';
     const tooltip = lastError
         ? lastError

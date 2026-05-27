@@ -1,12 +1,18 @@
 import type { Command } from 'commander';
 import {
     type CapturedMessage,
+    type PairInfo,
     Session,
+    buildPairIndex,
     defaultCapturesDbPath,
     extractTextPreview,
     openDatabase,
     validateAcpMessage,
 } from '@acp-devtools/core';
+
+// Preserve the existing import path `./inspect.js` for downstream consumers
+// (`stats.ts`, `inspect.test.ts`) — source of truth lives in core.
+export { buildPairIndex, type PairInfo };
 
 interface InspectCommandOptions {
     db: string;
@@ -158,38 +164,6 @@ export function registerInspectCommand(program: Command): void {
         });
 }
 
-export interface PairInfo {
-    /** Seq of the matching request (for a response) or response (for a request). */
-    pairSeq: number;
-    /** Wall-clock delta between request and response (always non-negative). */
-    latencyMs: number;
-}
-
-/**
- * Build a `seq → PairInfo` index from a session's messages. Both directions
- * of the pair point at each other: req.seq → resp.seq + latency, and
- * resp.seq → req.seq + latency. Notifications and orphan responses get no
- * entry. If two requests reuse the same rpcId the later request wins —
- * matching the UI's `buildRequestIndex` in `messagesStore.ts`.
- */
-export function buildPairIndex(messages: CapturedMessage[]): Map<number, PairInfo> {
-    const idToReq = new Map<string, CapturedMessage>();
-    const out = new Map<number, PairInfo>();
-    for (const m of messages) {
-        if (m.rpcId === undefined || m.rpcId === null) continue;
-        const key = String(m.rpcId);
-        if (m.kind === 'request') {
-            idToReq.set(key, m);
-        } else if (m.kind === 'response' || m.kind === 'error') {
-            const req = idToReq.get(key);
-            if (!req) continue;
-            const latencyMs = Math.max(0, m.timestamp - req.timestamp);
-            out.set(req.seq, { pairSeq: m.seq, latencyMs });
-            out.set(m.seq, { pairSeq: req.seq, latencyMs });
-        }
-    }
-    return out;
-}
 
 interface InspectFilter {
     directions: Set<CapturedMessage['direction']> | null;

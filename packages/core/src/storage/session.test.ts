@@ -84,4 +84,94 @@ describe('Session', () => {
         expect(latest.info.id).toBe(two.info.id);
         expect(latest.info.name).toBe('two');
     });
+
+    it('starts a session with all v4 metadata columns initialized to null', () => {
+        const session = Session.start(db, { name: 'fresh' });
+        expect(session.info.clientVersion).toBeNull();
+        expect(session.info.clientPlatform).toBeNull();
+        expect(session.info.agentName).toBeNull();
+        expect(session.info.agentVersion).toBeNull();
+        expect(session.info.protocolVersion).toBeNull();
+        expect(session.info.currentMode).toBeNull();
+        expect(session.info.currentModel).toBeNull();
+        expect(session.info.agentCapabilitiesJson).toBeNull();
+    });
+
+    it('setMetadataFromMessages populates structured columns from initialize', () => {
+        const session = Session.start(db);
+        const initReq: CapturedMessage = {
+            seq: 1,
+            timestamp: 1_700_000_000_000,
+            direction: 'editor-to-agent',
+            kind: 'request',
+            method: 'initialize',
+            rpcId: '1',
+            raw: '',
+            payload: {
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'initialize',
+                params: {
+                    protocolVersion: 1,
+                    clientInfo: {
+                        name: 'JetBrains.WebStorm',
+                        title: 'WebStorm 2026.1.2',
+                        version: '2026.1.2',
+                        _meta: { platform: 'intellij' },
+                    },
+                },
+            } as unknown as CapturedMessage['payload'],
+        };
+        const initRsp: CapturedMessage = {
+            seq: 2,
+            timestamp: 1_700_000_001_000,
+            direction: 'agent-to-editor',
+            kind: 'response',
+            rpcId: '1',
+            raw: '',
+            payload: {
+                jsonrpc: '2.0',
+                id: 1,
+                result: {
+                    protocolVersion: 1,
+                    agentInfo: { name: 'claude-agent-acp', version: '0.37.0' },
+                    agentCapabilities: { loadSession: true },
+                },
+            } as unknown as CapturedMessage['payload'],
+        };
+        session.record(initReq);
+        session.record(initRsp);
+        session.setMetadataFromMessages([initReq, initRsp]);
+        const reloaded = Session.load(db, session.info.id);
+        expect(reloaded.info.protocolVersion).toBe(1);
+        expect(reloaded.info.clientVersion).toBe('2026.1.2');
+        expect(reloaded.info.clientPlatform).toBe('intellij');
+        expect(reloaded.info.agentName).toBe('claude-agent-acp');
+        expect(reloaded.info.agentVersion).toBe('0.37.0');
+        expect(reloaded.info.agentCapabilitiesJson).toContain('"loadSession":true');
+    });
+
+    it('setMetadataFromMessages is idempotent — repeat call produces identical row state', () => {
+        const session = Session.start(db);
+        const msg: CapturedMessage = {
+            seq: 1,
+            timestamp: 0,
+            direction: 'editor-to-agent',
+            kind: 'request',
+            method: 'initialize',
+            rpcId: '1',
+            raw: '',
+            payload: {
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'initialize',
+                params: { protocolVersion: 1, clientInfo: { name: 'zed', title: 'Zed' } },
+            } as unknown as CapturedMessage['payload'],
+        };
+        session.record(msg);
+        session.setMetadataFromMessages([msg]);
+        const snapshot1 = { ...session.info };
+        session.setMetadataFromMessages([msg]);
+        expect(session.info).toEqual(snapshot1);
+    });
 });

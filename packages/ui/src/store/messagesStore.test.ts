@@ -18,6 +18,14 @@ const sessionFixture = (overrides: Partial<SessionRecord> = {}): SessionRecord =
     endedAt: null,
     clientName: null,
     importedAt: null,
+    clientVersion: null,
+    clientPlatform: null,
+    agentName: null,
+    agentVersion: null,
+    protocolVersion: null,
+    currentMode: null,
+    currentModel: null,
+    agentCapabilitiesJson: null,
     ...overrides,
 });
 
@@ -171,6 +179,68 @@ describe('handleEvent · message and clear watermark', () => {
         useMessagesStore.getState().clear();
         send({ type: 'session.start', session: sessionFixture({ id: 2 }) });
         expect(useMessagesStore.getState().clearedUpToSeq).toBeNull();
+    });
+});
+
+describe('appendMessages — rAF batching API', () => {
+    it('appends a batch in a single set call', () => {
+        send({ type: 'session.start', session: sessionFixture() });
+        const batch = [mkMessage(), mkMessage(), mkMessage()];
+        useMessagesStore.getState().appendMessages(batch);
+        expect(useMessagesStore.getState().messages).toHaveLength(3);
+    });
+
+    it('respects clearedUpToSeq when batching — dropped messages are not appended', () => {
+        send({ type: 'session.start', session: sessionFixture() });
+        send({ type: 'message', message: mkMessage() }); // seq 1
+        useMessagesStore.getState().clear();
+        useMessagesStore.getState().appendMessages([
+            mkMessage({ seq: 1 }),
+            mkMessage({ seq: 2 }),
+            mkMessage({ seq: 3 }),
+        ]);
+        const seqs = useMessagesStore.getState().messages.map((m) => m.seq);
+        // seq 1 was already cleared; only seq 2 and 3 survive.
+        expect(seqs).toEqual([2, 3]);
+    });
+
+    it('triggers subscribers once per batch, not once per message (perf regression)', () => {
+        send({ type: 'session.start', session: sessionFixture() });
+        let subscriberFires = 0;
+        const unsub = useMessagesStore.subscribe(() => {
+            subscriberFires += 1;
+        });
+        try {
+            useMessagesStore.getState().appendMessages([
+                mkMessage(),
+                mkMessage(),
+                mkMessage(),
+                mkMessage(),
+                mkMessage(),
+            ]);
+            // One set() call → one subscriber notification, regardless of
+            // batch size. Regression for the WS replay storm: 1392 frames
+            // arriving one-at-a-time used to fire 1392 subscribers (each
+            // running the perf-insights / timeline-projection / virtuoso
+            // scroll selectors over the growing array) and froze the tab.
+            expect(subscriberFires).toBe(1);
+        } finally {
+            unsub();
+        }
+    });
+
+    it('no-op on empty batch (no subscriber notification)', () => {
+        send({ type: 'session.start', session: sessionFixture() });
+        let subscriberFires = 0;
+        const unsub = useMessagesStore.subscribe(() => {
+            subscriberFires += 1;
+        });
+        try {
+            useMessagesStore.getState().appendMessages([]);
+            expect(subscriberFires).toBe(0);
+        } finally {
+            unsub();
+        }
     });
 });
 

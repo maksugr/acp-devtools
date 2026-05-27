@@ -1,4 +1,4 @@
-import type { WsEvent } from '@acp-devtools/core';
+import type { CapturedMessage, WsEvent } from '@acp-devtools/core';
 import { useMessagesStore } from '../store/messagesStore';
 
 const DEFAULT_URL = 'ws://127.0.0.1:3737';
@@ -11,6 +11,35 @@ let attempt = 0;
 let manuallyClosed = false;
 let currentUrl = DEFAULT_URL;
 let openedOnce = false;
+
+// rAF-batching buffer for incoming `message` events. Replays of fat
+// sessions can push 1000+ frames in a single WS burst; if each one called
+// `set()` independently every subscriber (perf insights, timeline, virtuoso
+// scroll) would re-run its expensive selector once per frame and the main
+// thread would lock up. Instead we accumulate frames and flush them in a
+// single store update per animation frame.
+let pendingMessages: CapturedMessage[] = [];
+let flushScheduled = false;
+
+function flushPendingMessages(): void {
+    flushScheduled = false;
+    if (pendingMessages.length === 0) return;
+    const batch = pendingMessages;
+    pendingMessages = [];
+    useMessagesStore.getState().appendMessages(batch);
+}
+
+function scheduleFlush(): void {
+    if (flushScheduled) return;
+    flushScheduled = true;
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(flushPendingMessages);
+    } else {
+        // jsdom / non-browser fallback: fire as a microtask so unit tests
+        // still see the appended messages synchronously after a tick.
+        Promise.resolve().then(flushPendingMessages);
+    }
+}
 
 function scheduleReconnect(): void {
     if (manuallyClosed) return;
@@ -31,6 +60,9 @@ export function connect(url: string = DEFAULT_URL): void {
         }
         socket = null;
     }
+    // Drop any messages buffered from the previous capture — they belong to
+    // the old session and would otherwise leak into the new one's store.
+    pendingMessages = [];
     manuallyClosed = false;
     currentUrl = url;
     const store = useMessagesStore.getState();
@@ -61,6 +93,16 @@ export function connect(url: string = DEFAULT_URL): void {
     ws.addEventListener('message', (event) => {
         try {
             const parsed = JSON.parse(event.data as string) as WsEvent;
+            if (parsed.type === 'message') {
+                // Queue and flush in batches — see comment above.
+                pendingMessages.push(parsed.message);
+                scheduleFlush();
+                return;
+            }
+            // Non-message events (session.start, replay.done, session.end)
+            // must observe the messages already received, so flush the
+            // pending buffer synchronously before dispatching.
+            if (pendingMessages.length > 0) flushPendingMessages();
             useMessagesStore.getState().handleEvent(parsed);
         } catch (err) {
             console.warn('acp-devtools: invalid WS frame', err);

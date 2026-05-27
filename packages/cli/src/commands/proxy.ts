@@ -154,6 +154,14 @@ export function registerProxyCommand(program: Command): void {
                       endedAt: null,
                       clientName: null,
                       importedAt: null,
+                      clientVersion: null,
+                      clientPlatform: null,
+                      agentName: null,
+                      agentVersion: null,
+                      protocolVersion: null,
+                      currentMode: null,
+                      currentModel: null,
+                      agentCapabilitiesJson: null,
                   };
             broadcaster?.publishSessionStart(sessionInfo);
 
@@ -203,6 +211,18 @@ export function registerProxyCommand(program: Command): void {
             });
 
             let clientDetected = false;
+            // Buffer captured messages so the metadata extractor sees the full
+            // session up to "now" — extractSessionMetadata is pure over an
+            // array. Memory is bounded by a typical ACP session size (<50K
+            // frames in practice).
+            const messageBuffer: CapturedMessage[] = [];
+            const METADATA_METHODS = new Set([
+                'initialize',
+                'session/set_mode',
+                'session/set_model',
+                'session/update',
+            ]);
+
             const detectClient = (msg: CapturedMessage) => {
                 if (clientDetected) return;
                 if (msg.direction !== 'editor-to-agent' || msg.method !== 'initialize') return;
@@ -224,6 +244,12 @@ export function registerProxyCommand(program: Command): void {
                 }
             };
 
+            const refreshMetadata = (msg: CapturedMessage) => {
+                if (!session) return;
+                if (!msg.method || !METADATA_METHODS.has(msg.method)) return;
+                session.setMetadataFromMessages(messageBuffer);
+            };
+
             proxy.on('message', (msg) => {
                 if (opts.log === 'json') {
                     process.stderr.write(JSON.stringify(msg) + '\n');
@@ -231,8 +257,10 @@ export function registerProxyCommand(program: Command): void {
                     process.stderr.write(formatPretty(msg) + '\n');
                 }
                 session?.record(msg);
+                messageBuffer.push(msg);
                 broadcaster?.publishMessage(msg);
                 detectClient(msg);
+                refreshMetadata(msg);
             });
 
             proxy.on('error', (err) => {

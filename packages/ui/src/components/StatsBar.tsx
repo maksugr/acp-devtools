@@ -3,21 +3,23 @@ import {
     buildRequestIndex,
     useMessagesStore,
 } from '../store/messagesStore';
-import { formatLatency, percentile } from '../lib/format';
+import { formatBytes, formatLatency, percentile } from '../lib/format';
 import { buildValidationMap, summarizeValidation } from '../lib/validation';
+import { SpecHint } from './SpecHint';
 
 export function StatsBar() {
     const messages = useMessagesStore((s) => s.messages);
-    const replayDone = useMessagesStore((s) => s.replayDone);
 
     const stats = useMemo(() => {
         let req = 0;
         let res = 0;
         let note = 0;
         let err = 0;
+        let bytes = 0;
         const tsBySeq = new Map<number, number>();
         for (const m of messages) {
             tsBySeq.set(m.seq, m.timestamp);
+            bytes += m.raw.length;
             switch (m.kind) {
                 case 'request':
                     req += 1;
@@ -49,7 +51,7 @@ export function StatsBar() {
         const p50 = latencies.length ? percentile(latencies, 50) : null;
         const p99 = latencies.length ? percentile(latencies, 99) : null;
         const spec = summarizeValidation(buildValidationMap(messages));
-        return { total: messages.length, req, res, note, err, p50, p99, spec };
+        return { total: messages.length, req, res, note, err, bytes, p50, p99, spec };
     }, [messages]);
 
     return (
@@ -72,6 +74,11 @@ export function StatsBar() {
                     value={stats.p99 !== null ? formatLatency(stats.p99) : '—'}
                     tone="primary"
                 />
+                <Stat
+                    label="bytes"
+                    value={stats.total > 0 ? formatBytes(stats.bytes) : '—'}
+                    tone="primary"
+                />
                 {stats.spec.checked > 0 && (
                     <SpecStat
                         invalidFrames={stats.spec.invalidFrames}
@@ -79,9 +86,6 @@ export function StatsBar() {
                         affectedMethods={stats.spec.affectedMethods}
                     />
                 )}
-                <span className={replayDone ? 'text-accent-ok' : 'text-ink-muted'}>
-                    {replayDone ? '● replay synced' : '◌ awaiting replay'}
-                </span>
                 <StarPrompt />
             </div>
         </footer>
@@ -115,21 +119,41 @@ function SpecStat({
 }) {
     if (invalidFrames === 0) {
         return (
-            <span className="inline-flex items-baseline gap-1" title="every frame validates against the ACP schema">
-                <span>spec</span>
-                <span className="text-accent-ok">✓</span>
-            </span>
+            <SpecHint
+                label={
+                    <span className="font-sans">
+                        every frame validates against the ACP schema
+                    </span>
+                }
+                tone="info"
+            >
+                <span className="inline-flex items-baseline gap-1">
+                    <span>spec</span>
+                    <span className="text-accent-ok">✓</span>
+                </span>
+            </SpecHint>
         );
     }
-    const tooltip =
-        `${totalErrors} schema error${totalErrors === 1 ? '' : 's'} in ` +
-        `${invalidFrames} frame${invalidFrames === 1 ? '' : 's'}` +
-        (affectedMethods.length ? ` · methods: ${affectedMethods.join(', ')}` : '');
+    const summary = `${totalErrors} schema error${totalErrors === 1 ? '' : 's'} in ${invalidFrames} frame${invalidFrames === 1 ? '' : 's'}`;
     return (
-        <span className="inline-flex items-baseline gap-1" title={tooltip}>
-            <span>spec</span>
-            <span className="text-accent-error">⚠ {invalidFrames}</span>
-        </span>
+        <SpecHint
+            tone="warn"
+            label={
+                <div className="space-y-1.5 font-sans">
+                    <div>{summary}</div>
+                    {affectedMethods.length > 0 && (
+                        <div className="font-mono text-[10px] text-ink-muted">
+                            methods: {affectedMethods.join(', ')}
+                        </div>
+                    )}
+                </div>
+            }
+        >
+            <span className="inline-flex items-baseline gap-1">
+                <span>spec</span>
+                <span className="text-accent-error">⚠ {invalidFrames}</span>
+            </span>
+        </SpecHint>
     );
 }
 

@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { DEFAULT_AGENT, isAgentShortcut } from '@acp-devtools/core';
+import { registerBackfillMetadataCommand } from './commands/backfill-metadata.js';
 import { registerDeleteCommand } from './commands/delete.js';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
 import { registerInspectCommand } from './commands/inspect.js';
 import { registerListCommand } from './commands/list.js';
+import { registerMcpCommand } from './commands/mcp.js';
 import { registerMockAgentCommand } from './commands/mock-agent.js';
 import { registerMockEditorCommand } from './commands/mock-editor.js';
 import { registerProxyCommand } from './commands/proxy.js';
 import { registerReplayCommand } from './commands/replay.js';
 import { registerSearchCommand } from './commands/search.js';
+import { registerSessionInfoCommand } from './commands/session-info.js';
 import { registerStatsCommand } from './commands/stats.js';
 import { registerUiCommand } from './commands/ui.js';
 import { registerValidateCommand } from './commands/validate.js';
@@ -28,8 +31,11 @@ const KNOWN_SUBCOMMANDS = new Set([
     'list',
     'inspect',
     'search',
+    'session-info',
     'stats',
     'validate',
+    'backfill-metadata',
+    'mcp',
     'mock-agent',
     'mock-editor',
     'help',
@@ -93,7 +99,10 @@ registerDeleteCommand(program);
 registerListCommand(program);
 registerInspectCommand(program);
 registerSearchCommand(program);
+registerSessionInfoCommand(program);
 registerStatsCommand(program);
+registerBackfillMetadataCommand(program);
+registerMcpCommand(program);
 registerMockAgentCommand(program);
 registerMockEditorCommand(program);
 registerValidateCommand(program);

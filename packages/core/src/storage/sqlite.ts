@@ -2,17 +2,25 @@ import Database from 'better-sqlite3';
 
 export type SqliteDatabase = Database.Database;
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS sessions (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    name          TEXT,
-    agent_command TEXT,
-    started_at    INTEGER NOT NULL,
-    ended_at      INTEGER,
-    client_name   TEXT,
-    imported_at   INTEGER
+    id                       INTEGER PRIMARY KEY AUTOINCREMENT,
+    name                     TEXT,
+    agent_command            TEXT,
+    started_at               INTEGER NOT NULL,
+    ended_at                 INTEGER,
+    client_name              TEXT,
+    imported_at              INTEGER,
+    client_version           TEXT,
+    client_platform          TEXT,
+    agent_name               TEXT,
+    agent_version            TEXT,
+    protocol_version         INTEGER,
+    current_mode             TEXT,
+    current_model            TEXT,
+    agent_capabilities_json  TEXT
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -69,6 +77,25 @@ export function openDatabase(path: string): SqliteDatabase {
         // NULL — the UI uses non-null to flip mode label from LIVE/REPLAY to
         // IMPORTED.
         db.exec(`ALTER TABLE sessions ADD COLUMN imported_at INTEGER`);
+    }
+    // v4 — structured metadata columns. Populated by the proxy as it observes
+    // `initialize` traffic, and backfilled for imported / pre-v4 sessions by
+    // `acp-devtools backfill-metadata`. All nullable: a NULL column means the
+    // value has not been observed yet (or the session pre-dates the column).
+    const v4Columns: Array<[string, string]> = [
+        ['client_version', 'TEXT'],
+        ['client_platform', 'TEXT'],
+        ['agent_name', 'TEXT'],
+        ['agent_version', 'TEXT'],
+        ['protocol_version', 'INTEGER'],
+        ['current_mode', 'TEXT'],
+        ['current_model', 'TEXT'],
+        ['agent_capabilities_json', 'TEXT'],
+    ];
+    for (const [name, type] of v4Columns) {
+        if (!hasColumn(db, 'sessions', name)) {
+            db.exec(`ALTER TABLE sessions ADD COLUMN ${name} ${type}`);
+        }
     }
     db.pragma(`user_version = ${SCHEMA_VERSION}`);
     return db;

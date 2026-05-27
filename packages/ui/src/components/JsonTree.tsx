@@ -1,11 +1,21 @@
 import { useState } from 'react';
+import type { SpecInfo } from '@acp-devtools/core/acp/spec-decoder/browser';
 import { cn } from '../lib/cn';
+import { SpecHint } from './SpecHint';
 
 interface JsonTreeProps {
     value: unknown;
     name?: string;
     depth?: number;
     defaultExpanded?: boolean;
+    /** Current path within the payload root — used to look up spec metadata. */
+    path?: string[];
+    /**
+     * Optional resolver returning ACP spec metadata for a path within the
+     * payload. When passed, each key shows a description tooltip (ⓘ) when
+     * the spec has one, and an `⚠ ext` badge for unknown / extension fields.
+     */
+    getSpec?: (path: string[]) => SpecInfo | null;
 }
 
 const COLLAPSE_THRESHOLD = 6;
@@ -34,7 +44,14 @@ function renderPrimitive(v: unknown): string {
     return String(v);
 }
 
-export function JsonTree({ value, name, depth = 0, defaultExpanded }: JsonTreeProps) {
+export function JsonTree({
+    value,
+    name,
+    depth = 0,
+    defaultExpanded,
+    path = [],
+    getSpec,
+}: JsonTreeProps) {
     const expandable = isObject(value) || Array.isArray(value);
     const childCount = isObject(value)
         ? Object.keys(value).length
@@ -46,7 +63,9 @@ export function JsonTree({ value, name, depth = 0, defaultExpanded }: JsonTreePr
         defaultExpanded ?? (depth < 2 && childCount <= COLLAPSE_THRESHOLD);
     const [open, setOpen] = useState<boolean>(shouldDefaultExpand);
 
-    const keyLabel = name !== undefined ? <KeyLabel name={name} /> : null;
+    const spec = name !== undefined && getSpec ? getSpec(path) : null;
+    const keyLabel =
+        name !== undefined ? <KeyLabel name={name} spec={spec} /> : null;
 
     if (!expandable) {
         return (
@@ -97,10 +116,19 @@ export function JsonTree({ value, name, depth = 0, defaultExpanded }: JsonTreePr
                                   value={item}
                                   name={String(i)}
                                   depth={depth + 1}
+                                  path={[...path, String(i)]}
+                                  {...(getSpec ? { getSpec } : {})}
                               />
                           ))
                         : Object.entries(value as Record<string, unknown>).map(([k, v]) => (
-                              <JsonTree key={k} value={v} name={k} depth={depth + 1} />
+                              <JsonTree
+                                  key={k}
+                                  value={v}
+                                  name={k}
+                                  depth={depth + 1}
+                                  path={[...path, k]}
+                                  {...(getSpec ? { getSpec } : {})}
+                              />
                           ))}
                     <div className="text-ink-secondary">{closer}</div>
                 </div>
@@ -109,11 +137,97 @@ export function JsonTree({ value, name, depth = 0, defaultExpanded }: JsonTreePr
     );
 }
 
-function KeyLabel({ name }: { name: string }) {
+function KeyLabel({ name, spec }: { name: string; spec: SpecInfo | null }) {
     const isIndex = /^\d+$/.test(name);
+    const description = spec?.description ?? null;
     return (
-        <span className={cn(isIndex ? 'text-ink-muted' : 'text-ink-secondary')}>
-            {isIndex ? `${name}:` : `"${name}":`}
+        <span className="inline-flex items-baseline gap-1">
+            <span className={cn(isIndex ? 'text-ink-muted' : 'text-ink-secondary')}>
+                {isIndex ? `${name}:` : `"${name}":`}
+            </span>
+            {spec && !spec.inSpec && (
+                <SpecBadge
+                    tone={spec.isExtension ? 'extension' : 'unknown'}
+                    explanation={
+                        spec.isExtension
+                            ? 'Extension — not declared in the ACP spec; contents are implementation-defined.'
+                            : 'Unknown — this field is not declared in the ACP schema for this message.'
+                    }
+                />
+            )}
+            {spec?.inSpec && spec.isExtension && (
+                <SpecBadge
+                    tone="extension"
+                    explanation="Extension — _meta payload is implementation-defined per ACP spec."
+                />
+            )}
+            {description && (
+                <SpecHint
+                    label={<DescriptionBlock text={description} type={spec?.type} enumValues={spec?.enumValues} />}
+                    tone="info"
+                    className="text-ink-muted hover:text-ink-primary"
+                    focusable
+                >
+                    <span aria-label={`spec: ${description.split('\n')[0]}`}>ⓘ</span>
+                </SpecHint>
+            )}
         </span>
+    );
+}
+
+function DescriptionBlock({
+    text,
+    type,
+    enumValues,
+}: {
+    text: string;
+    type?: string;
+    enumValues?: unknown[];
+}) {
+    return (
+        <div className="space-y-1.5">
+            {type && (
+                <div className="font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                    <span className="text-accent-info">{type}</span>
+                </div>
+            )}
+            <div className="whitespace-pre-wrap font-sans text-[12px] leading-snug text-ink-secondary">
+                {text}
+            </div>
+            {enumValues && enumValues.length > 0 && (
+                <div className="font-mono text-[10px] text-ink-muted">
+                    enum: {enumValues.map((v) => JSON.stringify(v)).join(' · ')}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function SpecBadge({
+    tone,
+    explanation,
+}: {
+    tone: 'extension' | 'unknown';
+    explanation: string;
+}) {
+    const cls =
+        tone === 'extension'
+            ? 'border-accent-warn/40 bg-accent-warn/10 text-accent-warn'
+            : 'border-accent-error/40 bg-accent-error/10 text-accent-error';
+    return (
+        <SpecHint
+            label={<span className="font-sans">{explanation}</span>}
+            tone={tone === 'extension' ? 'warn' : 'error'}
+            focusable
+        >
+            <span
+                className={cn(
+                    'inline-flex items-center rounded-sm border px-1 font-mono text-[9px] uppercase tracking-widest',
+                    cls,
+                )}
+            >
+                {tone === 'extension' ? '⚠ ext' : '⚠ unknown'}
+            </span>
+        </SpecHint>
     );
 }

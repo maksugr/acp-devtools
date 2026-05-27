@@ -230,17 +230,18 @@ inspector picks it up within 2.5s.
 
 ## CLI reference
 
-One binary, fourteen subcommands. Every UI control has a CLI equivalent —
+One binary, seventeen subcommands. Every UI control has a CLI equivalent —
 the inspector is one frontend among others, not a hard dependency. Run any
 command with `--help` for the full flag listing.
 
 | Group | Commands |
 |---|---|
 | **Capture** | `proxy` |
-| **Inspect** | `ui`, `replay`, `inspect`, `search`, `stats`, `validate` |
+| **Inspect** | `ui`, `replay`, `inspect`, `search`, `stats`, `session-info`, `validate` |
 | **Manage data** | `list`, `export`, `import`, `delete` |
 | **Mock** | `mock-agent`, `mock-editor` |
-| **Setup** | `doctor` |
+| **Integrate** | `mcp` |
+| **Setup** | `doctor`, `backfill-metadata` |
 
 ### `proxy [agent] [args…]`
 
@@ -296,6 +297,7 @@ sorted by when they were *imported*, not by their original capture time.
 ```bash
 acp-devtools list                          # default db, 50 rows
 acp-devtools list --imported               # only imported sessions
+acp-devtools list --client WebStorm        # filter by client name/version/platform
 acp-devtools list --limit 5 --json         # machine-readable
 ```
 
@@ -305,6 +307,7 @@ acp-devtools list --limit 5 --json         # machine-readable
 | `--limit <n>` | `50` | maximum rows |
 | `--imported` | — | only imported sessions |
 | `--saved` | — | only non-imported (live-captured) sessions |
+| `--client <s>` | — | case-insensitive substring match on `client_name`/`client_version`/`client_platform` |
 | `--json` | — | emit JSON instead of an aligned table |
 
 Sample output:
@@ -476,7 +479,7 @@ acp-devtools stats 23 --json | jq '.latency.p99'
 | Flag | Default | Meaning |
 |---|---|---|
 | `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--by-method` | — | append per-method table (method · count · p50 · p99 · total) |
+| `--by-method` | — | append per-method table (method · count · p50 · p99 · total · ASCII latency distribution) |
 | `--json` | — | machine-readable JSON instead of human-readable text |
 
 Sample output:
@@ -500,10 +503,86 @@ p90    3.15s
 p99    4.85s
 max    5.04s
 mean   1.21s
+
+INSIGHTS
+  !  HOTSPOT    session/prompt consumed 39.1s of total wall time
+                    93% of 42.2s sampled latency
+  #  BUSIEST    session/update sent 75 notifications
 ```
 
+With `--by-method` you also get a per-method table that ends in an ASCII
+sparkline column showing each method's latency distribution
+(`▁▂▃▄▅▆▇█`, sorted ascending). At a glance you can tell a uniformly fast
+method (`██` — all bars tall and equal) from a long-tail one
+(`▁▁▁▁█` — one outlier dominating).
+
 The percentile algorithm matches the UI StatsBar (linear interpolation),
-so the inspector and CLI agree to the millisecond on the same data.
+so the inspector and CLI agree to the millisecond on the same data. The
+inspector exposes the same per-method breakdown through the TopBar
+`perf` button — sortable table with count, p50, p99, max, total, plus
+a per-row sparkline of the latency distribution, plus an INSIGHTS
+callout block surfacing hotspot / long-tail / outlier / busiest / error
+methods automatically.
+
+Below the table the perf panel embeds a **waterfall canvas** — each
+request drawn as a horizontal bar over wall-clock time, lanes for
+editor→agent / agent→editor / notifications, errored pairs tinted red.
+Long idle periods (> 30s) are visually compressed to a fixed 50px
+"X min idle" marker so a session with hours of inactivity stays
+readable. Drag to pan, `Cmd/Ctrl + wheel` (or the `+` / `−` / `reset`
+buttons in the section header) to zoom. Click any rect to jump to that
+message in the inspector. CLI-only equivalent: `inspect <id>` walks the
+same data linearly.
+
+### `session-info <id>`
+
+Prints derived client/agent metadata for a saved session — the terminal
+equivalent of the inspector's session info panel (TopBar → `info` button).
+Useful when triaging «WebStorm doesn't get file diffs» («`fs.writeTextFile`
+not advertised») or comparing capability matrices across clients without
+opening the UI.
+
+```bash
+acp-devtools session-info 23
+acp-devtools session-info 23 --json | jq '.metadata.clientCapabilities'
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--json` | — | machine-readable JSON instead of human-readable text |
+
+Sample output for a WebStorm capture:
+
+```
+SESSION #23
+────────────────────────────────────────────────
+  Client             WebStorm 2026.1.2 v2026.1.2 (intellij)
+  Agent              @agentclientprotocol/claude-agent-acp v0.37.0
+  Protocol           ACP v1
+  Started            2026-05-27T12:09:29.336Z → 2026-05-27T14:15:28.551Z
+  Messages           20
+
+CLIENT CAPABILITIES
+  fs.readTextFile    ✓
+  fs.writeTextFile   ✓
+  terminal           —
+  auth.terminal      —
+  auth.gateway       ✓
+
+AGENT CAPABILITIES
+  prompt             ✓
+  loadSession        ✓
+  auth methods       4
+
+RUNTIME STATE
+  current mode       default
+  current model      —
+  available cmds     debug, compact, init, …
+
+JETBRAINS EXTENSIONS
+  proxyConfig        {"proxies":[{"apiType":{"provider":"openai"}, …}]}
+```
 
 ### `validate <id>`
 
@@ -565,6 +644,15 @@ column) and `stats` (summary line) — see those sections.
 - **Footer chip** — `spec ⚠ N` next to `p50`/`p99` shows how many frames
   in the visible session are non-conforming (or `spec ✓` when clean). The
   tooltip lists the affected method names.
+
+### The Tree tab is spec-aware
+
+When the message's method maps to a known ACP request/response/notification,
+the Tree tab shows the schema-def name at the top (e.g. `ACP TYPE
+InitializeRequest`) with the one-line spec description. Each field carries
+a ⓘ hover tooltip pulled from the schema description, and a `⚠ ext` badge
+appears on anything under `_meta` or fields not declared in the spec —
+useful to spot editor-specific extensions at a glance.
 
 ### The inspector's equivalents
 
@@ -794,6 +882,95 @@ Reports Node version, resolved binary path, the `~/.acp-devtools/` tree,
 captures.db statistics, live captures, and detected IDE config files. Exit
 code 1 if anything in the "fail" tier.
 
+### `mcp`
+
+Runs a Model Context Protocol server over stdio that exposes saved
+captures as **read-only** tools. Wire it into Claude Code (or any MCP
+client) and ask Claude to triage your ACP traffic:
+
+> «find spec violations in the last 10 sessions»
+> «compare p99 of `session/prompt` between WebStorm and Zed»
+> «show every message where the agent called `Edit` on `package.json`»
+
+Setup for Claude Code — add to `.claude/mcp_servers.json` (project or
+user-wide):
+
+```json
+{
+    "mcpServers": {
+        "acp-devtools": {
+            "command": "acp-devtools",
+            "args": ["mcp"]
+        }
+    }
+}
+```
+
+After restarting Claude Code the ten tools below appear in `/tools`:
+
+| Tool | Returns |
+|---|---|
+| `list_sessions` | newest-first list of saved sessions with structured metadata |
+| `find_sessions_by_client` | sessions whose client name/version/platform matches a substring |
+| `get_session_metadata` | client/agent info, capabilities, runtime mode/model |
+| `get_latency_stats` | per-method count + p50/p99/max latency + session-wide percentiles + auto-detected insights |
+| `get_session_summary` | one-call digest: metadata + totals + latency + per-method + insights |
+| `get_session_messages` | paginated message slice, filterable by kind/method/direction |
+| `get_message` | single message by `(session_id, seq)` |
+| `get_paired` | request↔response pair partner + latency |
+| `search_messages` | substring search across raw frames |
+| `find_spec_violations` | every frame that fails the ACP schema |
+
+Every tool advertises MCP-spec `readOnlyHint: true`, `idempotentHint: true`,
+`openWorldHint: false` — host clients can use these as safety hints. The
+server also ships an `instructions` block on `initialize` that briefs the
+connecting LLM on the surface area, so an agent does not have to call
+`tools/list` and read every description to know where to start. Stdio
+only — no network surface. The binary path advertised to the client must
+be the same `acp-devtools` your proxy uses (so the DB schemas match).
+
+```bash
+acp-devtools mcp                          # serve over stdio
+acp-devtools mcp --db /tmp/session.db     # alternative database
+acp-devtools mcp --name acp-prod          # custom server name
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--name <name>` | `acp-devtools` | server name advertised in MCP handshake |
+
+### `backfill-metadata`
+
+Recomputes structured session metadata (client version, platform, agent
+name, agent version, protocol version, current mode/model) for saved
+sessions by re-scanning their `messages` table and running the same
+extractor the live proxy uses. Pure data layer — captures.db is the only
+input and the only output.
+
+```bash
+acp-devtools backfill-metadata             # all sessions
+acp-devtools backfill-metadata --id 23     # single session
+acp-devtools backfill-metadata --json      # for scripts
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read/write |
+| `--id <id>` | — | only backfill the named session |
+| `--json` | — | machine-readable JSON instead of text table |
+
+When to run it:
+
+- After upgrading from a pre-v0.1 install. The new structured columns are
+  added by the schema migration but old rows arrive with NULL; this command
+  fills them.
+- After `import`-ing JSON sessions from another machine. The proxy never
+  observed those messages, so its live-detection path didn't fire.
+
+Live captures and CLI-saved sessions don't need it — the proxy populates
+the columns as `initialize` flows through.
+
 ---
 
 ## Supported agents
@@ -929,6 +1106,22 @@ fixtures/                          dev/test data (contributor-only)
   sample-session.jsonl             3-request input fixture
   ws-client.js                     minimal WS subscriber for terminal debugging
   fixture.db                       generated by `npm run fixture:generate` (gitignored)
+  generate-fat-session.mjs         1392 msg / 4 days / mixed idle gaps — UI stress test
+  generate-broken-session.mjs      28 msg with ~14 ACP spec violations — validate UX
+  generate-error-storm.mjs         9 errors across 6 methods — ERRORS insight + red rects
+  generate-tiny-session.mjs        5 msg / 1 prompt — edge cases (N=1 percentiles)
+  generate-streaming-heavy.mjs     1741 msg (1733 streaming chunks) — StreamCluster + BUSIEST
+  generate-permission-flow.mjs     19 msg with 6 agent→editor requests — `agent-req` lane
+```
+
+The `generate-*.mjs` scripts each emit a `SessionExport` JSON to stdout
+(or to `--out PATH`); pipe through `acp-devtools import` to seed your
+`captures.db`:
+
+```bash
+node fixtures/generate-fat-session.mjs --out /tmp/fat.json
+acp-devtools import /tmp/fat.json
+acp-devtools ui                        # pick the imported session
 ```
 
 The CLI is bundled with **tsup** — `@acp-devtools/core` and `@acp-devtools/ui`

@@ -1,5 +1,8 @@
+import { useMemo, useState } from 'react';
 import type { CapturedMessage } from '@acp-devtools/core';
+import { resolveSpecForMessage } from '@acp-devtools/core/acp/spec-decoder/browser';
 import { cn } from '../lib/cn';
+import { SpecHint } from './SpecHint';
 import {
     directionArrow,
     directionLabel,
@@ -28,6 +31,12 @@ export function DetailPanel({
 }: DetailPanelProps) {
     const tab = useMessagesStore((s) => s.detailTab);
     const setTab = useMessagesStore((s) => s.setDetailTab);
+
+    const resolver = useMemo(() => {
+        if (!message) return null;
+        const pairedMethod = pairedRequest?.method ?? undefined;
+        return resolveSpecForMessage(message, pairedMethod ? { pairedMethod } : undefined);
+    }, [message, pairedRequest]);
 
     if (!message) {
         return (
@@ -62,7 +71,7 @@ export function DetailPanel({
                     {message.method ?? message.kind}
                 </h2>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-ink-secondary">
-                    <Field label="kind" value={message.kind} />
+                    <KindField message={message} resolver={resolver} />
                     {message.rpcId !== undefined && message.rpcId !== null && (
                         <Field label="id" value={String(message.rpcId)} />
                     )}
@@ -116,12 +125,8 @@ export function DetailPanel({
             </nav>
 
             <div className="flex-1 overflow-auto px-5 py-4">
-                {tab === 'tree' && <TreeView message={message} />}
-                {tab === 'raw' && (
-                    <pre className="whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed text-ink-primary">
-                        {message.raw}
-                    </pre>
-                )}
+                {tab === 'tree' && <TreeView message={message} resolver={resolver} />}
+                {tab === 'raw' && <RawView raw={message.raw} />}
                 {tab === 'meta' && <MetaView message={message} />}
                 {tab === 'spec' && <SpecView validation={validation} />}
             </div>
@@ -202,7 +207,18 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
     );
 }
 
-function TreeView({ message }: { message: CapturedMessage }) {
+function TreeView({
+    message,
+    resolver,
+}: {
+    message: CapturedMessage;
+    resolver: ReturnType<typeof resolveSpecForMessage> | null;
+}) {
+    const getSpec = useMemo(() => {
+        if (!resolver) return undefined;
+        return (path: string[]) => resolver.resolve(path);
+    }, [resolver]);
+
     if (message.payload === null) {
         return (
             <div className="space-y-2 font-mono text-xs">
@@ -215,7 +231,55 @@ function TreeView({ message }: { message: CapturedMessage }) {
             </div>
         );
     }
-    return <JsonTree value={message.payload} defaultExpanded />;
+
+    return (
+        <JsonTree
+            value={message.payload}
+            defaultExpanded
+            {...(getSpec ? { getSpec } : {})}
+        />
+    );
+}
+
+function RawView({ raw }: { raw: string }) {
+    const [copied, setCopied] = useState(false);
+    const onCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(raw);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        } catch {
+            // clipboard API may be unavailable in non-secure contexts —
+            // fall back to a no-op rather than crashing.
+        }
+    };
+    return (
+        <div className="group relative">
+            <button
+                type="button"
+                onClick={onCopy}
+                aria-label="Copy raw frame to clipboard"
+                title="Copy raw frame to clipboard"
+                className={cn(
+                    // Hidden by default; the parent's `group-hover` reveals it
+                    // with a translucent (70%) surface fill so it doesn't
+                    // dominate the raw text underneath. Direct hover flips to
+                    // a fully solid bg-surface-rowHover + accent for a clear
+                    // "I'm clickable" state.
+                    'absolute right-0 top-0 inline-flex h-6 items-center rounded-sm border bg-surface-elev/70 px-2 font-mono text-[10px] uppercase tracking-widest opacity-0 transition-[opacity,background-color,border-color,color] duration-150',
+                    'group-hover:opacity-100 focus-visible:opacity-100',
+                    copied
+                        ? 'border-accent-ok/60 bg-surface-elev text-accent-ok opacity-100'
+                        : 'border-line text-ink-secondary hover:border-accent-info/70 hover:bg-surface-rowHover hover:text-accent-info',
+                )}
+            >
+                {copied ? '✓ copied' : 'copy'}
+            </button>
+            <pre className="whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed text-ink-primary">
+                {raw}
+            </pre>
+        </div>
+    );
 }
 
 function MetaView({ message }: { message: CapturedMessage }) {
@@ -238,6 +302,29 @@ function MetaView({ message }: { message: CapturedMessage }) {
                 </div>
             ))}
         </dl>
+    );
+}
+
+function KindField({
+    message,
+    resolver,
+}: {
+    message: CapturedMessage;
+    resolver: ReturnType<typeof resolveSpecForMessage> | null;
+}) {
+    const field = <Field label="kind" value={message.kind} />;
+    if (!resolver?.typeDescription) return field;
+    return (
+        <SpecHint
+            label={
+                <div className="whitespace-pre-wrap font-sans text-[12px] leading-snug text-ink-secondary">
+                    {resolver.typeDescription}
+                </div>
+            }
+            tone="info"
+        >
+            {field}
+        </SpecHint>
     );
 }
 

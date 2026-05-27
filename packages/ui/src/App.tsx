@@ -9,14 +9,16 @@ import {
 } from './store/messagesStore';
 import { buildValidationMap } from './lib/validation';
 import { useDiscoveryStore } from './store/discoveryStore';
-import { captureLabel } from './lib/captureLabel';
+import { captureLabel, sessionHeader } from './lib/captureLabel';
 import { parseUrlState, writeUrlState } from './lib/urlState';
 import { CommandPalette } from './components/CommandPalette';
 import { ConnectingState } from './components/ConnectingState';
 import { DetailPanel } from './components/DetailPanel';
 import { EmptyState } from './components/EmptyState';
 import { FilterBar } from './components/FilterBar';
+import { PerformancePanel } from './components/PerformancePanel';
 import { ReplayControls } from './components/ReplayControls';
+import { SessionInfoPanel } from './components/SessionInfoPanel';
 import { SplitPane } from './components/SplitPane';
 import { StatsBar } from './components/StatsBar';
 import { Timeline } from './components/Timeline';
@@ -66,7 +68,16 @@ export function App() {
         }
     }, []);
 
-    // Mirror the full UI state into the URL on every change.
+    // Drawer state is NOT persisted in the URL — page reload always starts
+    // with both drawers closed. The browser Back button still undoes
+    // opening a drawer thanks to a `history.state` marker (no URL param)
+    // pushed when the drawer opens; popstate inspects the marker.
+    const [infoOpen, setInfoOpenInternal] = useState(false);
+    const [perfOpen, setPerfOpenInternal] = useState(false);
+
+    // Mirror the full UI state into the URL on every change — same
+    // `replaceState` behaviour the app had before. Drawer-open state is
+    // tracked separately via `history.state` (see openInfo/openPerf below).
     useEffect(() => {
         const flush = () => {
             const m = useMessagesStore.getState();
@@ -86,6 +97,66 @@ export function App() {
             unsubM();
             unsubD();
         };
+    }, []);
+
+    // Drawer open/close — opening pushes a history entry tagged with the
+    // drawer name; closing (via close button OR via selecting a timeline
+    // event) calls `history.back()` so the popstate handler runs and the
+    // browser back-stack stays consistent with the visible state.
+    const openInfo = () => {
+        if (infoOpen) return;
+        window.history.pushState({ drawer: 'info' }, '', window.location.href);
+        setInfoOpenInternal(true);
+    };
+    const openPerf = () => {
+        if (perfOpen) return;
+        window.history.pushState({ drawer: 'perf' }, '', window.location.href);
+        setPerfOpenInternal(true);
+    };
+    const closeInfo = () => {
+        if (!infoOpen) return;
+        window.history.back();
+    };
+    const closePerf = () => {
+        if (!perfOpen) return;
+        window.history.back();
+    };
+    // Click a timeline event inside the perf drawer → navigate forward to
+    // a new history entry with that selection, drawer closed. This is NOT
+    // closePerf() (which would go back); we want forward navigation so the
+    // user can press Back to return to the perf-open view they came from.
+    const navigateFromDrawer = (seq: number) => {
+        window.history.pushState({ drawer: null }, '', window.location.href);
+        useMessagesStore.getState().select(seq);
+        setInfoOpenInternal(false);
+        setPerfOpenInternal(false);
+    };
+
+    // Browser Back/Forward — sync the drawer flags to whatever the new
+    // history entry's state object describes. Routine state (selection,
+    // filters) is already in the URL and reapplied via the parsed query.
+    useEffect(() => {
+        const onPop = (e: PopStateEvent) => {
+            const state = e.state as { drawer?: 'info' | 'perf' } | null;
+            setInfoOpenInternal(state?.drawer === 'info');
+            setPerfOpenInternal(state?.drawer === 'perf');
+            const parsed = parseUrlState(window.location.search);
+            const ms = useMessagesStore.getState();
+            const ds = useDiscoveryStore.getState();
+            const patch: Partial<ReturnType<typeof useMessagesStore.getState>> = {};
+            if (Object.keys(parsed.filters).length > 0) {
+                patch.filters = { ...ms.filters, ...parsed.filters };
+            }
+            patch.selectedSeq = parsed.selectedSeq;
+            patch.detailTab = parsed.detailTab ?? 'tree';
+            patch.playback = { ...ms.playback, cap: parsed.playbackCap };
+            useMessagesStore.setState(patch);
+            if (parsed.captureUrl !== ds.selectedUrl && parsed.captureUrl) {
+                ds.setSelected(parsed.captureUrl);
+            }
+        };
+        window.addEventListener('popstate', onPop);
+        return () => window.removeEventListener('popstate', onPop);
     }, []);
 
     // Auto-pick the newest *live* capture. Saved-session URLs (/replay/N) are
@@ -199,6 +270,20 @@ export function App() {
     const status = useMessagesStore((s) => s.connection);
     const lastError = useMessagesStore((s) => s.lastError);
 
+    // Browser tab title carries the selected capture label so several
+    // inspector tabs are easy to tell apart at a glance. Convention is
+    // page-name-first (truncates better in narrow tabs) — app name suffix.
+    useEffect(() => {
+        const base = 'ACP Devtools';
+        if (!session) {
+            document.title = base;
+            return;
+        }
+        const { primary, secondary } = sessionHeader(session);
+        const head = secondary ? `${primary} · ${secondary}` : primary;
+        document.title = `${head} — ${base}`;
+    }, [session]);
+
     const selectedMessage = useMemo(
         () => selectMessage(messages, selectedSeq),
         [messages, selectedSeq],
@@ -244,6 +329,12 @@ export function App() {
         <div className="flex h-full flex-col bg-surface-base text-ink-primary">
             <Toast message={toast?.message ?? null} tone={toast?.tone ?? 'info'} />
             <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+            <SessionInfoPanel open={infoOpen} onClose={closeInfo} />
+            <PerformancePanel
+                open={perfOpen}
+                onClose={closePerf}
+                onNavigateToSeq={navigateFromDrawer}
+            />
             <TopBar
                 wsUrl={displayUrl}
                 overrideUrl={null}
@@ -255,6 +346,8 @@ export function App() {
                 }}
                 onImportResult={(message, tone) => setToast({ message, tone })}
                 activeUrl={wsUrl}
+                onOpenInfo={openInfo}
+                onOpenPerf={openPerf}
             />
             <FilterBar />
             <main className="flex-1 overflow-hidden">

@@ -33,6 +33,34 @@
             "types": "./dist/acp/text.d.ts",
             "import": "./dist/acp/text.js"
         },
+        "./acp/session-metadata": {
+            "types": "./dist/acp/session-metadata.d.ts",
+            "import": "./dist/acp/session-metadata.js"
+        },
+        "./acp/method-stats": {
+            "types": "./dist/acp/method-stats.d.ts",
+            "import": "./dist/acp/method-stats.js"
+        },
+        "./acp/perf-insights": {
+            "types": "./dist/acp/perf-insights.d.ts",
+            "import": "./dist/acp/perf-insights.js"
+        },
+        "./acp/sparkline": {
+            "types": "./dist/acp/sparkline.d.ts",
+            "import": "./dist/acp/sparkline.js"
+        },
+        "./acp/timeline-layout": {
+            "types": "./dist/acp/timeline-layout.d.ts",
+            "import": "./dist/acp/timeline-layout.js"
+        },
+        "./acp/spec-decoder": {
+            "types": "./dist/acp/spec-decoder.d.ts",
+            "import": "./dist/acp/spec-decoder.js"
+        },
+        "./acp/spec-decoder/browser": {
+            "types": "./dist/acp/spec-decoder-browser.d.ts",
+            "import": "./dist/acp/spec-decoder-browser.js"
+        },
         "./acp/validate": {
             "types": "./dist/acp/validate.d.ts",
             "import": "./dist/acp/validate.js"

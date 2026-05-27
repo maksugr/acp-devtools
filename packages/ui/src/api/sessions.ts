@@ -7,6 +7,15 @@ export interface SavedSession {
     message_count: number;
     client_name: string | null;
     imported_at: number | null;
+    // v4 structured-metadata columns — all nullable. NULL when the session
+    // predates Phase C or the proxy hasn't seen `initialize` yet.
+    client_version: string | null;
+    client_platform: string | null;
+    agent_name: string | null;
+    agent_version: string | null;
+    protocol_version: number | null;
+    current_mode: string | null;
+    current_model: string | null;
 }
 
 interface SessionsResponse {

@@ -91,9 +91,12 @@ export interface WriteState {
 const OWNED_KEYS = ['ws', 'dir', 'kind', 'streams', 'q', 'seq', 'tab', 'play'];
 
 /**
- * Rewrite the query string to reflect the given UI state. Preserves any params
- * the URL state subsystem does not own; uses `replaceState` so we never grow
- * the browser back-stack while the user toggles things.
+ * Rewrite the query string to reflect the given UI state. Preserves any
+ * params the URL state subsystem does not own; uses `replaceState` so we
+ * never grow the browser back-stack while the user toggles things.
+ * Carries the existing `history.state` through — drawers (perf / info)
+ * tag their pushed history entries with a state marker that this routine
+ * must not clobber when ephemeral URL params change.
  */
 export function writeUrlState(state: WriteState): void {
     const p = new URLSearchParams(window.location.search);
@@ -128,6 +131,6 @@ export function writeUrlState(state: WriteState): void {
     const query = p.toString();
     const next = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;
     if (next !== window.location.pathname + window.location.search + window.location.hash) {
-        window.history.replaceState(null, '', next);
+        window.history.replaceState(window.history.state, '', next);
     }
 }

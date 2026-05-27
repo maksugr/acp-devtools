@@ -191,12 +191,6 @@ function buildCommands(onClose: () => void): Command[] {
         });
     }
     cmds.push({
-        id: 'view.clear',
-        label: 'Clear messages from view',
-        section: 'view',
-        run: () => msgState.clear(),
-    });
-    cmds.push({
         id: 'view.deselect',
         label: 'Deselect message',
         hint: 'esc',
