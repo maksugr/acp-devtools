@@ -334,7 +334,7 @@ in the inspector's session picker.
 ## For contributors
 
 ```bash
-npm test               # vitest run — 220+ tests across core + ui
+npm test               # vitest run — 270+ tests across core + ui
 npm run lint           # eslint
 npm run typecheck      # tsc --noEmit on core + cli + ui
 npm run format         # prettier --write
