@@ -61,6 +61,37 @@ notification / error / stream), method, the short rpc id, payload size, and
 latency to the paired request. The detail panel (not shown) renders the full
 JSON for any selected message in Tree / Raw / Meta tabs.
 
+### Labels you'll see
+
+The session header (left of the picker) tells you **what** you're looking at;
+the connection chip (right of the actions menu) tells you **how** it's being
+delivered. Every label has a tooltip on hover.
+
+| Header label | Meaning |
+|---|---|
+| `SESSION #N` | live capture — proxy is still running, frames are arriving |
+| `REPLAY #N` | playback of a saved session from `captures.db` |
+| `IMPORTED #N` | playback of a session that was loaded from a JSON file (the row has `imported_at` set in the database) |
+
+| Connection chip | Meaning |
+|---|---|
+| `LIVE` | WebSocket attached to a running proxy; frames stream in real time |
+| `REPLAY` | WebSocket serving a finished session from `captures.db` |
+| `FILE` | viewing an imported session — the proxy is unrelated, nothing is reconnecting |
+| `WAITING` | reconnect loop is trying to reach the WS, exponential backoff |
+| `IDLE` | no capture selected (e.g. the proxy ended and replay finished) |
+| `CLOSED` | server closed the socket; click the chip to retry |
+| `ERROR` | the most recent connection attempt failed with the error in the tooltip |
+
+| Row badge | Meaning |
+|---|---|
+| `REQ` | JSON-RPC request (expects a response) |
+| `RSP` | JSON-RPC response (carries `result`) |
+| `NTF` | JSON-RPC notification (one-way, no id) |
+| `ERR` | error response (carries `error.code`/`error.message`) |
+| `UNK` | the frame did not parse as JSON-RPC; raw bytes are still preserved |
+| `STR` | collapsed run of consecutive `agent_message_chunk` notifications |
+
 ## Compared to existing ACP inspectors
 
 There are two other public ACP inspector projects. They're worth knowing
@@ -191,8 +222,16 @@ inspector picks it up within 2.5s.
 
 ## CLI reference
 
-One binary, four subcommands. Run any command with `--help` for full flag
-listings — e.g. `acp-devtools proxy --help`, `acp-devtools ui --help`.
+One binary, eleven subcommands. Every UI control has a CLI equivalent — the
+inspector is one frontend among others, not a hard dependency. Run any
+command with `--help` for the full flag listing.
+
+| Group | Commands |
+|---|---|
+| **Capture** | `proxy` |
+| **Inspect** | `ui`, `replay`, `inspect`, `search`, `stats` |
+| **Manage data** | `list`, `export`, `import`, `delete` |
+| **Setup** | `doctor` |
 
 ### `proxy [agent] [args…]`
 
@@ -222,16 +261,242 @@ acp-devtools proxy --save-to /tmp/session.db \
 | `--ws-host <host>` | `127.0.0.1` | WebSocket bind address |
 | `--no-ws` | — | disable the WebSocket server entirely |
 
-### `replay <db>`
+### `replay <path>`
 
-Streams a saved session to the inspector over WebSocket.
+Streams a saved session to the inspector over WebSocket. Accepts either a
+SQLite database from `--save-to` or a `.json` file produced by `export`
+(auto-detected by extension).
 
 ```bash
 acp-devtools replay /tmp/session.db --ws-port 3737
+acp-devtools replay /tmp/capture.json --ws-port 3737      # imported JSON
 ```
 
-Flags: `--session <id>` (default: latest), `--ws-port <port>`,
+Flags: `--session <id>` (SQLite only; default: latest), `--ws-port <port>`,
 `--ws-host <host>`.
+
+### `list`
+
+Lists saved sessions in the database, newest first. Imported sessions are
+sorted by when they were *imported*, not by their original capture time.
+
+```bash
+acp-devtools list                          # default db, 50 rows
+acp-devtools list --imported               # only imported sessions
+acp-devtools list --limit 5 --json         # machine-readable
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--limit <n>` | `50` | maximum rows |
+| `--imported` | — | only imported sessions |
+| `--saved` | — | only non-imported (live-captured) sessions |
+| `--json` | — | emit JSON instead of an aligned table |
+
+Sample output:
+
+```
+#25  20h3m  imported  5msg   acp-session-16-2026-05-27-...json
+#23  50m    saved     20msg  WebStorm 2026.1.2 · npx -y @agentclientprotocol/claude-agent-acp
+#22  56m    saved     0msg   npx -y @agentclientprotocol/claude-agent-acp
+```
+
+Live captures don't appear here — they're process descriptors, not database
+rows. Use `acp-devtools doctor` to see them.
+
+### `export <db>`
+
+Writes one session as a self-contained JSON file — metadata plus every
+captured frame, losslessly. Useful for attaching to GitHub issues, offline
+analysis with `jq`, or building per-agent fixtures.
+
+```bash
+acp-devtools export ~/.acp-devtools/captures.db --session 21 > capture.json
+acp-devtools export /tmp/session.db -o capture.json
+```
+
+Flags: `--session <id>` (default: latest), `-o, --output <file>`,
+`--no-pretty` (compact one-line JSON for diff / grep).
+
+### `import <file>`
+
+Inserts a JSON export into the database as a new saved session, with
+`imported_at = now()`. The new id is printed to stdout (so it works in a
+shell pipeline); the human-readable status line goes to stderr.
+
+```bash
+acp-devtools import capture.json
+# stderr: acp-devtools: imported capture.json → session #29 (12 messages)
+# stdout: 29
+
+id=$(acp-devtools import capture.json --quiet)
+acp-devtools list --json | jq ".[] | select(.id == $id)"
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to write to |
+| `--quiet` | — | suppress the stderr status line |
+
+### `delete <id…>`
+
+Removes one or more sessions from the database forever; the schema cascades
+to their messages. No interactive prompt — pair with `acp-devtools list`
+first if you want to verify ids.
+
+```bash
+acp-devtools delete 27                      # one session
+acp-devtools delete 25 26 27                # several at once
+acp-devtools delete --db /tmp/other.db 5
+```
+
+Exit codes: `0` if every id was deleted, `1` if any id was missing, `2`
+for malformed input.
+
+### `inspect <id>`
+
+Prints messages of a saved session to stdout — the terminal equivalent of
+the inspector timeline. Three output formats and the same filter axes as
+the UI's FilterBar.
+
+```bash
+# Plain table (default), 500 rows max
+acp-devtools inspect 23 --limit 20
+
+# Only requests, outgoing direction, scrolled to seq 50+
+acp-devtools inspect 23 --kind req --dir out --from-seq 50
+
+# Substring grep on the raw frame, like Cmd+F in the UI
+acp-devtools inspect 23 --grep session/prompt
+
+# JSON Lines — pipe to jq for arbitrary analysis
+acp-devtools inspect 23 --format jsonl | jq -r 'select(.method == "session/prompt") | .raw'
+
+# Just the raw frames — replay-friendly
+acp-devtools inspect 23 --format raw > rerun-input.jsonl
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--limit <n>` | `500` | max messages to print |
+| `--from-seq <n>` | — | start from this seq (inclusive) |
+| `--dir <codes>` | both | direction filter: `out`, `in`, `out,in` |
+| `--kind <codes>` | all | kind filter: comma-separated subset of `req,rsp,ntf,err,unk` |
+| `--method <pattern>` | — | substring match on method name (case-insensitive) |
+| `--grep <text>` | — | substring match on the raw frame (case-insensitive) |
+| `--paired` | — | only req/rsp/err — skip notifications |
+| `--no-preview` | — | omit the PREVIEW column (useful on narrow terminals or for grep) |
+| `-f, --format <mode>` | `table` | `table` (default), `jsonl` (CapturedMessage per line), `raw` (just the wire frames) |
+
+Sample table output:
+
+```
+  1  12:09:29.339  →A  REQ  initialize     1  →2   935ms  861B
+  2  12:09:30.274  A←  RSP  —              1  ←1   935ms  1.6KB
+  3  12:09:30.377  →A  REQ  session/new    2  →4   1.25s  289B
+  5  12:09:31.626  A←  NTF  session/update —  —        —  6.0KB
+ 13  12:09:32.316  →A  REQ  session/prompt 6  →20  5.04s  309B  "fix the bug in foo.ts"
+ 14  12:09:37.045  A←  NTF  session/update —  —        —  174B  "Looking at the file…"
+```
+
+Columns: seq · time (UTC HH:MM:SS.mmm) · direction (`→A` editor-to-agent
+or `A←` agent-to-editor) · kind · method · rpc_id · pair (`→N` request
+points at response seq N; `←N` response points back at request seq N) ·
+latency (request↔response wall-clock) · frame size · preview (extracted
+text for `session/prompt` and agent reply chunks). Notifications without
+text content and orphan responses leave pair/latency/preview empty. Parse
+failures land in the METHOD column as `! <error message>`.
+
+The pair index is computed across the **whole session**, not just the
+filtered subset — so `--kind req` still shows the latency on each
+request, even though the matching responses are hidden.
+
+### `search <query>`
+
+Full-text substring search across every saved session — the cross-session
+equivalent of the UI search box. Case-insensitive.
+
+```bash
+acp-devtools search session/prompt                # everywhere
+acp-devtools search "Edit" --session 23           # only session #23
+acp-devtools search prompt --in-method            # match method names only
+acp-devtools search initialize --json | jq        # programmatic
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to search |
+| `--limit <n>` | `50` | maximum hits |
+| `--session <id>` | — | restrict to one session |
+| `--in-method` | — | match method names only |
+| `--in-payload` | — | match inside the frame body only |
+| `--json` | — | machine-readable JSON instead of a table |
+
+Sample output:
+
+```
+#23/13   session/prompt  …est","id":6,"method":"session/prompt","params":{"sessionId":"9b…
+#23/15   session/update  …{"name":"init","description":"Initialize a new CLAUDE.md…
+```
+
+Columns: `#session/seq` · method · snippet (with `…` around the hit).
+
+### `stats <id>`
+
+Aggregates a saved session — the terminal equivalent of the inspector's
+footer StatsBar. Totals per direction and kind, plus p50 / p90 / p99 / max
+/ mean latency over request↔response pairs. Add `--by-method` for a
+per-method breakdown.
+
+```bash
+acp-devtools stats 23
+acp-devtools stats 23 --by-method
+acp-devtools stats 23 --json | jq '.latency.p99'
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--by-method` | — | append per-method table (method · count · p50 · p99 · total) |
+| `--json` | — | machine-readable JSON instead of human-readable text |
+
+Sample output:
+
+```
+session #23  ·  1h14m ago  ·  lasted 2m37s  ·  WebStorm 2026.1.2 · Claude Code
+
+DIRECTION          COUNT
+→ editor → agent   6
+← agent → editor   14
+
+KIND   COUNT
+REQ    6
+RSP    6
+NTF    8
+ERR    0
+
+LATENCY (response pairs · 6 samples)
+p50    470ms
+p90    3.15s
+p99    4.85s
+max    5.04s
+mean   1.21s
+```
+
+The percentile algorithm matches the UI StatsBar (linear interpolation),
+so the inspector and CLI agree to the millisecond on the same data.
+
+### The inspector's equivalents
+
+The picker hides a `×` trash on each saved-session row that maps to `delete
+<id>`. The `[⋯]` menu in the top bar exposes `import`, `export`, and
+`clear`. Imported sessions sit under their own **IMPORTED** section in the
+picker; the mode label in the top bar flips from `REPLAY` to `IMPORTED`
+and the connection chip from `LIVE` to `FILE` so you always know whether
+the data on screen came from a process, the database, or a file you just
+opened.
 
 ### `ui`
 
@@ -248,10 +513,55 @@ acp-devtools ui --port 3737
 | `--no-open` | — | suppress the browser auto-open |
 | `--captures-db <file>` | `~/.acp-devtools/captures.db` | DB for `/api/sessions` and `/replay/<id>` |
 
-The server exposes four endpoints: `GET /api/active` (live captures from
+The server exposes six endpoints: `GET /api/active` (live captures from
 the discovery directory), `GET /api/sessions` (saved sessions in
-captures.db), `GET /api/info` (binary path, used by the empty state to
+captures.db), `POST /api/import` (insert a JSON export as a new session,
+sets `imported_at`; the inspector's `[⋯] → import` action uses this),
+`DELETE /api/sessions/<id>` (remove a session and cascade-delete its
+messages), `GET /api/info` (binary path, used by the empty state to
 pre-fill snippets), and `WS /replay/<id>` (stream a saved session).
+
+### Headless workflow (no browser)
+
+Every inspector action is a CLI invocation. A typical no-UI loop:
+
+```bash
+# 1. Capture a session (IDE talks to acp-devtools instead of the agent).
+#    Sessions are auto-saved to ~/.acp-devtools/captures.db; each gets a
+#    globally unique id.
+#    (Wire it up in your IDE per the Quickstart, then have a chat.)
+
+# 2. See what's there.
+acp-devtools list --limit 10
+
+# 3. Inspect a specific session offline — dump it as JSON, query with jq.
+acp-devtools export ~/.acp-devtools/captures.db --session 23 -o /tmp/s23.json
+jq '.messages | map(select(.method == "session/prompt")) | length' /tmp/s23.json
+# → 4
+
+# 4. Inspect a session in the terminal — same filters as the UI FilterBar.
+acp-devtools inspect 23 --kind req --method session/prompt
+acp-devtools inspect 23 --format jsonl | jq 'select(.method == "fs/read_text_file")'
+
+# 5. Search across every saved session for a pattern.
+acp-devtools search session/cancel --limit 10
+
+# 6. Share a session with a teammate.
+acp-devtools export ~/.acp-devtools/captures.db --session 23 -o capture.json
+# email / Slack / gist / GitHub-issue-attach the resulting JSON
+
+# 7. Receive someone's capture — load it into your own database.
+id=$(acp-devtools import their-capture.json --quiet)
+acp-devtools list --imported
+
+# 8. Clean up.
+acp-devtools delete 17 18 19
+```
+
+For interactive inspection without a browser the inspector still helps —
+`acp-devtools ui` serves a local-only web UI on `127.0.0.1` that you can
+point any browser at. But nothing requires it: `list` / `export` / `jq` /
+`sqlite3 ~/.acp-devtools/captures.db` is enough for most debugging.
 
 ### `doctor`
 

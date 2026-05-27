@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
+import { refreshSavedSessions } from '../api/discovery';
 import { captureLabel, shortAgentName } from '../lib/captureLabel';
 import {
+    deleteSession as apiDeleteSession,
     isReplayUrl,
     replayUrlFor,
     sessionIdFromReplayUrl,
+    type SavedSession,
 } from '../api/sessions';
 import { useDiscoveryStore } from '../store/discoveryStore';
 
@@ -48,6 +51,14 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
     const savedOnly = useMemo(
         () => savedSessions.filter((s) => !liveDbIds.has(s.id)),
         [savedSessions, liveDbIds],
+    );
+    const savedRegular = useMemo(
+        () => savedOnly.filter((s) => s.imported_at === null),
+        [savedOnly],
+    );
+    const savedImported = useMemo(
+        () => savedOnly.filter((s) => s.imported_at !== null),
+        [savedOnly],
     );
     const currentSaved =
         replayId !== null ? savedOnly.find((s) => s.id === replayId) ?? null : null;
@@ -151,58 +162,58 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
                     </ul>
 
                     <SectionHeader>
-                        saved · {savedOnly.length} session{savedOnly.length === 1 ? '' : 's'}
+                        saved · {savedRegular.length} session{savedRegular.length === 1 ? '' : 's'}
                     </SectionHeader>
-                    {savedOnly.length === 0 && (
+                    {savedRegular.length === 0 && (
                         <div className="px-3 py-3 text-center font-mono text-[11px] text-ink-muted">
                             {savedSessions.length === 0
                                 ? 'captures.db is empty'
-                                : 'all saved sessions are currently live'}
+                                : savedImported.length > 0
+                                  ? 'no live-captured sessions yet'
+                                  : 'all saved sessions are currently live'}
                         </div>
                     )}
                     <ul className="max-h-[300px] overflow-y-auto">
-                        {savedOnly.map((s) => {
-                            const url = replayUrlFor(s.id);
-                            const isActive = url === activeUrl;
-                            return (
-                                <li key={s.id}>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            onSelect(url);
-                                            setOpen(false);
-                                        }}
-                                        title={`session #${s.id} · ${s.agent_command ?? ''} · ${s.message_count} messages`}
-                                        className={cn(
-                                            'flex w-full items-baseline gap-3 border-b border-line-grid/70 px-3 py-2 text-left transition-colors hover:bg-surface-rowHover',
-                                            isActive ? 'bg-surface-rowHover' : '',
-                                        )}
-                                    >
-                                        <span
-                                            aria-hidden
-                                            className={cn(
-                                                'h-2 w-2 shrink-0 rounded-full',
-                                                isActive
-                                                    ? 'bg-accent-note animate-pulse-soft'
-                                                    : 'bg-ink-dim',
-                                            )}
-                                        />
-                                        <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-primary">
-                                            <span className="text-accent-note">#{s.id}</span>
-                                            <span className="text-ink-muted"> · </span>
-                                            {s.name ??
-                                                (s.client_name
-                                                    ? `${s.client_name} · ${shortAgentName(s.agent_command ?? '')}`
-                                                    : shortAgentName(s.agent_command ?? ''))}
-                                        </span>
-                                        <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                                            {s.message_count}msg · {formatAge(s.started_at)}
-                                        </span>
-                                    </button>
-                                </li>
-                            );
-                        })}
+                        {savedRegular.map((s) => (
+                            <SavedRow
+                                key={s.id}
+                                s={s}
+                                activeUrl={activeUrl}
+                                onPick={(url) => {
+                                    onSelect(url);
+                                    setOpen(false);
+                                }}
+                            />
+                        ))}
                     </ul>
+
+                    {(savedImported.length > 0 || savedSessions.some((s) => s.imported_at !== null)) && (
+                        <>
+                            <SectionHeader>
+                                imported · {savedImported.length} file
+                                {savedImported.length === 1 ? '' : 's'}
+                            </SectionHeader>
+                            {savedImported.length === 0 ? (
+                                <div className="px-3 py-3 text-center font-mono text-[11px] text-ink-muted">
+                                    no imported files
+                                </div>
+                            ) : (
+                                <ul className="max-h-[200px] overflow-y-auto">
+                                    {savedImported.map((s) => (
+                                        <SavedRow
+                                            key={s.id}
+                                            s={s}
+                                            activeUrl={activeUrl}
+                                            onPick={(url) => {
+                                                onSelect(url);
+                                                setOpen(false);
+                                            }}
+                                        />
+                                    ))}
+                                </ul>
+                            )}
+                        </>
+                    )}
 
                     {overrideUrl && (
                         <div className="border-t border-line px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-accent-warn">
@@ -220,6 +231,90 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
         <div className="border-b border-line bg-surface-base/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
             {children}
         </div>
+    );
+}
+
+interface SavedRowProps {
+    s: SavedSession;
+    activeUrl: string | null;
+    onPick: (url: string) => void;
+}
+
+function SavedRow({ s, activeUrl, onPick }: SavedRowProps) {
+    const url = replayUrlFor(s.id);
+    const isActive = url === activeUrl;
+    const onDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const label = s.name ?? shortAgentName(s.agent_command ?? '');
+        if (!window.confirm(`Delete session #${s.id} ${label} forever?`)) {
+            return;
+        }
+        void (async () => {
+            try {
+                await apiDeleteSession(s.id);
+                if (isActive) useDiscoveryStore.getState().setSelected(null);
+                await refreshSavedSessions();
+            } catch (err) {
+                // Surfacing through alert is crude but acceptable for an
+                // explicit destructive action the user just confirmed —
+                // silent failure would leave a phantom row.
+                const msg = err instanceof Error ? err.message : String(err);
+                window.alert(`Delete failed: ${msg}`);
+            }
+        })();
+    };
+    return (
+        <li className="group relative">
+            <button
+                type="button"
+                onClick={() => onPick(url)}
+                title={`session #${s.id} · ${s.agent_command ?? ''} · ${s.message_count} messages`}
+                className={cn(
+                    'flex w-full items-baseline gap-3 border-b border-line-grid/70 px-3 py-2 text-left transition-colors hover:bg-surface-rowHover',
+                    isActive ? 'bg-surface-rowHover' : '',
+                )}
+            >
+                <span
+                    aria-hidden
+                    className={cn(
+                        'h-2 w-2 shrink-0 rounded-full',
+                        isActive ? 'bg-accent-note animate-pulse-soft' : 'bg-ink-dim',
+                    )}
+                />
+                <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-primary">
+                    <span className="text-accent-note">#{s.id}</span>
+                    <span className="text-ink-muted"> · </span>
+                    {s.name ??
+                        (s.client_name
+                            ? `${s.client_name} · ${shortAgentName(s.agent_command ?? '')}`
+                            : shortAgentName(s.agent_command ?? ''))}
+                </span>
+                <span
+                    className={cn(
+                        'shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted transition-opacity',
+                        // Fade stats while hovered so the trash overlay does
+                        // not look like it bleeds into the text.
+                        'group-hover:opacity-30',
+                    )}
+                >
+                    {s.message_count}msg · {formatAge(s.started_at)}
+                </span>
+            </button>
+            <button
+                type="button"
+                onClick={onDelete}
+                aria-label={`delete session #${s.id} forever`}
+                title="Delete this session from captures.db forever"
+                className={cn(
+                    'absolute right-2 top-1/2 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-sm border border-line bg-surface-elev text-[12px] leading-none text-ink-muted transition-colors',
+                    // Overlay the stats area on hover instead of taking its
+                    // own slot — that's why the row uses plain `px-3` padding.
+                    'group-hover:flex hover:border-accent-error/60 hover:bg-accent-error/10 hover:text-accent-error',
+                )}
+            >
+                <span aria-hidden>×</span>
+            </button>
+        </li>
     );
 }
 

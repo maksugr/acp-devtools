@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import type { CapturedMessage } from '@acp-devtools/core';
+import { extractTextPreview, isUserPrompt } from '@acp-devtools/core/acp/text';
 import { cn } from '../lib/cn';
 import {
     directionArrow,
@@ -10,7 +11,6 @@ import {
     formatTimeMs,
     latencyTone,
 } from '../lib/format';
-import { extractTextPreview, isUserPrompt } from '../lib/acpText';
 
 interface MessageRowProps {
     message: CapturedMessage;

@@ -5,7 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase, type SqliteDatabase } from '../storage/sqlite.js';
 import { Session } from '../storage/session.js';
 import type { CapturedMessage } from '../acp/types.js';
-import { listSessionsSummary } from './queries.js';
+import { exportSessionFromParts } from '../storage/export.js';
+import { deleteSession, insertImportedSession, listSessionsSummary } from './queries.js';
 
 let tmp: string;
 let dbPath: string;
@@ -89,5 +90,153 @@ describe('listSessionsSummary', () => {
         Session.start(db, { agentCommand: 'mock' });
         const out = listSessionsSummary(dbPath);
         expect(out[0]?.client_name).toBeNull();
+    });
+
+    it('exposes imported_at — null for live captures, non-null for imports', () => {
+        Session.start(db, { agentCommand: 'live', startedAt: 1000 });
+        const exp = exportSessionFromParts(
+            {
+                id: 99,
+                name: 'src',
+                agentCommand: 'mock',
+                clientName: null,
+                startedAt: 500,
+                endedAt: 700,
+                importedAt: null,
+            },
+            [mockMessage(1)],
+            { tool: { name: 't', version: '1' } },
+        );
+        // queries.insertImportedSession opens its own DB connection — close
+        // ours first so SQLite doesn't trip on the WAL lock on the same path.
+        db.close();
+        insertImportedSession(dbPath, exp);
+        db = openDatabase(dbPath);
+
+        const out = listSessionsSummary(dbPath);
+        // Sort key is COALESCE(imported_at, started_at) DESC — the imported
+        // row's imported_at (~Date.now()) towers over the live session's
+        // started_at=1000, so the import comes first.
+        expect(out.map((r) => r.imported_at)).toEqual([
+            expect.any(Number),
+            null,
+        ]);
+    });
+
+    it('sorts imports by imported_at, not by their original started_at', () => {
+        // Live capture started 2 hours ago — bigger started_at than the
+        // import's original timestamp.
+        Session.start(db, { agentCommand: 'live', startedAt: Date.now() - 7_200_000 });
+        const exp = exportSessionFromParts(
+            {
+                id: 99,
+                name: 'src',
+                agentCommand: 'mock',
+                clientName: null,
+                startedAt: 1, // long-ago capture
+                endedAt: 2,
+                importedAt: null,
+            },
+            [mockMessage(1)],
+            { tool: { name: 't', version: '1' } },
+        );
+        db.close();
+        insertImportedSession(dbPath, exp);
+        db = openDatabase(dbPath);
+
+        const out = listSessionsSummary(dbPath);
+        // The import was added "just now", so even though its original
+        // started_at is tiny it should appear FIRST in the picker.
+        expect(out[0]?.imported_at).toEqual(expect.any(Number));
+        expect(out[1]?.imported_at).toBeNull();
+    });
+});
+
+describe('insertImportedSession', () => {
+    it('creates a new session with fresh id, preserves metadata, sets imported_at', () => {
+        const exp = exportSessionFromParts(
+            {
+                id: 7,
+                name: null,
+                agentCommand: 'npx -y @zed/claude-code-acp',
+                clientName: 'Zed',
+                startedAt: 1_700_000_000_000,
+                endedAt: 1_700_000_005_000,
+                importedAt: null,
+            },
+            [
+                mockMessage(1),
+                mockMessage(2, { direction: 'agent-to-editor', kind: 'response', method: undefined }),
+            ],
+            { tool: { name: 't', version: '1' } },
+        );
+        db.close();
+        const result = insertImportedSession(dbPath, exp, { sourceFilename: 'capture.json' });
+        db = openDatabase(dbPath);
+
+        expect(result.messageCount).toBe(2);
+        expect(result.id).toBeGreaterThan(0);
+        const summary = listSessionsSummary(dbPath);
+        expect(summary).toHaveLength(1);
+        expect(summary[0]?.id).toBe(result.id);
+        expect(summary[0]?.name).toBe('capture.json'); // sourceFilename fallback
+        expect(summary[0]?.client_name).toBe('Zed');
+        expect(summary[0]?.message_count).toBe(2);
+        expect(summary[0]?.imported_at).toEqual(expect.any(Number));
+        expect(summary[0]?.started_at).toBe(1_700_000_000_000);
+        expect(summary[0]?.ended_at).toBe(1_700_000_005_000);
+    });
+
+    it('keeps the export session.name when present (does not fall back to filename)', () => {
+        const exp = exportSessionFromParts(
+            {
+                id: 1,
+                name: 'preserved label',
+                agentCommand: null,
+                clientName: null,
+                startedAt: 1000,
+                endedAt: null,
+                importedAt: null,
+            },
+            [],
+            { tool: { name: 't', version: '1' } },
+        );
+        db.close();
+        const result = insertImportedSession(dbPath, exp, { sourceFilename: 'fallback.json' });
+        db = openDatabase(dbPath);
+        expect(listSessionsSummary(dbPath)[0]?.name).toBe('preserved label');
+        expect(result.id).toBeGreaterThan(0);
+    });
+});
+
+describe('deleteSession', () => {
+    it('removes the session and cascades messages', () => {
+        const s = Session.start(db, { agentCommand: 'doomed' });
+        s.record(mockMessage(1));
+        s.record(mockMessage(2));
+        s.close();
+        db.close();
+
+        const removed = deleteSession(dbPath, s.info.id);
+        expect(removed).toBe(true);
+
+        db = openDatabase(dbPath);
+        const out = listSessionsSummary(dbPath);
+        expect(out).toHaveLength(0);
+        const rows = db
+            .prepare(`SELECT COUNT(*) as c FROM messages WHERE session_id = ?`)
+            .get(s.info.id) as { c: number };
+        expect(rows.c).toBe(0);
+    });
+
+    it('returns false for a missing id', () => {
+        db.close();
+        const removed = deleteSession(dbPath, 9999);
+        db = openDatabase(dbPath);
+        expect(removed).toBe(false);
+    });
+
+    it('returns false when the db file does not exist', () => {
+        expect(deleteSession(join(tmp, 'nope.db'), 1)).toBe(false);
     });
 });

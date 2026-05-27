@@ -87,6 +87,7 @@ const session = (overrides: Partial<SessionRecord> = {}): SessionRecord => ({
     startedAt: 1_700_000_000_000,
     endedAt: null,
     clientName: null,
+    importedAt: null,
     ...overrides,
 });
 

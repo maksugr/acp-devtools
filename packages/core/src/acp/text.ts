@@ -1,4 +1,4 @@
-import type { CapturedMessage } from '@acp-devtools/core';
+import type { CapturedMessage } from './types.js';
 
 interface PromptBlock {
     type?: string;
@@ -22,12 +22,16 @@ interface SessionPromptParams {
 }
 
 /**
- * Pull a short human-readable preview out of an ACP message, so the timeline
- * can show the user's prompt and the agent's reply inline (instead of just
- * the JSON-RPC method name).
+ * Pull a short human-readable preview out of an ACP message — used by both
+ * the inspector timeline (next to the method name) and the CLI's `inspect`
+ * table's PREVIEW column.
  *
- * Returns null when nothing meaningful can be extracted — the caller renders
- * just the method name in that case.
+ * Returns null when nothing meaningful can be extracted. Recognised shapes:
+ * - `session/prompt` → joined text of all `params.prompt[].text` blocks of
+ *   type `text`. Image / audio blocks contribute nothing.
+ * - `session/update` (notification) → `params.update.content.text`, falling
+ *   back to `params.update.text` when the content shape is absent (older
+ *   agents).
  */
 export function extractTextPreview(m: CapturedMessage): string | null {
     if (!m.payload || typeof m.payload !== 'object') return null;

@@ -1,16 +1,31 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { DEFAULT_AGENT, isAgentShortcut } from '@acp-devtools/core';
+import { registerDeleteCommand } from './commands/delete.js';
 import { registerDoctorCommand } from './commands/doctor.js';
+import { registerExportCommand } from './commands/export.js';
+import { registerImportCommand } from './commands/import.js';
+import { registerInspectCommand } from './commands/inspect.js';
+import { registerListCommand } from './commands/list.js';
 import { registerProxyCommand } from './commands/proxy.js';
 import { registerReplayCommand } from './commands/replay.js';
+import { registerSearchCommand } from './commands/search.js';
+import { registerStatsCommand } from './commands/stats.js';
 import { registerUiCommand } from './commands/ui.js';
+import { CLI_VERSION } from './version.js';
 
 const KNOWN_SUBCOMMANDS = new Set([
     'proxy',
     'replay',
     'ui',
     'doctor',
+    'export',
+    'import',
+    'delete',
+    'list',
+    'inspect',
+    'search',
+    'stats',
     'help',
     '-h',
     '--help',
@@ -59,13 +74,20 @@ const program = new Command();
 program
     .name('acp-devtools')
     .description('Visual debugger / inspector for the Agent Client Protocol (ACP)')
-    .version('0.1.0')
+    .version(CLI_VERSION)
     .enablePositionalOptions();
 
 registerProxyCommand(program);
 registerReplayCommand(program);
 registerUiCommand(program);
 registerDoctorCommand(program);
+registerExportCommand(program);
+registerImportCommand(program);
+registerDeleteCommand(program);
+registerListCommand(program);
+registerInspectCommand(program);
+registerSearchCommand(program);
+registerStatsCommand(program);
 
 program.parseAsync([process.argv[0]!, process.argv[1]!, ...expanded]).catch((err) => {
     process.stderr.write(`acp-devtools: ${err instanceof Error ? err.message : String(err)}\n`);

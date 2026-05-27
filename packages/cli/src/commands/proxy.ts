@@ -153,6 +153,7 @@ export function registerProxyCommand(program: Command): void {
                       startedAt: Date.now(),
                       endedAt: null,
                       clientName: null,
+                      importedAt: null,
                   };
             broadcaster?.publishSessionStart(sessionInfo);
 

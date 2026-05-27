@@ -5,13 +5,12 @@ import { useMessagesStore } from '../store/messagesStore';
 
 beforeEach(() => {
     // Reset the messages store to a known baseline. Default filters: every
-    // direction + every kind enabled, streams collapsed, hideBoilerplate off.
+    // direction + every kind enabled, streams visible.
     useMessagesStore.setState({
         filters: {
             directions: new Set(['editor-to-agent', 'agent-to-editor']),
             kinds: new Set(['request', 'response', 'notification', 'error', 'unknown']),
             search: '',
-            hideBoilerplate: false,
             showStreams: true,
         },
     });
@@ -55,22 +54,6 @@ describe('FilterBar — kind chips', () => {
         expect(useMessagesStore.getState().filters.showStreams).toBe(false);
         fireEvent.click(screen.getByRole('button', { name: /^stream$/i }));
         expect(useMessagesStore.getState().filters.showStreams).toBe(true);
-    });
-});
-
-describe('FilterBar — hide boilerplate checkbox', () => {
-    it('starts unchecked when filters.hideBoilerplate is false', () => {
-        render(<FilterBar />);
-        const checkbox = screen.getByRole('checkbox');
-        expect(checkbox).not.toBeChecked();
-    });
-    it('toggles filters.hideBoilerplate when clicked', () => {
-        render(<FilterBar />);
-        const checkbox = screen.getByRole('checkbox');
-        fireEvent.click(checkbox);
-        expect(useMessagesStore.getState().filters.hideBoilerplate).toBe(true);
-        fireEvent.click(checkbox);
-        expect(useMessagesStore.getState().filters.hideBoilerplate).toBe(false);
     });
 });
 

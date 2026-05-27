@@ -17,6 +17,7 @@ const sessionFixture = (overrides: Partial<SessionRecord> = {}): SessionRecord =
     startedAt: 1_700_000_000_000,
     endedAt: null,
     clientName: null,
+    importedAt: null,
     ...overrides,
 });
 
@@ -58,7 +59,6 @@ const initialFilters = (): Filters => ({
     directions: new Set(ALL_DIRECTIONS),
     kinds: new Set(ALL_KINDS),
     search: '',
-    hideBoilerplate: false,
     showStreams: true,
 });
 
@@ -255,13 +255,6 @@ describe('applyFilters', () => {
         const out = applyFilters(build(), filters);
         // Chunks (4,5) gone, non-chunk notification (3) stays.
         expect(out.map((m) => m.seq)).toEqual([1, 2, 3, 6]);
-    });
-
-    it('hideBoilerplate strips set_mode / set_model methods', () => {
-        const filters = initialFilters();
-        filters.hideBoilerplate = true;
-        const out = applyFilters(build(), filters);
-        expect(out.map((m) => m.seq)).not.toContain(6);
     });
 
     it('search filters by raw substring (case-insensitive)', () => {

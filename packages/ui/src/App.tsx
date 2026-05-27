@@ -26,10 +26,12 @@ export function App() {
     const captures = useDiscoveryStore((s) => s.captures);
     const selectedUrl = useDiscoveryStore((s) => s.selectedUrl);
     const setSelected = useDiscoveryStore((s) => s.setSelected);
+    const sessionImportedAt = useMessagesStore((s) => s.session?.importedAt ?? null);
 
     const wsUrl = selectedUrl;
     const isReplaySelected =
         selectedUrl !== null && /\/replay\/\d+$/.test(selectedUrl);
+    const isImported = sessionImportedAt !== null;
 
     useEffect(() => {
         const stop = startDiscoveryPolling();
@@ -39,7 +41,7 @@ export function App() {
     // Re-apply theme when the OS preference changes (only effective in `system` mode).
     useEffect(() => bindSystemThemeListener(), []);
 
-    const [toast, setToast] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ message: string; tone: 'info' | 'success' | 'warn' } | null>(null);
     const prevUrls = useRef<Set<string>>(new Set());
 
     // Hydrate everything (filters, selected seq, detail tab, playback cap,
@@ -86,7 +88,8 @@ export function App() {
     }, []);
 
     // Auto-pick the newest *live* capture. Saved-session URLs (/replay/N) are
-    // deliberate user choices — never override them.
+    // deliberate user choices — never override them. Imports become regular
+    // saved sessions via `/replay/<id>` and are covered by the same guard.
     useEffect(() => {
         const currentUrlSet = new Set(captures.map((c) => c.url));
         prevUrls.current = (() => {
@@ -112,7 +115,7 @@ export function App() {
             setSelected(newest!.url);
         } else if (newCaptureAppeared && newest!.url !== selectedUrl) {
             setSelected(newest!.url);
-            setToast(`switched → ${captureLabel(newest!)}`);
+            setToast({ message: `switched → ${captureLabel(newest!)}`, tone: 'success' });
         }
         prevUrls.current = currentUrlSet;
     }, [captures, selectedUrl, setSelected, isReplaySelected]);
@@ -236,16 +239,18 @@ export function App() {
 
     return (
         <div className="flex h-full flex-col bg-surface-base text-ink-primary">
-            <Toast message={toast} tone="success" />
+            <Toast message={toast?.message ?? null} tone={toast?.tone ?? 'info'} />
             <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
             <TopBar
                 wsUrl={displayUrl}
                 overrideUrl={null}
                 isReplay={isReplaySelected}
+                isImported={isImported}
                 onPickCapture={(url) => {
                     setSelected(url);
                     prevUrls.current.add(url);
                 }}
+                onImportResult={(message, tone) => setToast({ message, tone })}
                 activeUrl={wsUrl}
             />
             <FilterBar />
@@ -274,7 +279,7 @@ export function App() {
                                 <div className="min-h-0 flex-1">
                                     <Timeline />
                                 </div>
-                                {isReplaySelected && <ReplayControls />}
+                                {(isReplaySelected || isImported) && <ReplayControls />}
                             </div>
                         }
                         right={

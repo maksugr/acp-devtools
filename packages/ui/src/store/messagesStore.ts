@@ -9,7 +9,6 @@ export interface Filters {
     directions: Set<CapturedMessage['direction']>;
     kinds: Set<CapturedMessage['kind']>;
     search: string;
-    hideBoilerplate: boolean;
     showStreams: boolean;
 }
 
@@ -46,7 +45,6 @@ interface MessagesState {
     toggleDirection: (dir: CapturedMessage['direction']) => void;
     toggleKind: (kind: CapturedMessage['kind']) => void;
     toggleStreams: () => void;
-    setHideBoilerplate: (v: boolean) => void;
     setPlaybackCap: (cap: number | null) => void;
     setPlaying: (playing: boolean) => void;
     setPlaybackSpeed: (speed: number) => void;
@@ -63,13 +61,10 @@ const ALL_KINDS: CapturedMessage['kind'][] = [
     'unknown',
 ];
 
-const BOILERPLATE_METHODS = new Set(['session/set_mode', 'session/set_model']);
-
 const initialFilters: Filters = {
     directions: new Set(ALL_DIRECTIONS),
     kinds: new Set(ALL_KINDS),
     search: '',
-    hideBoilerplate: false,
     showStreams: true,
 };
 
@@ -83,7 +78,6 @@ function isStreamChunk(m: CapturedMessage): boolean {
 interface PersistedFilters {
     directions: CapturedMessage['direction'][];
     kinds: CapturedMessage['kind'][];
-    hideBoilerplate: boolean;
     showStreams: boolean;
 }
 
@@ -164,7 +158,6 @@ export const useMessagesStore = create<MessagesState>()(
         }),
     toggleStreams: () =>
         set((s) => ({ filters: { ...s.filters, showStreams: !s.filters.showStreams } })),
-    setHideBoilerplate: (v) => set((s) => ({ filters: { ...s.filters, hideBoilerplate: v } })),
     setPlaybackCap: (cap) =>
         set((s) => ({ playback: { ...s.playback, cap } })),
     setPlaying: (playing) =>
@@ -191,7 +184,6 @@ export const useMessagesStore = create<MessagesState>()(
                 filters: {
                     directions: [...state.filters.directions],
                     kinds: [...state.filters.kinds],
-                    hideBoilerplate: state.filters.hideBoilerplate,
                     showStreams: state.filters.showStreams,
                 },
             }),
@@ -204,7 +196,6 @@ export const useMessagesStore = create<MessagesState>()(
                         ...current.filters,
                         directions: new Set(persisted.filters.directions),
                         kinds: new Set(persisted.filters.kinds),
-                        hideBoilerplate: persisted.filters.hideBoilerplate,
                         showStreams: persisted.filters.showStreams,
                     },
                 };
@@ -235,7 +226,6 @@ export function applyFilters(
             return false;
         }
 
-        if (filters.hideBoilerplate && m.method && BOILERPLATE_METHODS.has(m.method)) return false;
         if (q && !m.raw.toLowerCase().includes(q)) return false;
         return true;
     });
@@ -263,4 +253,4 @@ export function buildRequestIndex(messages: CapturedMessage[]): Map<number, numb
     return responseToRequest;
 }
 
-export { ALL_DIRECTIONS, ALL_KINDS, BOILERPLATE_METHODS };
+export { ALL_DIRECTIONS, ALL_KINDS };

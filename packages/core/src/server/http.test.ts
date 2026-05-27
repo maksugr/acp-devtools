@@ -1,7 +1,9 @@
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { Readable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { exportSessionFromParts, serializeExport } from '../storage/export.js';
 import { openDatabase, type SqliteDatabase } from '../storage/sqlite.js';
 import { Session } from '../storage/session.js';
 import { createApiHandler } from './http.js';
@@ -22,6 +24,38 @@ interface MockRes {
 
 function makeReq(url: string, method = 'GET'): MockReq {
     return { url, method };
+}
+
+/**
+ * A `Readable` stream tagged with HTTP req fields so handlers can treat it
+ * as an `IncomingMessage`. Each call emits the given body in one chunk then
+ * `end`, which is enough for our JSON POST handler.
+ */
+function makeStreamReq(
+    url: string,
+    method: string,
+    body: string,
+    headers: Record<string, string> = {},
+): Readable & { url: string; method: string; headers: Record<string, string> } {
+    const stream = Readable.from([Buffer.from(body, 'utf8')]) as Readable & {
+        url?: string;
+        method?: string;
+        headers?: Record<string, string>;
+    };
+    stream.url = url;
+    stream.method = method;
+    stream.headers = headers;
+    return stream as Readable & { url: string; method: string; headers: Record<string, string> };
+}
+
+function waitForEnd(res: MockRes): Promise<void> {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (res.ended) resolve();
+            else setTimeout(check, 5);
+        };
+        check();
+    });
 }
 
 function makeRes(): MockRes {
@@ -164,5 +198,112 @@ describe('createApiHandler', () => {
         const res = makeRes();
         expect(handler(req as never, res as never)).toBe(true);
         expect(res.statusCode).toBe(405);
+    });
+});
+
+describe('POST /api/import', () => {
+    function buildExportJson(): string {
+        const exp = exportSessionFromParts(
+            {
+                id: 99,
+                name: null,
+                agentCommand: 'mock',
+                clientName: 'Zed',
+                startedAt: 1_700_000_000_000,
+                endedAt: 1_700_000_001_000,
+                importedAt: null,
+            },
+            [
+                {
+                    seq: 1,
+                    timestamp: 1_700_000_000_001,
+                    direction: 'editor-to-agent',
+                    kind: 'request',
+                    method: 'initialize',
+                    rpcId: 1,
+                    raw: '{"jsonrpc":"2.0","id":1,"method":"initialize"}',
+                    payload: { jsonrpc: '2.0', id: 1, method: 'initialize' },
+                },
+            ],
+            { tool: { name: 'acp-devtools', version: '0.1.0' } },
+        );
+        return serializeExport(exp);
+    }
+
+    it('inserts a new session and returns its id', async () => {
+        db.close();
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeStreamReq('/api/import', 'POST', buildExportJson(), {
+            'x-acp-source-filename': 'sample.json',
+        });
+        const res = makeRes();
+        expect(handler(req as never, res as never)).toBe(true);
+        await waitForEnd(res);
+        db = openDatabase(dbPath);
+        expect(res.statusCode).toBe(201);
+        const body = JSON.parse(res.body) as { id: number; messageCount: number };
+        expect(body.id).toBeGreaterThan(0);
+        expect(body.messageCount).toBe(1);
+        const rows = db.prepare(`SELECT name, client_name, imported_at FROM sessions`).all() as Array<{
+            name: string | null;
+            client_name: string | null;
+            imported_at: number | null;
+        }>;
+        expect(rows).toHaveLength(1);
+        expect(rows[0]?.name).toBe('sample.json');
+        expect(rows[0]?.client_name).toBe('Zed');
+        expect(rows[0]?.imported_at).toEqual(expect.any(Number));
+    });
+
+    it('returns 400 with the parser message for malformed JSON', async () => {
+        db.close();
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeStreamReq('/api/import', 'POST', '{garbage');
+        const res = makeRes();
+        handler(req as never, res as never);
+        await waitForEnd(res);
+        db = openDatabase(dbPath);
+        expect(res.statusCode).toBe(400);
+        const body = JSON.parse(res.body) as { error: string };
+        expect(body.error).toMatch(/invalid JSON/);
+    });
+
+    it('returns 405 for GET', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/api/import', 'GET');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(405);
+    });
+});
+
+describe('DELETE /api/sessions/:id', () => {
+    it('deletes an existing session and returns 200', () => {
+        const s = Session.start(db, { agentCommand: 'doomed' });
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq(`/api/sessions/${s.info.id}`, 'DELETE');
+        const res = makeRes();
+        expect(handler(req as never, res as never)).toBe(true);
+        expect(res.statusCode).toBe(200);
+        const body = JSON.parse(res.body) as { deleted: boolean; id: number };
+        expect(body.deleted).toBe(true);
+        expect(body.id).toBe(s.info.id);
+    });
+
+    it('returns 404 for a missing id', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/api/sessions/9999', 'DELETE');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(404);
+    });
+
+    it('returns 405 for non-DELETE on /api/sessions/:id', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/api/sessions/1', 'POST');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(405);
+        expect(res.headers['allow']).toBe('DELETE');
     });
 });

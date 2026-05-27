@@ -58,7 +58,6 @@ export function parseUrlState(search: string): UrlState {
         if (kinds.length > 0) filters.kinds = new Set(kinds);
     }
 
-    if (p.get('hide-bp') === '1') filters.hideBoilerplate = true;
     if (p.get('streams') === '0') filters.showStreams = false;
     const q = p.get('q');
     if (q !== null) filters.search = q;
@@ -89,7 +88,7 @@ export interface WriteState {
     captureUrl: string | null;
 }
 
-const OWNED_KEYS = ['ws', 'dir', 'kind', 'hide-bp', 'streams', 'q', 'seq', 'tab', 'play'];
+const OWNED_KEYS = ['ws', 'dir', 'kind', 'streams', 'q', 'seq', 'tab', 'play'];
 
 /**
  * Rewrite the query string to reflect the given UI state. Preserves any params
@@ -120,7 +119,6 @@ export function writeUrlState(state: WriteState): void {
                 .join(','),
         );
     }
-    if (state.filters.hideBoilerplate) p.set('hide-bp', '1');
     if (!state.filters.showStreams) p.set('streams', '0');
     if (state.filters.search) p.set('q', state.filters.search);
     if (state.selectedSeq !== null) p.set('seq', String(state.selectedSeq));

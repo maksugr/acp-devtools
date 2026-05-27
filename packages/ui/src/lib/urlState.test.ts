@@ -7,7 +7,6 @@ const defaultFilters = (): Filters => ({
     directions: new Set(ALL_DIRECTIONS),
     kinds: new Set(ALL_KINDS),
     search: '',
-    hideBoilerplate: false,
     showStreams: true,
 });
 
@@ -32,8 +31,7 @@ describe('parseUrlState', () => {
     });
 
     it('reads boolean filters', () => {
-        const s = parseUrlState('?hide-bp=1&streams=0');
-        expect(s.filters.hideBoilerplate).toBe(true);
+        const s = parseUrlState('?streams=0');
         expect(s.filters.showStreams).toBe(false);
     });
 
@@ -95,7 +93,6 @@ describe('writeUrlState', () => {
                 directions: new Set(['editor-to-agent']),
                 kinds: new Set(['request', 'response']),
                 search: 'foo bar',
-                hideBoilerplate: true,
                 showStreams: false,
             },
             selectedSeq: 42,
@@ -111,7 +108,6 @@ describe('writeUrlState', () => {
         expect(parsed.filters.directions).toEqual(new Set(['editor-to-agent']));
         expect(parsed.filters.kinds).toEqual(new Set(['request', 'response']));
         expect(parsed.filters.search).toBe('foo bar');
-        expect(parsed.filters.hideBoilerplate).toBe(true);
         expect(parsed.filters.showStreams).toBe(false);
     });
 

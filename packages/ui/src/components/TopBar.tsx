@@ -7,15 +7,25 @@ import {
 import { formatAge, formatDateTime } from '../lib/format';
 import { sessionHeader } from '../lib/captureLabel';
 import { useNow } from '../lib/useNow';
+import { SessionActionsMenu, type SessionActionToastTone } from './SessionActionsMenu';
 import { SessionPicker } from './SessionPicker';
 import { ThemeToggle } from './ThemeToggle';
+
+export type TopBarToastTone = SessionActionToastTone;
 
 interface TopBarProps {
     wsUrl: string;
     overrideUrl: string | null;
     activeUrl: string | null;
     isReplay: boolean;
+    isImported?: boolean;
     onPickCapture: ((url: string) => void) | null;
+    /**
+     * Surface import outcomes — successful loads and parse errors — to the
+     * App-level Toast. Optional so tests and standalone usage of TopBar do
+     * not have to wire it.
+     */
+    onImportResult?: (message: string, tone: TopBarToastTone) => void;
 }
 
 export function TopBar({
@@ -23,12 +33,13 @@ export function TopBar({
     overrideUrl,
     activeUrl,
     isReplay,
+    isImported = false,
     onPickCapture,
+    onImportResult,
 }: TopBarProps) {
     const connection = useMessagesStore((s) => s.connection);
     const session = useMessagesStore((s) => s.session);
     const lastError = useMessagesStore((s) => s.lastError);
-    const clear = useMessagesStore((s) => s.clear);
     const lastEventTs = useMessagesStore((s) =>
         s.messages.length > 0 ? s.messages[s.messages.length - 1]!.timestamp : null,
     );
@@ -51,36 +62,44 @@ export function TopBar({
                 {session &&
                     (() => {
                         const { primary } = sessionHeader(session);
-                        // `isReplay` (passed in from App) is the authoritative
-                        // signal — it comes from the URL form (/replay/N) and
-                        // does not require `endedAt` to be set (proxies that
+                        // `isReplay` / `isImported` (passed in from App) are the
+                        // authoritative signals — they come from the URL form
+                        // (/replay/N) or imported file state respectively, and
+                        // do not require `endedAt` to be set (proxies that
                         // crashed leave endedAt = NULL forever).
-                        const replayEndTs =
+                        const frozen = isReplay || isImported;
+                        const frozenEndTs =
                             session.endedAt !== null
                                 ? session.endedAt
                                 : lastEventTs ?? session.startedAt;
-                        const durationLabel = isReplay
-                            ? formatAge(session.startedAt, replayEndTs)
+                        const durationLabel = frozen
+                            ? formatAge(session.startedAt, frozenEndTs)
                             : formatAge(session.startedAt, now);
                         const idleMs = lastEventTs !== null ? now - lastEventTs : null;
-                        const showIdle = !isReplay && idleMs !== null && idleMs > 5000;
+                        const showIdle = !frozen && idleMs !== null && idleMs > 5000;
                         const startedIso = new Date(session.startedAt).toISOString();
+                        const modeLabel = isImported
+                            ? 'IMPORTED'
+                            : isReplay
+                              ? 'REPLAY'
+                              : 'SESSION';
+                        const modeTitle = isImported
+                            ? 'session loaded from a JSON file on disk — not connected to any proxy'
+                            : isReplay
+                              ? 'replay of a saved session — proxy has ended'
+                              : 'live capture — proxy process is still running';
+                        const idColor = isImported
+                            ? 'text-accent-warn'
+                            : isReplay
+                              ? 'text-accent-note'
+                              : 'text-accent-out';
                         return (
                             <div className="flex items-center gap-3 font-mono text-[11px] text-ink-secondary">
-                                <span
-                                    className="text-ink-muted"
-                                    title={
-                                        isReplay
-                                            ? 'replay of a saved session — proxy has ended'
-                                            : 'live capture — proxy process is still running'
-                                    }
-                                >
-                                    {isReplay ? 'REPLAY' : 'SESSION'}
+                                <span className="text-ink-muted" title={modeTitle}>
+                                    {modeLabel}
                                 </span>
                                 <span
-                                    className={cn(
-                                        isReplay ? 'text-accent-note' : 'text-accent-out',
-                                    )}
+                                    className={idColor}
                                     title={
                                         session.agentCommand
                                             ? `session #${session.id} · ${session.agentCommand}`
@@ -99,12 +118,12 @@ export function TopBar({
                                         <span
                                             className="text-ink-muted"
                                             title={
-                                                isReplay
+                                                frozen
                                                     ? 'capture duration (start → end of recorded session)'
                                                     : 'how long the proxy process has been alive'
                                             }
                                         >
-                                            {isReplay ? 'lasted' : 'alive'} {durationLabel}
+                                            {frozen ? 'lasted' : 'alive'} {durationLabel}
                                         </span>
                                     </>
                                 )}
@@ -124,29 +143,29 @@ export function TopBar({
                             </div>
                         );
                     })()}
-                {onPickCapture && (
-                    <SessionPicker
-                        onSelect={onPickCapture}
-                        activeUrl={activeUrl}
-                        overrideUrl={overrideUrl}
+                <div className="flex items-center gap-1.5">
+                    {onPickCapture && (
+                        <SessionPicker
+                            onSelect={onPickCapture}
+                            activeUrl={activeUrl}
+                            overrideUrl={overrideUrl}
+                        />
+                    )}
+                    <ConnectionPill
+                        status={connection}
+                        wsUrl={wsUrl}
+                        lastError={lastError}
+                        isReplay={isReplay}
+                        isImported={isImported}
+                        onReconnect={reconnect}
                     />
-                )}
-                <button
-                    type="button"
-                    onClick={clear}
-                    className="inline-flex h-7 items-center rounded-sm border border-line px-2 font-mono text-[10px] uppercase tracking-widest text-ink-muted transition-colors hover:border-line-strong hover:text-ink-secondary"
-                    title="Hide current messages from view. They come back when you reopen the session — nothing is deleted from disk."
-                >
-                    clear
-                </button>
-                <ConnectionPill
-                    status={connection}
-                    wsUrl={wsUrl}
-                    lastError={lastError}
-                    isReplay={isReplay}
-                    onReconnect={reconnect}
-                />
-                <ThemeToggle />
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <SessionActionsMenu
+                        {...(onImportResult ? { onImportResult } : {})}
+                    />
+                    <ThemeToggle />
+                </div>
             </div>
         </header>
     );
@@ -157,14 +176,29 @@ function ConnectionPill({
     wsUrl,
     lastError,
     isReplay,
+    isImported,
     onReconnect,
 }: {
     status: ConnectionStatus;
     wsUrl: string;
     lastError: string | null;
     isReplay: boolean;
+    isImported: boolean;
     onReconnect: () => void;
 }) {
+    if (isImported) {
+        // Imported views are inherently disconnected — nothing to reconnect to.
+        // The pill becomes a passive «FILE» badge instead of a status surface.
+        return (
+            <div
+                className="inline-flex h-7 cursor-default items-center gap-2 rounded-sm border border-accent-warn/40 bg-accent-warn/10 px-3 font-mono text-[10px] font-semibold uppercase tracking-widest text-accent-warn"
+                title={`viewing data from a JSON file · ${wsUrl}`}
+            >
+                <span aria-hidden className="inline-block h-2 w-2 rounded-full bg-accent-warn" />
+                <span className="inline-block min-w-[52px] text-center">FILE</span>
+            </div>
+        );
+    }
     const openText = isReplay ? 'REPLAY' : 'LIVE';
     const text =
         status === 'open'

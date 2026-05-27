@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 
 export type SqliteDatabase = Database.Database;
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS sessions (
@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     agent_command TEXT,
     started_at    INTEGER NOT NULL,
     ended_at      INTEGER,
-    client_name   TEXT
+    client_name   TEXT,
+    imported_at   INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -61,6 +62,13 @@ export function openDatabase(path: string): SqliteDatabase {
     // so older databases need an in-place ALTER for each post-v1 column.
     if (!hasColumn(db, 'sessions', 'client_name')) {
         db.exec(`ALTER TABLE sessions ADD COLUMN client_name TEXT`);
+    }
+    if (!hasColumn(db, 'sessions', 'imported_at')) {
+        // `imported_at` is the wall-clock at which a session was inserted via
+        // `POST /api/import`. Live captures and CLI-saved sessions leave it
+        // NULL — the UI uses non-null to flip mode label from LIVE/REPLAY to
+        // IMPORTED.
+        db.exec(`ALTER TABLE sessions ADD COLUMN imported_at INTEGER`);
     }
     db.pragma(`user_version = ${SCHEMA_VERSION}`);
     return db;

@@ -12,7 +12,6 @@ export function FilterBar() {
     const toggleKind = useMessagesStore((s) => s.toggleKind);
     const toggleStreams = useMessagesStore((s) => s.toggleStreams);
     const setSearch = useMessagesStore((s) => s.setSearch);
-    const setHideBoilerplate = useMessagesStore((s) => s.setHideBoilerplate);
 
     return (
         <div className="flex items-center gap-3 border-b border-line bg-surface-elev/70 px-4 py-2">
@@ -38,16 +37,6 @@ export function FilterBar() {
                 ))}
                 <StreamChip active={filters.showStreams} onClick={toggleStreams} />
             </div>
-            <Sep />
-            <label className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-                <input
-                    type="checkbox"
-                    checked={filters.hideBoilerplate}
-                    onChange={(e) => setHideBoilerplate(e.target.checked)}
-                    className="h-3 w-3 cursor-pointer accent-accent-out"
-                />
-                hide set_mode/set_model
-            </label>
             <div className="ml-auto">
                 <input
                     type="search"

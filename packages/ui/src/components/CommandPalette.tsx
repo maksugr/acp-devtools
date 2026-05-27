@@ -8,7 +8,9 @@ import {
 } from '../store/messagesStore';
 import { useDiscoveryStore } from '../store/discoveryStore';
 import { captureLabel, shortAgentName } from '../lib/captureLabel';
-import { replayUrlFor } from '../api/sessions';
+import { downloadSessionExport } from '../lib/downloadExport';
+import { importSession, replayUrlFor } from '../api/sessions';
+import { refreshSavedSessions } from '../api/discovery';
 
 interface Command {
     id: string;
@@ -153,6 +155,42 @@ function buildCommands(onClose: () => void): Command[] {
     const cmds: Command[] = [];
 
     cmds.push({
+        id: 'session.import',
+        label: 'Import session JSON from disk…',
+        section: 'session',
+        run: () => {
+            // Build a one-shot hidden input so the palette stays close-friendly.
+            // The dialog opens immediately when the palette dismisses; on
+            // success the new session is auto-selected via /replay/<id>.
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json,.json';
+            input.addEventListener('change', () => {
+                const file = input.files?.[0];
+                if (!file) return;
+                void (async () => {
+                    try {
+                        const result = await importSession(file);
+                        await refreshSavedSessions();
+                        discState.setSelected(replayUrlFor(result.id));
+                    } catch (err) {
+                        const msg = err instanceof Error ? err.message : String(err);
+                        window.alert(`Import failed: ${msg}`);
+                    }
+                })();
+            });
+            input.click();
+        },
+    });
+    if (msgState.session !== null && msgState.messages.length > 0) {
+        cmds.push({
+            id: 'session.export',
+            label: 'Export current session as JSON',
+            section: 'session',
+            run: () => downloadSessionExport(msgState.session!, msgState.messages),
+        });
+    }
+    cmds.push({
         id: 'view.clear',
         label: 'Clear messages from view',
         section: 'view',
@@ -164,14 +202,6 @@ function buildCommands(onClose: () => void): Command[] {
         hint: 'esc',
         section: 'view',
         run: () => msgState.select(null),
-    });
-    cmds.push({
-        id: 'view.toggle-boilerplate',
-        label: msgState.filters.hideBoilerplate
-            ? 'Show set_mode / set_model messages'
-            : 'Hide set_mode / set_model messages',
-        section: 'filter',
-        run: () => msgState.setHideBoilerplate(!msgState.filters.hideBoilerplate),
     });
     cmds.push({
         id: 'view.toggle-streams',
@@ -186,10 +216,9 @@ function buildCommands(onClose: () => void): Command[] {
         label: 'Reset all filters',
         section: 'filter',
         run: () => {
-            const reset: Pick<Filters, 'directions' | 'kinds' | 'hideBoilerplate' | 'showStreams' | 'search'> = {
+            const reset: Pick<Filters, 'directions' | 'kinds' | 'showStreams' | 'search'> = {
                 directions: new Set(ALL_DIRECTIONS),
                 kinds: new Set(ALL_KINDS),
-                hideBoilerplate: false,
                 showStreams: true,
                 search: '',
             };

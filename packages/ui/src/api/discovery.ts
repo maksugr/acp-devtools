@@ -48,3 +48,15 @@ export function startDiscoveryPolling(): () => void {
 export function refreshActive(): Promise<void> {
     return tick();
 }
+
+/** Re-fetch only the saved-sessions list — used right after import / delete so
+ * the picker reflects the change without waiting for the next poll tick. */
+export async function refreshSavedSessions(): Promise<void> {
+    const store = useDiscoveryStore.getState();
+    try {
+        const sessions = await fetchSavedSessions();
+        store.setSavedSessions(sessions);
+    } catch (err) {
+        store.setError(err instanceof Error ? err.message : String(err));
+    }
+}

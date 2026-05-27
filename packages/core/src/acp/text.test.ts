@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { CapturedMessage } from '@acp-devtools/core';
-import { extractTextPreview, isUserPrompt } from './acpText';
+import type { CapturedMessage } from './types.js';
+import { extractTextPreview, isUserPrompt } from './text.js';
 
-const mkMessage = (overrides: Partial<CapturedMessage> = {}): CapturedMessage => ({
+const mk = (overrides: Partial<CapturedMessage> = {}): CapturedMessage => ({
     seq: 1,
     timestamp: 0,
     direction: 'editor-to-agent',
@@ -14,7 +14,7 @@ const mkMessage = (overrides: Partial<CapturedMessage> = {}): CapturedMessage =>
 
 describe('extractTextPreview', () => {
     it('joins text blocks of a session/prompt request', () => {
-        const m = mkMessage({
+        const m = mk({
             method: 'session/prompt',
             payload: {
                 jsonrpc: '2.0',
@@ -32,7 +32,7 @@ describe('extractTextPreview', () => {
         expect(extractTextPreview(m)).toBe('hello world');
     });
     it('returns null for a session/prompt with no text blocks', () => {
-        const m = mkMessage({
+        const m = mk({
             method: 'session/prompt',
             payload: {
                 jsonrpc: '2.0',
@@ -44,7 +44,7 @@ describe('extractTextPreview', () => {
         expect(extractTextPreview(m)).toBeNull();
     });
     it('pulls update.content.text from session/update', () => {
-        const m = mkMessage({
+        const m = mk({
             kind: 'notification',
             method: 'session/update',
             payload: {
@@ -61,7 +61,7 @@ describe('extractTextPreview', () => {
         expect(extractTextPreview(m)).toBe('Hi there');
     });
     it('falls back to update.text when content.text is missing', () => {
-        const m = mkMessage({
+        const m = mk({
             kind: 'notification',
             method: 'session/update',
             payload: {
@@ -73,21 +73,17 @@ describe('extractTextPreview', () => {
         expect(extractTextPreview(m)).toBe('thinking…');
     });
     it('returns null when payload is null', () => {
-        expect(extractTextPreview(mkMessage({ payload: null }))).toBeNull();
+        expect(extractTextPreview(mk({ payload: null }))).toBeNull();
     });
     it('returns null for unrelated methods', () => {
-        expect(extractTextPreview(mkMessage({ method: 'fs/read_text_file' }))).toBeNull();
+        expect(extractTextPreview(mk({ method: 'fs/read_text_file' }))).toBeNull();
     });
 });
 
 describe('isUserPrompt', () => {
     it('matches request session/prompt only', () => {
-        expect(
-            isUserPrompt(mkMessage({ method: 'session/prompt', kind: 'request' })),
-        ).toBe(true);
-        expect(
-            isUserPrompt(mkMessage({ method: 'session/prompt', kind: 'response' })),
-        ).toBe(false);
-        expect(isUserPrompt(mkMessage({ method: 'session/new', kind: 'request' }))).toBe(false);
+        expect(isUserPrompt(mk({ method: 'session/prompt', kind: 'request' }))).toBe(true);
+        expect(isUserPrompt(mk({ method: 'session/prompt', kind: 'response' }))).toBe(false);
+        expect(isUserPrompt(mk({ method: 'session/new', kind: 'request' }))).toBe(false);
     });
 });
