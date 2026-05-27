@@ -27,24 +27,6 @@ let rpcId = 0;
 const messages = [];
 const sessionId = '0eed7bdc-broken-fixture';
 
-function pushFrame({ direction, kind, payload, method, parseError }) {
-    seq += 1;
-    const frame = {
-        seq,
-        timestamp: ts,
-        direction,
-        kind,
-        raw: JSON.stringify(payload),
-        payload,
-    };
-    if (method) frame.method = method;
-    if (payload && payload.id !== undefined && payload.id !== null) {
-        frame.rpcId = payload.id;
-    }
-    if (parseError) frame.parseError = parseError;
-    ts += 50 + Math.floor(Math.random() * 500);
-}
-
 function advance(ms) {
     ts += ms;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { LaneEvent, LaneId, TimelineLayout } from '@acp-devtools/core/acp/timeline-layout';
+import type { LaneEvent, LaneId } from '@acp-devtools/core/acp/timeline-layout';
 import { buildTimelineLayout } from '@acp-devtools/core/acp/timeline-layout';
 import type { CapturedMessage } from '@acp-devtools/core';
 import { formatLatency } from '../lib/format';
