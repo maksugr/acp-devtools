@@ -1,5 +1,9 @@
 # ACP Devtools
 
+[![CI](https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml/badge.svg)](https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen)](package.json)
+
 A transparent stdio proxy between your editor and an ACP coding agent that
 captures every JSON-RPC frame, stores sessions in SQLite, and streams them
 to a local web inspector. See every request, response, and notification on

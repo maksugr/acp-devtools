@@ -82,8 +82,25 @@ export function StatsBar() {
                 <span className={replayDone ? 'text-accent-ok' : 'text-ink-muted'}>
                     {replayDone ? '● replay synced' : '◌ awaiting replay'}
                 </span>
+                <StarPrompt />
             </div>
         </footer>
+    );
+}
+
+function StarPrompt() {
+    return (
+        <a
+            href="https://github.com/maksugr/acp-devtools"
+            target="_blank"
+            rel="noreferrer noopener"
+            title="Enjoying acp-devtools? Star it on GitHub — thank you!"
+            aria-label="Star acp-devtools on GitHub"
+            className="inline-flex items-baseline gap-1 text-ink-muted transition-colors hover:text-accent-warn focus-visible:text-accent-warn focus-visible:outline-none"
+        >
+            <span aria-hidden="true" className="text-[10px]">★</span>
+            <span className="text-[9px] tracking-normal">Star on GitHub</span>
+        </a>
     );
 }
 

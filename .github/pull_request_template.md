@@ -17,7 +17,7 @@
 
 <!-- How did you verify this works? Local commands, screenshots, captures. -->
 
-- [ ] `npm run precommit` passes (lint + typecheck + 113 tests)
+- [ ] `npm run precommit` passes (lint + typecheck + tests)
 - [ ] Manually exercised the changed flow (describe what you ran)
 
 ## Notes for reviewers
