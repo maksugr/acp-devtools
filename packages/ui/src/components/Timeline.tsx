@@ -3,6 +3,7 @@ import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import type { CapturedMessage } from '@acp-devtools/core';
 import { applyFilters, buildRequestIndex, useMessagesStore } from '../store/messagesStore';
 import { groupTimeline, type TimelineEntry } from '../lib/grouping';
+import { buildValidationMap, type ValidationResult } from '../lib/validation';
 import { MessageRow } from './MessageRow';
 import { StreamCluster } from './StreamCluster';
 
@@ -21,6 +22,7 @@ export function Timeline() {
     );
     const grouped = useMemo(() => groupTimeline(filtered), [filtered]);
     const responseToRequest = useMemo(() => buildRequestIndex(messages), [messages]);
+    const validationBySeq = useMemo(() => buildValidationMap(messages), [messages]);
 
     const reqTimestampBySeq = useMemo(() => {
         const m = new Map<number, number>();
@@ -91,6 +93,7 @@ export function Timeline() {
             onSelect: select,
             responseToRequest,
             reqTimestampBySeq,
+            validationBySeq,
         });
     };
 
@@ -124,6 +127,7 @@ interface RenderCtx {
     onSelect: (seq: number) => void;
     responseToRequest: Map<number, number>;
     reqTimestampBySeq: Map<number, number>;
+    validationBySeq: Map<number, ValidationResult>;
 }
 
 function renderTimelineEntry(entry: TimelineEntry, ctx: RenderCtx): React.ReactElement {
@@ -134,12 +138,14 @@ function renderTimelineEntry(entry: TimelineEntry, ctx: RenderCtx): React.ReactE
             reqSeq !== undefined
                 ? m.timestamp - (ctx.reqTimestampBySeq.get(reqSeq) ?? m.timestamp)
                 : undefined;
+        const validation = ctx.validationBySeq.get(m.seq);
         return (
             <MessageRow
                 message={m}
                 selected={ctx.selectedSeq === m.seq}
                 paired={ctx.pairedSeq === m.seq}
                 {...(latency !== undefined ? { latencyMs: latency } : {})}
+                {...(validation !== undefined ? { validation } : {})}
                 onSelect={ctx.onSelect}
             />
         );

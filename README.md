@@ -91,6 +91,7 @@ delivered. Every label has a tooltip on hover.
 | `ERR` | error response (carries `error.code`/`error.message`) |
 | `UNK` | the frame did not parse as JSON-RPC; raw bytes are still preserved |
 | `STR` | collapsed run of consecutive `agent_message_chunk` notifications |
+| `⚠ SPEC N` | the frame fails the official ACP schema with `N` ajv errors; click the row, then the **Spec** tab in the detail panel for the full list. The footer's `spec ⚠ N` chip aggregates across the session. |
 
 ## Compared to existing ACP inspectors
 
@@ -222,14 +223,14 @@ inspector picks it up within 2.5s.
 
 ## CLI reference
 
-One binary, thirteen subcommands. Every UI control has a CLI equivalent —
+One binary, fourteen subcommands. Every UI control has a CLI equivalent —
 the inspector is one frontend among others, not a hard dependency. Run any
 command with `--help` for the full flag listing.
 
 | Group | Commands |
 |---|---|
 | **Capture** | `proxy` |
-| **Inspect** | `ui`, `replay`, `inspect`, `search`, `stats` |
+| **Inspect** | `ui`, `replay`, `inspect`, `search`, `stats`, `validate` |
 | **Manage data** | `list`, `export`, `import`, `delete` |
 | **Mock** | `mock-agent`, `mock-editor` |
 | **Setup** | `doctor` |
@@ -396,6 +397,7 @@ acp-devtools inspect 23 --format raw > rerun-input.jsonl
 | `--grep <text>` | — | substring match on the raw frame (case-insensitive) |
 | `--paired` | — | only req/rsp/err — skip notifications |
 | `--no-preview` | — | omit the PREVIEW column (useful on narrow terminals or for grep) |
+| `--spec` | — | add a SPEC column showing schema-validation status (`✓` / `⚠N` / blank for skipped) |
 | `-f, --format <mode>` | `table` | `table` (default), `jsonl` (CapturedMessage per line), `raw` (just the wire frames) |
 
 Sample table output:
@@ -495,6 +497,67 @@ mean   1.21s
 
 The percentile algorithm matches the UI StatsBar (linear interpolation),
 so the inspector and CLI agree to the millisecond on the same data.
+
+### `validate <id>`
+
+Checks every frame in a session against the official ACP JSON schema
+shipped in `@agentclientprotocol/sdk` (Draft 2020-12, ajv). Surfaces
+violations as a flat table — useful when you suspect an editor or agent
+you don't control is sending malformed traffic.
+
+```bash
+# Default: validate session #23 in the shared captures.db
+acp-devtools validate 23
+
+# Only complain about a specific method
+acp-devtools validate 23 --method session/prompt
+
+# CI-friendly JSON output, exit 1 on any violation
+acp-devtools validate 23 --json
+```
+
+Sample output for a corrupted session:
+
+```
+session #31 · 7 checked · 0 skipped (no schema) · 2 violations in 2 methods
+
+ #1  initialize      InitializeRequest  /     must have required property 'protocolVersion'
+ #3  session/prompt  PromptRequest      /     must have required property 'prompt'
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--limit <n>` | `200` | maximum violations to print |
+| `--method <pattern>` | — | only report messages whose method contains this substring |
+| `--json` | — | machine-readable JSON (CI / scripts) |
+
+Exit code is `1` whenever at least one violation is found, `0` on clean
+sessions — drop into a CI step to gate releases.
+
+Frames are skipped (counted but not flagged) when:
+- the message itself failed to parse (already surfaced as `! <error>` in `inspect`);
+- the method isn't in the spec at all (extension methods, future API additions);
+- the spec has no schema for the kind (e.g. JSON-RPC error envelopes — those are framing, not ACP-specific).
+
+The same check runs as part of `inspect --spec` (per-row `✓` / `⚠N`
+column) and `stats` (summary line) — see those sections.
+
+**In the inspector UI, the same data shows up in three places:**
+
+- **Timeline row badge** — a red `⚠ SPEC N` chip appears next to the
+  method name on every invalid frame. `N` is the number of ajv errors on
+  that frame; the tooltip lists the first few.
+- **Detail panel — `Spec` tab.** Click a row, switch to the **Spec** tab
+  (rightmost). For invalid frames you get a card per ajv error with the
+  keyword (`required`/`type`/`enum`), JSON-pointer path, and message. For
+  valid frames you see the matched `$def` (e.g. `InitializeRequest`). For
+  frames that can't be validated (parse error, unknown method, response
+  without paired request) the tab explains why instead of faking a green
+  tick.
+- **Footer chip** — `spec ⚠ N` next to `p50`/`p99` shows how many frames
+  in the visible session are non-conforming (or `spec ✓` when clean). The
+  tooltip lists the affected method names.
 
 ### The inspector's equivalents
 

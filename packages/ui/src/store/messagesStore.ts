@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { CapturedMessage, SessionRecord, WsEvent } from '@acp-devtools/core';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error';
-export type DetailTab = 'tree' | 'raw' | 'meta';
+export type DetailTab = 'tree' | 'raw' | 'meta' | 'spec';
 
 export interface Filters {
     directions: Set<CapturedMessage['direction']>;

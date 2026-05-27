@@ -7,6 +7,7 @@ import {
     selectMessage,
     useMessagesStore,
 } from './store/messagesStore';
+import { buildValidationMap } from './lib/validation';
 import { useDiscoveryStore } from './store/discoveryStore';
 import { captureLabel } from './lib/captureLabel';
 import { parseUrlState, writeUrlState } from './lib/urlState';
@@ -210,6 +211,8 @@ export function App() {
         return { responseToRequest, requestToResponse };
     }, [messages]);
 
+    const validationBySeq = useMemo(() => buildValidationMap(messages), [messages]);
+
     let latency: number | undefined;
     let paired: typeof selectedMessage = null;
     if (selectedMessage) {
@@ -287,6 +290,12 @@ export function App() {
                                 message={selectedMessage}
                                 {...(latency !== undefined ? { latencyMs: latency } : {})}
                                 {...(paired ? { pairedRequest: paired } : {})}
+                                {...(selectedMessage
+                                    ? (() => {
+                                          const v = validationBySeq.get(selectedMessage.seq);
+                                          return v ? { validation: v } : {};
+                                      })()
+                                    : {})}
                                 onJumpToPaired={(seq) =>
                                     useMessagesStore.getState().select(seq)
                                 }

@@ -11,12 +11,14 @@ import {
     formatTimeMs,
     latencyTone,
 } from '../lib/format';
+import type { ValidationResult } from '../lib/validation';
 
 interface MessageRowProps {
     message: CapturedMessage;
     selected: boolean;
     paired?: boolean;
     latencyMs?: number;
+    validation?: ValidationResult;
     onSelect: (seq: number) => void;
 }
 
@@ -61,6 +63,7 @@ function MessageRowImpl({
     selected,
     paired = false,
     latencyMs,
+    validation,
     onSelect,
 }: MessageRowProps) {
     const isOut = message.direction === 'editor-to-agent';
@@ -68,6 +71,7 @@ function MessageRowImpl({
     const tone = latencyMs !== undefined ? latencyTone(latencyMs) : null;
     const preview = extractTextPreview(message);
     const isPrompt = isUserPrompt(message);
+    const specBadge = validation && !validation.skipped && !validation.valid;
 
     return (
         <button
@@ -127,6 +131,19 @@ function MessageRowImpl({
                 >
                     {message.method ? message.method : '—'}
                 </span>
+                {specBadge && validation && (
+                    <span
+                        className={cn(
+                            'inline-flex shrink-0 items-center gap-0.5 rounded-sm border border-accent-error/40',
+                            'bg-accent-error/10 px-1 text-[9px] font-semibold uppercase tracking-widest text-accent-error',
+                        )}
+                        title={`fails ACP schema (${validation.schemaName ?? '?'}): ${validation.errors
+                            .map((e) => `${e.path === '/' ? '' : e.path + ' '}${e.message}`)
+                            .join(' · ')}`}
+                    >
+                        ⚠ SPEC {validation.errors.length}
+                    </span>
+                )}
                 {preview && (
                     <span
                         className={cn(

@@ -5,6 +5,7 @@ import {
     type SessionRecord,
     defaultCapturesDbPath,
     openDatabase,
+    validateAcpMessage,
 } from '@acp-devtools/core';
 import { buildPairIndex } from './inspect.js';
 
@@ -26,6 +27,7 @@ export interface SessionStats {
     direction: { editorToAgent: number; agentToEditor: number };
     kind: { request: number; response: number; notification: number; error: number; unknown: number };
     parseErrors: number;
+    spec: { checked: number; valid: number; violations: number; affectedMethods: string[] };
     latency: {
         sampleSize: number;
         p50: number | null;
@@ -116,6 +118,34 @@ export function computeStats(info: SessionRecord, messages: CapturedMessage[]): 
     }
     latencies.sort((a, b) => a - b);
 
+    // Schema validation rollup. Counts checked frames (skipped ones don't
+    // count toward valid OR violations), violation count, and the unique set
+    // of methods that produced at least one violation.
+    const seqToMethod = new Map<number, string>();
+    for (const m of messages) {
+        if (m.method) seqToMethod.set(m.seq, m.method);
+    }
+    let specChecked = 0;
+    let specValid = 0;
+    let specViolations = 0;
+    const affectedMethods = new Set<string>();
+    for (const m of messages) {
+        const pair = pairs.get(m.seq);
+        const pairedMethod = pair ? seqToMethod.get(pair.pairSeq) : undefined;
+        const opts: Parameters<typeof validateAcpMessage>[1] = {};
+        if (pairedMethod !== undefined) opts.pairedMethod = pairedMethod;
+        const result = validateAcpMessage(m, opts);
+        if (result.skipped) continue;
+        specChecked += 1;
+        if (result.valid) {
+            specValid += 1;
+        } else {
+            specViolations += result.errors.length;
+            const method = m.method ?? pairedMethod;
+            if (method) affectedMethods.add(method);
+        }
+    }
+
     const perMethod = buildPerMethod(messages, pairs);
 
     return {
@@ -130,6 +160,12 @@ export function computeStats(info: SessionRecord, messages: CapturedMessage[]): 
         direction,
         kind,
         parseErrors,
+        spec: {
+            checked: specChecked,
+            valid: specValid,
+            violations: specViolations,
+            affectedMethods: [...affectedMethods].sort(),
+        },
         latency: {
             sampleSize: latencies.length,
             p50: latencies.length ? percentile(latencies, 50) : null,
@@ -274,6 +310,18 @@ function renderStats(s: SessionStats, byMethod: boolean): string {
     if (s.kind.unknown > 0) lines.push(`UNK    ${s.kind.unknown}\n`);
     if (s.parseErrors > 0) lines.push(`PARSE  ${s.parseErrors}\n`);
     lines.push('\n');
+
+    if (s.spec.checked > 0) {
+        if (s.spec.violations === 0) {
+            lines.push(`SPEC   ${s.spec.checked} frames checked · all conform\n`);
+        } else {
+            lines.push(
+                `SPEC   ${s.spec.checked} checked · ${s.spec.violations} violation${s.spec.violations === 1 ? '' : 's'} in ${s.spec.affectedMethods.length} method${s.spec.affectedMethods.length === 1 ? '' : 's'} (${s.spec.affectedMethods.join(', ')})\n`,
+            );
+            lines.push(`       run \`acp-devtools validate ${s.sessionId}\` for details\n`);
+        }
+        lines.push('\n');
+    }
 
     const l = s.latency;
     if (l.sampleSize === 0) {

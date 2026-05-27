@@ -5,6 +5,7 @@ import {
     defaultCapturesDbPath,
     extractTextPreview,
     openDatabase,
+    validateAcpMessage,
 } from '@acp-devtools/core';
 
 interface InspectCommandOptions {
@@ -17,6 +18,7 @@ interface InspectCommandOptions {
     grep?: string;
     paired?: boolean;
     preview: boolean;
+    spec?: boolean;
     format: 'table' | 'jsonl' | 'raw';
 }
 
@@ -56,6 +58,10 @@ export function registerInspectCommand(program: Command): void {
         .option(
             '--no-preview',
             'omit the PREVIEW column (useful on narrow terminals or for grep-friendly output)',
+        )
+        .option(
+            '--spec',
+            'add a SPEC column showing schema-validation status (✓ / ⚠ N / blank for skipped frames)',
         )
         .option(
             '-f, --format <mode>',
@@ -118,14 +124,31 @@ export function registerInspectCommand(program: Command): void {
                 // hide the response and we couldn't show latency on the request).
                 const all = [...session.messages()];
                 const pairs = buildPairIndex(all);
+                const seqToMethod = new Map<number, string>();
+                for (const m of all) {
+                    if (m.method) seqToMethod.set(m.seq, m.method);
+                }
                 const tableBuf: TableRow[] = [];
                 for (const m of all) {
                     if (!passes(m, filter)) continue;
                     if (tableBuf.length >= limit) break;
-                    tableBuf.push(toTableRow(m, pairs.get(m.seq)));
+                    let specCell = '';
+                    if (opts.spec) {
+                        const pair = pairs.get(m.seq);
+                        const pairedMethod = pair ? seqToMethod.get(pair.pairSeq) : undefined;
+                        const valOpts: Parameters<typeof validateAcpMessage>[1] = {};
+                        if (pairedMethod !== undefined) valOpts.pairedMethod = pairedMethod;
+                        const result = validateAcpMessage(m, valOpts);
+                        if (result.skipped) specCell = '';
+                        else if (result.valid) specCell = '✓';
+                        else specCell = `⚠${result.errors.length}`;
+                    }
+                    tableBuf.push(toTableRow(m, pairs.get(m.seq), specCell));
                 }
                 printed = tableBuf.length;
-                process.stdout.write(renderTable(tableBuf, opts.preview !== false));
+                process.stdout.write(
+                    renderTable(tableBuf, opts.preview !== false, Boolean(opts.spec)),
+                );
             }
 
             db.close();
@@ -233,6 +256,7 @@ interface TableRow {
     latency: string;
     size: string;
     preview: string;
+    spec: string;
 }
 
 const KIND_LABEL: Record<CapturedMessage['kind'], string> = {
@@ -243,7 +267,7 @@ const KIND_LABEL: Record<CapturedMessage['kind'], string> = {
     unknown: 'UNK',
 };
 
-function toTableRow(m: CapturedMessage, pair: PairInfo | undefined): TableRow {
+function toTableRow(m: CapturedMessage, pair: PairInfo | undefined, specCell: string = ''): TableRow {
     let paired = '—';
     let latency = '—';
     if (pair !== undefined) {
@@ -273,6 +297,7 @@ function toTableRow(m: CapturedMessage, pair: PairInfo | undefined): TableRow {
         latency,
         size: formatBytes(Buffer.byteLength(m.raw, 'utf8')),
         preview: previewText ? `"${collapseWhitespace(previewText)}"` : '',
+        spec: specCell,
     };
 }
 
@@ -302,7 +327,7 @@ function formatBytes(n: number): string {
 
 const PREVIEW_MAX = 50;
 
-function renderTable(rows: TableRow[], includePreview: boolean): string {
+function renderTable(rows: TableRow[], includePreview: boolean, includeSpec: boolean = false): string {
     if (rows.length === 0) return '';
     const widths = {
         seq: Math.max(3, ...rows.map((r) => r.seq.length)),
@@ -314,6 +339,7 @@ function renderTable(rows: TableRow[], includePreview: boolean): string {
         paired: Math.max(4, ...rows.map((r) => r.paired.length)),
         latency: Math.max(7, ...rows.map((r) => r.latency.length)),
         size: Math.max(4, ...rows.map((r) => r.size.length)),
+        spec: Math.max(3, ...rows.map((r) => r.spec.length)),
     };
     // Cap method column at 40 chars so a single weird method doesn't blow the
     // layout. Truncation uses ellipsis; raw output stays addressable via jsonl.
@@ -337,6 +363,9 @@ function renderTable(rows: TableRow[], includePreview: boolean): string {
                     r.latency.padStart(widths.latency),
                     r.size.padEnd(widths.size),
                 ];
+                if (includeSpec) {
+                    cells.push(r.spec.padEnd(widths.spec));
+                }
                 if (includePreview && r.preview) {
                     cells.push(truncate(r.preview, PREVIEW_MAX + 2 /* quotes */));
                 }

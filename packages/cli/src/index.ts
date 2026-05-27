@@ -14,6 +14,7 @@ import { registerReplayCommand } from './commands/replay.js';
 import { registerSearchCommand } from './commands/search.js';
 import { registerStatsCommand } from './commands/stats.js';
 import { registerUiCommand } from './commands/ui.js';
+import { registerValidateCommand } from './commands/validate.js';
 import { CLI_VERSION } from './version.js';
 
 const KNOWN_SUBCOMMANDS = new Set([
@@ -28,6 +29,7 @@ const KNOWN_SUBCOMMANDS = new Set([
     'inspect',
     'search',
     'stats',
+    'validate',
     'mock-agent',
     'mock-editor',
     'help',
@@ -94,6 +96,7 @@ registerSearchCommand(program);
 registerStatsCommand(program);
 registerMockAgentCommand(program);
 registerMockEditorCommand(program);
+registerValidateCommand(program);
 
 program.parseAsync([process.argv[0]!, process.argv[1]!, ...expanded]).catch((err) => {
     process.stderr.write(`acp-devtools: ${err instanceof Error ? err.message : String(err)}\n`);

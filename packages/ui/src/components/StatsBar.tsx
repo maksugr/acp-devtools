@@ -4,6 +4,7 @@ import {
     useMessagesStore,
 } from '../store/messagesStore';
 import { formatLatency, percentile } from '../lib/format';
+import { buildValidationMap, summarizeValidation } from '../lib/validation';
 
 export function StatsBar() {
     const messages = useMessagesStore((s) => s.messages);
@@ -47,7 +48,8 @@ export function StatsBar() {
         latencies.sort((a, b) => a - b);
         const p50 = latencies.length ? percentile(latencies, 50) : null;
         const p99 = latencies.length ? percentile(latencies, 99) : null;
-        return { total: messages.length, req, res, note, err, p50, p99 };
+        const spec = summarizeValidation(buildValidationMap(messages));
+        return { total: messages.length, req, res, note, err, p50, p99, spec };
     }, [messages]);
 
     return (
@@ -70,11 +72,47 @@ export function StatsBar() {
                     value={stats.p99 !== null ? formatLatency(stats.p99) : '—'}
                     tone="primary"
                 />
+                {stats.spec.checked > 0 && (
+                    <SpecStat
+                        invalidFrames={stats.spec.invalidFrames}
+                        totalErrors={stats.spec.totalErrors}
+                        affectedMethods={stats.spec.affectedMethods}
+                    />
+                )}
                 <span className={replayDone ? 'text-accent-ok' : 'text-ink-muted'}>
                     {replayDone ? '● replay synced' : '◌ awaiting replay'}
                 </span>
             </div>
         </footer>
+    );
+}
+
+function SpecStat({
+    invalidFrames,
+    totalErrors,
+    affectedMethods,
+}: {
+    invalidFrames: number;
+    totalErrors: number;
+    affectedMethods: string[];
+}) {
+    if (invalidFrames === 0) {
+        return (
+            <span className="inline-flex items-baseline gap-1" title="every frame validates against the ACP schema">
+                <span>spec</span>
+                <span className="text-accent-ok">✓</span>
+            </span>
+        );
+    }
+    const tooltip =
+        `${totalErrors} schema error${totalErrors === 1 ? '' : 's'} in ` +
+        `${invalidFrames} frame${invalidFrames === 1 ? '' : 's'}` +
+        (affectedMethods.length ? ` · methods: ${affectedMethods.join(', ')}` : '');
+    return (
+        <span className="inline-flex items-baseline gap-1" title={tooltip}>
+            <span>spec</span>
+            <span className="text-accent-error">⚠ {invalidFrames}</span>
+        </span>
     );
 }
 
