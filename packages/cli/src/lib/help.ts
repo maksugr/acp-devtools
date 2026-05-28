@@ -5,9 +5,16 @@ import { colorEnabled, createStyler, type Styler } from './style.js';
 // Collapse the user's home directory to `~` for display. The actual option
 // default stays the absolute path — this only tidies the help text so it
 // doesn't leak a username and reads the same on every machine.
+//
+// Commander renders option defaults via JSON.stringify, which on Windows
+// doubles the backslashes (C:\\Users\\me\\...). So match both the raw home and
+// that escaped form, then normalize the path right after `~` to forward slashes
+// so the shown default reads identically on every platform.
 export function tidyHome(text: string, home: string = homedir()): string {
     if (!home) return text;
-    return text.split(home).join('~');
+    const escapedHome = home.replace(/\\/g, '\\\\');
+    const collapsed = text.split(escapedHome).join('~').split(home).join('~');
+    return collapsed.replace(/~[^"\s)]*/g, (segment) => segment.replace(/\\+/g, '/'));
 }
 
 interface CommandGroup {

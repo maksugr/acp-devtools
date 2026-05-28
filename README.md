@@ -1,8 +1,15 @@
-# ACP Devtools
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img alt="ACP Devtools" src="assets/logo.png" width="420">
+  </picture>
+</p>
 
-[![CI](https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml/badge.svg)](https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%E2%89%A520-brightgreen)](package.json)
+<p align="center">
+  <a href="https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <a href="package.json"><img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen"></a>
+</p>
 
 A transparent stdio proxy between your editor and an ACP coding agent that
 captures every JSON-RPC frame, stores sessions in SQLite, and streams them

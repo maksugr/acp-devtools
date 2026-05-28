@@ -116,6 +116,13 @@ describe('tidyHome', () => {
         );
     });
 
+    it('handles the Windows JSON-escaped form and normalizes slashes', () => {
+        // commander JSON.stringify-encodes the default, doubling backslashes.
+        expect(
+            tidyHome('(default: "C:\\\\Users\\\\me\\\\.acp-devtools\\\\captures.db")', 'C:\\Users\\me'),
+        ).toBe('(default: "~/.acp-devtools/captures.db")');
+    });
+
     it('leaves paths outside home untouched', () => {
         expect(tidyHome('/etc/acp/captures.db', '/Users/me')).toBe('/etc/acp/captures.db');
     });
