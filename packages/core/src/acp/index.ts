@@ -4,6 +4,8 @@ export * from './text.js';
 export * from './validate.js';
 export * from './session-metadata.js';
 export * from './method-stats.js';
+export * from './session-diff.js';
+export * from './session-compare.js';
 export * from './perf-insights.js';
 export * from './sparkline.js';
 export * from './spec-decoder.js';

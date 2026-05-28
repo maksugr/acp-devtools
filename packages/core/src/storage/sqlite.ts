@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import Database from 'better-sqlite3';
 
 export type SqliteDatabase = Database.Database;
@@ -99,6 +100,20 @@ export function openDatabase(path: string): SqliteDatabase {
     }
     db.pragma(`user_version = ${SCHEMA_VERSION}`);
     return db;
+}
+
+/**
+ * Open an **existing** captures database for reading. Unlike {@link openDatabase}
+ * — which creates the file if it is missing (correct for the proxy / import
+ * write paths) — this throws when the path does not exist, so a typo'd or
+ * mistaken `--db` / positional argument fails loudly instead of silently
+ * leaving an empty SQLite file behind. `:memory:` is allowed through.
+ */
+export function openExistingDatabase(path: string): SqliteDatabase {
+    if (path !== ':memory:' && !existsSync(path)) {
+        throw new Error(`no such database: ${path}`);
+    }
+    return openDatabase(path);
 }
 
 export function getSchemaVersion(db: SqliteDatabase): number {

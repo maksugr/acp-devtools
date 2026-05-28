@@ -7,7 +7,7 @@ import {
     type CapturedMessage,
     defaultCapturesDbPath,
     type MethodStats,
-    openDatabase,
+    openExistingDatabase,
     percentile as corePercentile,
     type PerformanceInsight,
     Session,
@@ -69,7 +69,7 @@ export function registerStatsCommand(program: Command): void {
             }
             let db;
             try {
-                db = openDatabase(opts.db);
+                db = openExistingDatabase(opts.db);
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 process.stderr.write(`acp-devtools: cannot open ${opts.db}: ${msg}\n`);

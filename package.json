@@ -34,7 +34,7 @@
         "dev:proxy": "npm run build && node packages/cli/dist/index.js proxy",
         "dev:ui": "npm --workspace @acp-devtools/ui run dev",
         "dev:replay": "npm run build && node packages/cli/dist/index.js replay",
-        "dev:fixture": "npm run build && node packages/cli/dist/index.js replay fixtures/fixture.db --ws-port 3737",
+        "dev:fixture": "npm run build && node packages/cli/dist/index.js replay --db fixtures/fixture.db --ws-port 3737",
         "fixture:generate": "npm run build && rimraf fixtures/fixture.db && node packages/cli/dist/index.js proxy --no-ws --save-to fixtures/fixture.db --session-name mock-fixture node fixtures/mock-agent.js < fixtures/sample-session.jsonl",
         "build:ui": "npm --workspace @acp-devtools/ui run build",
         "mock-agent": "node fixtures/mock-agent.js",

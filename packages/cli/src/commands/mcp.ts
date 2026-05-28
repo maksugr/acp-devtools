@@ -3,9 +3,12 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import {
+    buildMetadataDiff,
+    buildMethodStatsDiff,
     buildPairIndex,
     buildPerformanceInsights,
     buildPerMethodStats,
+    buildSessionDiff,
     type CapturedMessage,
     defaultCapturesDbPath,
     extractSessionMetadata,
@@ -41,6 +44,9 @@ database. Use it to investigate:
 - one-shot digest of a session (\`get_session_summary\` bundles
   metadata + latency stats + insights in one call — preferred over
   three separate calls when you just need an overview)
+- a regression or A/B comparison between two sessions
+  (\`diff_sessions\` aligns two captures and reports added / removed
+  frames and field-level payload changes)
 
 A typical investigation:
 1. \`list_sessions\` to see what is captured
@@ -633,6 +639,109 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                 }
             }
             return structuredResult({ session_id, checked, violations });
+        },
+    );
+
+    server.registerTool(
+        'diff_sessions',
+        {
+            description:
+                'Align two saved sessions and report what changed between them, across three layers. (1) `metadata`: high-signal differences in client/agent identity, capability matrices, protocol version, and runtime mode/model (JetBrains proxyConfig is excluded as volatile). (2) `perMethod`: per-method latency deltas (p50/p99/max and count, b−a). (3) `rows`: frame-level alignment via an LCS over (direction, kind, method) — matched frames compared field-by-field on the payload (volatile rpcId ignored), each row equal/changed/added/removed. A is the baseline, B is the new side. Use this for "worked yesterday, broke today" regressions and A/B comparisons of two agents on the same prompt — start with `metadata` and `perMethod`, which (unlike raw frames) do not drown in per-run noise. Equal frame rows are omitted unless include_equal is true; get_message(session_id, seq) with a row\'s a_seq/b_seq fetches the raw payload.',
+            inputSchema: {
+                session_a: z
+                    .number()
+                    .int()
+                    .positive()
+                    .describe('baseline session id (left side)'),
+                session_b: z
+                    .number()
+                    .int()
+                    .positive()
+                    .describe('new session id (right side)'),
+                include_equal: z
+                    .boolean()
+                    .optional()
+                    .describe('include unchanged rows in the response (default false)'),
+            },
+            outputSchema: {
+                session_a: z.number(),
+                session_b: z.number(),
+                summary: z.object({
+                    equal: z.number(),
+                    changed: z.number(),
+                    added: z.number(),
+                    removed: z.number(),
+                    total: z.number(),
+                }),
+                metadata: z.array(
+                    z.object({
+                        path: z.string(),
+                        kind: z.enum(['add', 'remove', 'change']),
+                        a: z.unknown().optional(),
+                        b: z.unknown().optional(),
+                    }),
+                ),
+                perMethod: z.array(
+                    z.object({
+                        method: z.string(),
+                        kind: z.enum(['request', 'notification']),
+                        a: perMethodSchema.nullable(),
+                        b: perMethodSchema.nullable(),
+                        countDelta: z.number(),
+                        p50Delta: z.number().nullable(),
+                        p99Delta: z.number().nullable(),
+                        maxDelta: z.number().nullable(),
+                    }),
+                ),
+                rows: z.array(
+                    z.object({
+                        op: z.enum(['equal', 'changed', 'added', 'removed']),
+                        kind: z.enum(['request', 'response', 'notification', 'error', 'unknown']),
+                        method: z.string().nullable(),
+                        direction: z.enum(['editor-to-agent', 'agent-to-editor']),
+                        a_seq: z.number().nullable(),
+                        b_seq: z.number().nullable(),
+                        changes: z.array(
+                            z.object({
+                                path: z.string(),
+                                kind: z.enum(['add', 'remove', 'change']),
+                                a: z.unknown().optional(),
+                                b: z.unknown().optional(),
+                            }),
+                        ),
+                    }),
+                ),
+            },
+            annotations: annotations({ title: 'Diff two sessions' }),
+        },
+        async ({ session_a, session_b, include_equal }) => {
+            const a = readMessages(opts.db, session_a);
+            const b = readMessages(opts.db, session_b);
+            const diff = buildSessionDiff(a, b);
+            const meta = buildMetadataDiff(a, b);
+            const perMethod = buildMethodStatsDiff(a, b);
+            const rows = diff.rows
+                .filter((r) => include_equal || r.op !== 'equal')
+                .map((r) => {
+                    const ref = r.a ?? r.b!;
+                    return {
+                        op: r.op,
+                        kind: ref.kind,
+                        method: r.signature.split('|')[2] || null,
+                        direction: ref.direction,
+                        a_seq: r.a ? r.a.seq : null,
+                        b_seq: r.b ? r.b.seq : null,
+                        changes: r.changes,
+                    };
+                });
+            return structuredResult({
+                session_a,
+                session_b,
+                summary: diff.summary,
+                metadata: meta.changes,
+                perMethod,
+                rows,
+            });
         },
     );
 

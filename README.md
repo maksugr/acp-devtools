@@ -271,23 +271,26 @@ acp-devtools proxy --save-to /tmp/session.db \
 | `--ws-host <host>` | `127.0.0.1` | WebSocket bind address |
 | `--no-ws` | — | disable the WebSocket server entirely |
 
-### `replay [path]`
+### `replay [id]`
 
-Streams a saved session to the inspector over WebSocket. Accepts either a
-SQLite database from `--save-to` or a `.json` file produced by `export`
-(auto-detected by extension). The path defaults to the shared
-`~/.acp-devtools/captures.db`, so calling `replay` with no arguments
-streams the latest live-captured session.
+Streams a saved session to the inspector over WebSocket. Like every other
+command, the positional argument is a **session id** (default: latest in the
+database); the database is chosen with `--db`. Pass `--file` to replay a
+`.json` export from a teammate instead of a stored session.
 
 ```bash
-acp-devtools replay --ws-port 3737                        # default DB, latest
-acp-devtools replay --session 21 --ws-port 3737           # default DB, specific session
-acp-devtools replay /tmp/session.db --ws-port 3737        # custom DB
-acp-devtools replay /tmp/capture.json --ws-port 3737      # JSON export from a teammate
+acp-devtools replay --ws-port 3737                        # latest session in captures.db
+acp-devtools replay 21 --ws-port 3737                     # specific session
+acp-devtools replay 5 --db /tmp/session.db --ws-port 3737 # session 5 in a custom DB
+acp-devtools replay --file /tmp/capture.json --ws-port 3737  # a JSON export
 ```
 
-Flags: `--session <id>` (SQLite only; default: latest), `--ws-port <port>`,
-`--ws-host <host>`.
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--file <path>` | — | replay a JSON export instead of a stored session |
+| `--ws-port <port>` | `3737` | WebSocket port |
+| `--ws-host <host>` | `127.0.0.1` | WebSocket bind address |
 
 ### `list`
 
@@ -321,22 +324,29 @@ Sample output:
 Live captures don't appear here — they're process descriptors, not database
 rows. Use `acp-devtools doctor` to see them.
 
-### `export [db]`
+### `export [id]`
 
 Writes one session as a self-contained JSON file — metadata plus every
 captured frame, losslessly. Useful for attaching to GitHub issues, offline
-analysis with `jq`, or building per-agent fixtures. `[db]` defaults to the
-shared `~/.acp-devtools/captures.db`.
+analysis with `jq`, or building per-agent fixtures. The positional argument
+is a **session id** (default: latest); the database is chosen with `--db`.
 
 ```bash
 acp-devtools export                                  # latest session, JSON to stdout
-acp-devtools export --session 21 -o capture.json     # specific session
-acp-devtools export --session 21 > capture.json      # equivalent via shell redirect
-acp-devtools export /tmp/session.db -o capture.json  # custom DB path
+acp-devtools export 21 -o capture.json               # specific session
+acp-devtools export 21 > capture.json                # equivalent via shell redirect
+acp-devtools export 5 --db /tmp/session.db -o c.json # session 5 from a custom DB
 ```
 
-Flags: `--session <id>` (default: latest), `-o, --output <file>`,
-`--no-pretty` (compact one-line JSON for diff / grep).
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `-o, --output <file>` | stdout | write JSON to a file |
+| `--no-pretty` | — | compact one-line JSON (diff / grep friendly) |
+
+The positional is a session id, consistent with `stats` / `inspect` / `diff`
+/ `validate` / `session-info`. A non-existent `--db` errors with
+`no such database: <path>` rather than silently creating an empty one.
 
 ### `import <file>`
 
@@ -463,6 +473,9 @@ Sample output:
 
 Columns: `#session/seq` · method · snippet (with `…` around the hit).
 
+Exit code is grep-style: `0` when there is at least one hit, `1` when nothing
+matched — so `acp-devtools search foo && …` branches correctly.
+
 ### `stats <id>`
 
 Aggregates a saved session — the terminal equivalent of the inspector's
@@ -533,6 +546,106 @@ readable. Drag to pan, `Cmd/Ctrl + wheel` (or the `+` / `−` / `reset`
 buttons in the section header) to zoom. Click any rect to jump to that
 message in the inspector. CLI-only equivalent: `inspect <id>` walks the
 same data linearly.
+
+### `diff <a> <b>`
+
+Aligns two saved sessions and reports what changed across **three layers** —
+the "worked yesterday, broke today" and A/B-the-same-prompt command. `a` is
+the baseline (left), `b` is the new side (right):
+
+1. **`INFO`** — metadata differences: client/agent identity, capability
+   matrices, protocol version, runtime mode/model. (JetBrains `proxyConfig` is
+   excluded as volatile.)
+2. **`PERF`** — per-method latency, A vs B, with the p99 delta.
+3. **`FRAMES`** — frame-level alignment via an LCS over `(direction, kind,
+   method)` (responses align by their paired request's method); matched frames
+   compared field-by-field on the payload, volatile `id` ignored.
+
+INFO and PERF are aggregates, so — unlike the frame layer — they stay
+high-signal even when per-run values (`sessionId`, `proxy_key`) churn. Start
+there when comparing similar sessions.
+
+```bash
+acp-devtools diff 23 41                 # info + perf + collapsed frame diff
+acp-devtools diff 23 41 --full          # show unchanged frames too
+acp-devtools diff 23 41 --json | jq '.metadata, .perf, .summary'
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
+| `--full` | — | print unchanged frames too (default collapses equal runs) |
+| `--json` | — | machine-readable JSON (`metadata` + `perf` + `summary` + `rows`) |
+
+Sample output:
+
+```
+diff  #23  →  #41
+  A #23  WebStorm 2026.1.2 · Claude Code  (20 msgs)
+  B #41  Zed · Claude Code  (22 msgs)
+
+INFO
+  ~ agent.name: "@zed-industries/claude-code-acp" → "claude-agent-acp"
+  ~ agentCapabilities.loadSession: true → false
+  ~ client.platform: "intellij" → null
+
+PERF  (p99 latency, Δ = B − A, sorted by |Δ p99|)
+METHOD          KIND  A p99  B p99   Δ p99  COUNT
+session/prompt  req   4.85s  9.80s  +4.95s    6→6
+initialize      req   1.37s  120ms  −1.25s    1→1
+
+FRAMES
+= 16 same   ≠ 2 differs   ◂ 0 only in A   ▸ 4 only in B
+
+   … 5 unchanged …
+≠ →A REQ session/prompt   a#6  b#6
+      ~ params.cwd: "/proj/a" → "/proj/b"
+      + params._meta.profile: "fast"
+   … 9 unchanged …
+▸ A← NTF session/update   a#—  b#19
+```
+
+Markers use set-membership, not code-diff vocabulary — these are two
+independent sessions, so a frame is *only in A* or *only in B*, never
+"added"/"removed": `=` same (in both, identical) · `≠` differs (in both,
+payload differs — each field change is indented below, where `~`/`+`/`-` are
+genuine key edits within that one payload) · `◂` only in A · `▸` only in B.
+The inspector exposes the same three layers through the TopBar `diff` button
+(next to `info` / `perf`) as **Frames · Info · Perf** tabs: Frames is the
+two-column aligned view (A left, B right) with same / differs / only-in-A /
+only-in-B tinting and a click-to-expand field-level change list; Info is the
+metadata change list; Perf is the per-method p99-delta table. Both sides are
+dropdowns — A starts on the session you opened the diff from, and you can swap
+either side (you can't pick the same session for both). The `diff_sessions`
+MCP tool returns all three layers as structured data (`metadata`, `perMethod`,
+and frame `rows`; the JSON keeps stable machine field names `equal` /
+`changed` / `added` / `removed`).
+
+#### When the diff helps — and when it doesn't
+
+The diff earns its keep when the two sessions are **supposed to be nearly
+identical**, so the handful of `≠` / `▸` / `◂` rows are exactly what changed:
+
+- **"Worked yesterday, broke today."** Same editor, same agent, same prompt —
+  diff yesterday's capture against today's. Most rows are `=`; the few that
+  aren't are the regression (an agent stopped advertising `fs.writeTextFile`,
+  a response became an `error`, a new `_meta` field appeared).
+- **Regression via replay.** Record a baseline, re-run the same input through a
+  new agent build with `mock-editor --save-to`, then diff baseline vs replay.
+  Same input in, so divergence is the agent's doing.
+- **A/B two agents on one prompt.** Claude Code vs Goose on the same task —
+  see where their wire behavior diverges (capabilities, extra notifications,
+  `tool_call` shape).
+- **Before/after an upgrade.** Capture the same actions before and after
+  bumping the agent or IDE; diff the handshake and capability negotiation.
+
+It is **not** a "pick any two sessions from history and compare" browser, and
+we don't pretend otherwise. Two *different* conversations naturally diverge —
+different prompts mean different tool calls and frame counts, so you'll get
+mostly `+`/`-` noise. Likewise, diffing against a near-empty session (one that
+only captured `initialize`) trivially reports "everything added." Garbage in,
+garbage out: feed it controlled pairs and it's sharp; feed it unrelated
+sessions and it'll tell you they're unrelated.
 
 ### `session-info <id>`
 
@@ -701,7 +814,7 @@ Every inspector action is a CLI invocation. A typical no-UI loop:
 acp-devtools list --limit 10
 
 # 3. Inspect a specific session offline — dump it as JSON, query with jq.
-acp-devtools export --session 23 -o /tmp/s23.json
+acp-devtools export 23 -o /tmp/s23.json
 jq '.messages | map(select(.method == "session/prompt")) | length' /tmp/s23.json
 # → 4
 
@@ -713,7 +826,7 @@ acp-devtools inspect 23 --format jsonl | jq 'select(.method == "fs/read_text_fil
 acp-devtools search session/cancel --limit 10
 
 # 6. Share a session with a teammate.
-acp-devtools export --session 23 -o capture.json
+acp-devtools export 23 -o capture.json
 # email / Slack / gist / GitHub-issue-attach the resulting JSON
 
 # 7. Receive someone's capture — load it into your own database.
@@ -848,8 +961,8 @@ acp-devtools mock-editor --session 23 \
     /path/to/your-agent-v2
 
 # Compare what changed
-acp-devtools export --session 23 -o /tmp/baseline.json
-acp-devtools export /tmp/v2.db -o /tmp/v2.json
+acp-devtools export 23 -o /tmp/baseline.json
+acp-devtools export --db /tmp/v2.db -o /tmp/v2.json
 diff <(jq -S '.messages | map({direction, kind, method})' /tmp/baseline.json) \
      <(jq -S '.messages | map({direction, kind, method})' /tmp/v2.json)
 ```
@@ -906,7 +1019,7 @@ user-wide):
 }
 ```
 
-After restarting Claude Code the ten tools below appear in `/tools`:
+After restarting Claude Code the eleven tools below appear in `/tools`:
 
 | Tool | Returns |
 |---|---|
@@ -920,6 +1033,7 @@ After restarting Claude Code the ten tools below appear in `/tools`:
 | `get_paired` | request↔response pair partner + latency |
 | `search_messages` | substring search across raw frames |
 | `find_spec_violations` | every frame that fails the ACP schema |
+| `diff_sessions` | align two sessions; added / removed frames + field-level payload changes |
 
 Every tool advertises MCP-spec `readOnlyHint: true`, `idempotentHint: true`,
 `openWorldHint: false` — host clients can use these as safety hints. The
@@ -950,15 +1064,17 @@ input and the only output.
 
 ```bash
 acp-devtools backfill-metadata             # all sessions
-acp-devtools backfill-metadata --id 23     # single session
+acp-devtools backfill-metadata 23          # single session
 acp-devtools backfill-metadata --json      # for scripts
 ```
 
 | Flag | Default | Meaning |
 |---|---|---|
 | `--db <path>` | `~/.acp-devtools/captures.db` | which database to read/write |
-| `--id <id>` | — | only backfill the named session |
 | `--json` | — | machine-readable JSON instead of text table |
+
+The optional positional is a session id (omit to backfill all), consistent
+with the other id-taking commands.
 
 When to run it:
 
@@ -1161,6 +1277,11 @@ After v0.1.0 ships, in rough priority order:
    Claude Code, MCP-aware decoding, redactors for cloud sharing.
 7. **Homebrew tap.** Single-command install for non-Node users
    (`brew install acp-devtools/tap/acp-devtools`).
+
+---
+
+Co-developed with [Claude Code](https://claude.com/claude-code) (Opus). Pair-programmed,
+but every line was read, shaped, and handcrafted by a experienced human, with love 🖤
 
 ---
 

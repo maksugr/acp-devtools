@@ -14,6 +14,7 @@ import { parseUrlState, writeUrlState } from './lib/urlState';
 import { CommandPalette } from './components/CommandPalette';
 import { ConnectingState } from './components/ConnectingState';
 import { DetailPanel } from './components/DetailPanel';
+import { DiffPanel } from './components/DiffPanel';
 import { EmptyState } from './components/EmptyState';
 import { FilterBar } from './components/FilterBar';
 import { PerformancePanel } from './components/PerformancePanel';
@@ -74,6 +75,7 @@ export function App() {
     // pushed when the drawer opens; popstate inspects the marker.
     const [infoOpen, setInfoOpenInternal] = useState(false);
     const [perfOpen, setPerfOpenInternal] = useState(false);
+    const [diffOpen, setDiffOpenInternal] = useState(false);
 
     // Mirror the full UI state into the URL on every change — same
     // `replaceState` behaviour the app had before. Drawer-open state is
@@ -113,12 +115,21 @@ export function App() {
         window.history.pushState({ drawer: 'perf' }, '', window.location.href);
         setPerfOpenInternal(true);
     };
+    const openDiff = () => {
+        if (diffOpen) return;
+        window.history.pushState({ drawer: 'diff' }, '', window.location.href);
+        setDiffOpenInternal(true);
+    };
     const closeInfo = () => {
         if (!infoOpen) return;
         window.history.back();
     };
     const closePerf = () => {
         if (!perfOpen) return;
+        window.history.back();
+    };
+    const closeDiff = () => {
+        if (!diffOpen) return;
         window.history.back();
     };
     // Click a timeline event inside the perf drawer → navigate forward to
@@ -130,6 +141,7 @@ export function App() {
         useMessagesStore.getState().select(seq);
         setInfoOpenInternal(false);
         setPerfOpenInternal(false);
+        setDiffOpenInternal(false);
     };
 
     // Browser Back/Forward — sync the drawer flags to whatever the new
@@ -137,9 +149,10 @@ export function App() {
     // filters) is already in the URL and reapplied via the parsed query.
     useEffect(() => {
         const onPop = (e: PopStateEvent) => {
-            const state = e.state as { drawer?: 'info' | 'perf' } | null;
+            const state = e.state as { drawer?: 'info' | 'perf' | 'diff' } | null;
             setInfoOpenInternal(state?.drawer === 'info');
             setPerfOpenInternal(state?.drawer === 'perf');
+            setDiffOpenInternal(state?.drawer === 'diff');
             const parsed = parseUrlState(window.location.search);
             const ms = useMessagesStore.getState();
             const ds = useDiscoveryStore.getState();
@@ -335,6 +348,7 @@ export function App() {
                 onClose={closePerf}
                 onNavigateToSeq={navigateFromDrawer}
             />
+            <DiffPanel open={diffOpen} onClose={closeDiff} />
             <TopBar
                 wsUrl={displayUrl}
                 overrideUrl={null}
@@ -348,6 +362,7 @@ export function App() {
                 activeUrl={wsUrl}
                 onOpenInfo={openInfo}
                 onOpenPerf={openPerf}
+                onOpenDiff={openDiff}
             />
             <FilterBar />
             <main className="flex-1 overflow-hidden">

@@ -3,7 +3,7 @@ import {
     Session,
     defaultCapturesDbPath,
     listSessionsSummary,
-    openDatabase,
+    openExistingDatabase,
 } from '@acp-devtools/core';
 
 interface SearchCommandOptions {
@@ -61,7 +61,7 @@ export function registerSearchCommand(program: Command): void {
 
             let db;
             try {
-                db = openDatabase(opts.db);
+                db = openExistingDatabase(opts.db);
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 process.stderr.write(`acp-devtools: cannot open ${opts.db}: ${msg}\n`);
@@ -95,11 +95,14 @@ export function registerSearchCommand(program: Command): void {
 
             if (opts.json) {
                 process.stdout.write(JSON.stringify(hits, null, 2) + '\n');
+                // grep-style: a search that found nothing exits non-zero so
+                // shell `&&` / `set -e` pipelines can branch on "no hits".
+                if (hits.length === 0) process.exit(1);
                 return;
             }
             if (hits.length === 0) {
                 process.stdout.write('no matches\n');
-                return;
+                process.exit(1);
             }
             process.stdout.write(renderHits(hits));
         });

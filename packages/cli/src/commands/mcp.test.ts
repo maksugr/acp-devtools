@@ -18,6 +18,7 @@ const EXPECTED_TOOLS = [
     'get_paired',
     'search_messages',
     'find_spec_violations',
+    'diff_sessions',
 ];
 
 let tmp: string;
@@ -445,6 +446,136 @@ describe('MCP server — tools/call', () => {
             ) as { matches: Array<{ seq: number }>; total: number };
             expect(body.matches.length).toBeGreaterThan(0);
             expect(body.total).toBe(body.matches.length);
+        } finally {
+            await close();
+        }
+    });
+
+    it('diff_sessions aligns two sessions and reports field-level changes', async () => {
+        // Seed a second session that differs from the seeded one in one param.
+        const db = openDatabase(dbPath);
+        const other = Session.start(db, { name: 'mcp-test-b', agentCommand: 'mock' });
+        other.setClientName('Zed');
+        other.record(
+            mk(1, {
+                payload: {
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'initialize',
+                    params: {
+                        protocolVersion: 2,
+                        clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
+                    },
+                } as unknown as CapturedMessage['payload'],
+            }),
+        );
+        other.close();
+        const otherId = other.info.id;
+        db.close();
+
+        const { client, close } = await withClient();
+        try {
+            const res = await client.callTool({
+                name: 'diff_sessions',
+                arguments: { session_a: sessionId, session_b: otherId },
+            });
+            const body = parseJsonContent(
+                (res.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as {
+                summary: { changed: number; removed: number };
+                metadata: Array<{ path: string }>;
+                perMethod: Array<{ method: string; kind: string }>;
+                rows: Array<{ op: string; method: string | null; changes: Array<{ path: string }> }>;
+            };
+            // A has initialize + response; B has only a changed initialize →
+            // initialize is "changed" (protocolVersion 1 → 2), response is removed.
+            const changed = body.rows.find((r) => r.op === 'changed');
+            expect(changed?.method).toBe('initialize');
+            expect(changed?.changes.some((c) => c.path === 'params.protocolVersion')).toBe(true);
+            expect(body.summary.removed).toBe(1);
+            // The metadata + per-method comparison layers are present.
+            expect(Array.isArray(body.metadata)).toBe(true);
+            expect(body.metadata.some((c) => c.path.includes('protocolVersion'))).toBe(true);
+            expect(Array.isArray(body.perMethod)).toBe(true);
+        } finally {
+            await close();
+        }
+    });
+
+    it('diff_sessions omits equal rows by default but includes them with include_equal', async () => {
+        // Seed a second session identical to the seeded one (initialize only).
+        const db = openDatabase(dbPath);
+        const twin = Session.start(db, { name: 'twin', agentCommand: 'mock' });
+        twin.record(mk(1));
+        twin.close();
+        const twinId = twin.info.id;
+        db.close();
+
+        const { client, close } = await withClient();
+        try {
+            const lean = await client.callTool({
+                name: 'diff_sessions',
+                arguments: { session_a: twinId, session_b: twinId },
+            });
+            const leanBody = parseJsonContent(
+                (lean.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as { summary: { equal: number }; rows: unknown[] };
+            expect(leanBody.summary.equal).toBe(1);
+            expect(leanBody.rows).toEqual([]); // equal rows filtered out
+
+            const full = await client.callTool({
+                name: 'diff_sessions',
+                arguments: { session_a: twinId, session_b: twinId, include_equal: true },
+            });
+            const fullBody = parseJsonContent(
+                (full.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as { rows: Array<{ op: string }> };
+            expect(fullBody.rows).toHaveLength(1);
+            expect(fullBody.rows[0]?.op).toBe('equal');
+        } finally {
+            await close();
+        }
+    });
+
+    it('diff_sessions reports a B-only frame as added with a_seq null', async () => {
+        // A = the seeded session (initialize + response). B adds a session/new.
+        const db = openDatabase(dbPath);
+        const longer = Session.start(db, { name: 'longer', agentCommand: 'mock' });
+        longer.record(mk(1));
+        longer.record(
+            mk(2, {
+                method: 'session/new',
+                rpcId: '2',
+                raw: '{"jsonrpc":"2.0","id":2,"method":"session/new"}',
+                payload: {
+                    jsonrpc: '2.0',
+                    id: 2,
+                    method: 'session/new',
+                    params: {},
+                } as unknown as CapturedMessage['payload'],
+            }),
+        );
+        longer.close();
+        const longerId = longer.info.id;
+        db.close();
+
+        const { client, close } = await withClient();
+        try {
+            const res = await client.callTool({
+                name: 'diff_sessions',
+                arguments: { session_a: sessionId, session_b: longerId },
+            });
+            const body = parseJsonContent(
+                (res.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as {
+                summary: { added: number };
+                rows: Array<{ op: string; method: string | null; a_seq: number | null; b_seq: number | null }>;
+            };
+            const added = body.rows.find((r) => r.op === 'added');
+            expect(added?.method).toBe('session/new');
+            expect(added?.a_seq).toBeNull();
+            expect(added?.b_seq).toBe(2);
+            expect(body.summary.added).toBe(1);
         } finally {
             await close();
         }

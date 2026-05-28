@@ -6,7 +6,7 @@ import {
     buildPairIndex,
     defaultCapturesDbPath,
     extractTextPreview,
-    openDatabase,
+    openExistingDatabase,
     validateAcpMessage,
 } from '@acp-devtools/core';
 
@@ -94,7 +94,7 @@ export function registerInspectCommand(program: Command): void {
 
             let db;
             try {
-                db = openDatabase(opts.db);
+                db = openExistingDatabase(opts.db);
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 process.stderr.write(`acp-devtools: cannot open ${opts.db}: ${msg}\n`);
@@ -159,7 +159,10 @@ export function registerInspectCommand(program: Command): void {
 
             db.close();
             if (printed === 0) {
+                // grep-style: nothing matched → non-zero exit so shell
+                // pipelines can branch on it (consistent with `search`).
                 process.stderr.write('acp-devtools: no matching messages\n');
+                process.exit(1);
             }
         });
 }

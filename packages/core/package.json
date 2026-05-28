@@ -41,6 +41,14 @@
             "types": "./dist/acp/method-stats.d.ts",
             "import": "./dist/acp/method-stats.js"
         },
+        "./acp/session-diff": {
+            "types": "./dist/acp/session-diff.d.ts",
+            "import": "./dist/acp/session-diff.js"
+        },
+        "./acp/session-compare": {
+            "types": "./dist/acp/session-compare.d.ts",
+            "import": "./dist/acp/session-compare.js"
+        },
         "./acp/perf-insights": {
             "types": "./dist/acp/perf-insights.d.ts",
             "import": "./dist/acp/perf-insights.js"

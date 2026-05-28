@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { DEFAULT_AGENT, isAgentShortcut } from '@acp-devtools/core';
 import { registerBackfillMetadataCommand } from './commands/backfill-metadata.js';
 import { registerDeleteCommand } from './commands/delete.js';
+import { registerDiffCommand } from './commands/diff.js';
 import { registerDoctorCommand } from './commands/doctor.js';
 import { registerExportCommand } from './commands/export.js';
 import { registerImportCommand } from './commands/import.js';
@@ -28,6 +29,7 @@ const KNOWN_SUBCOMMANDS = new Set([
     'export',
     'import',
     'delete',
+    'diff',
     'list',
     'inspect',
     'search',
@@ -96,6 +98,7 @@ registerDoctorCommand(program);
 registerExportCommand(program);
 registerImportCommand(program);
 registerDeleteCommand(program);
+registerDiffCommand(program);
 registerListCommand(program);
 registerInspectCommand(program);
 registerSearchCommand(program);

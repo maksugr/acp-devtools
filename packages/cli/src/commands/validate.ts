@@ -3,7 +3,7 @@ import {
     type CapturedMessage,
     Session,
     defaultCapturesDbPath,
-    openDatabase,
+    openExistingDatabase,
     validateAcpMessage,
 } from '@acp-devtools/core';
 import { buildPairIndex } from './inspect.js';
@@ -49,7 +49,7 @@ export function registerValidateCommand(program: Command): void {
             }
             let db;
             try {
-                db = openDatabase(opts.db);
+                db = openExistingDatabase(opts.db);
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 process.stderr.write(`acp-devtools: cannot open ${opts.db}: ${msg}\n`);

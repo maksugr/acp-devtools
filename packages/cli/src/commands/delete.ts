@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import type { Command } from 'commander';
 import {
     defaultCapturesDbPath,
@@ -26,6 +27,10 @@ export function registerDeleteCommand(program: Command): void {
                     process.exit(2);
                 }
                 ids.push(id);
+            }
+            if (!existsSync(opts.db)) {
+                process.stderr.write(`acp-devtools: no such database: ${opts.db}\n`);
+                process.exit(1);
             }
             // Look up labels BEFORE deletion so the status line can show what
             // we removed without a second query per id.

@@ -1,3 +1,5 @@
+import type { CapturedMessage, SessionRecord } from '@acp-devtools/core';
+
 export interface SavedSession {
     id: number;
     name: string | null;
@@ -20,6 +22,28 @@ export interface SavedSession {
 
 interface SessionsResponse {
     sessions: SavedSession[];
+}
+
+export interface SessionMessagesResponse {
+    session: SessionRecord;
+    messages: CapturedMessage[];
+}
+
+/**
+ * Fetch the full ordered frame list for one saved session, plus its record.
+ * The replay WS streams frames for the live timeline; the DiffPanel needs the
+ * whole set at once to align against the current session, so this is a plain
+ * one-shot JSON fetch against `GET /api/sessions/:id/messages`.
+ */
+export async function fetchSessionMessages(id: number): Promise<SessionMessagesResponse> {
+    const res = await fetch(`/api/sessions/${id}/messages`, {
+        headers: { accept: 'application/json' },
+    });
+    if (!res.ok) {
+        const message = await extractError(res);
+        throw new Error(message);
+    }
+    return (await res.json()) as SessionMessagesResponse;
 }
 
 export interface ImportResponse {

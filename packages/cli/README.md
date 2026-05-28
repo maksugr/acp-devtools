@@ -20,13 +20,14 @@ The `acp-devtools` binary is one CLI with subcommands plus a bundled UI:
   per method and auto-detected hotspots, request↔response pairing,
   spec-aware JSON tree, multi-day session waterfall.
 - **`mcp`** — Model Context Protocol server (stdio) that exposes the
-  capture store as ten read-only tools: `list_sessions`,
+  capture store as eleven read-only tools: `list_sessions`,
   `find_sessions_by_client`, `get_session_metadata`, `get_latency_stats`,
   `get_session_summary`, `get_session_messages`, `get_message`,
-  `get_paired`, `search_messages`, `find_spec_violations`.
+  `get_paired`, `search_messages`, `find_spec_violations`,
+  `diff_sessions`.
 - **`replay`** — re-emits any saved session over the same WebSocket so
   the inspector treats it as if it were live.
-- **`inspect` / `stats` / `search` / `session-info` / `validate` /
+- **`diff` / `inspect` / `stats` / `search` / `session-info` / `validate` /
   `export` / `import` / `mock-agent` / `mock-editor`** — headless
   workflows for terminals and CI.
 
@@ -91,7 +92,7 @@ setups are in the GitHub repo.
 }
 ```
 
-After restarting Claude Code the ten tools above appear in `/tools`. Every
+After restarting Claude Code the eleven tools above appear in `/tools`. Every
 tool advertises `readOnlyHint: true`, `idempotentHint: true`,
 `openWorldHint: false` per the MCP annotations spec, and the server emits
 an `instructions` block on `initialize` so the connecting LLM knows where

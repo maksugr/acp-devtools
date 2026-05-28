@@ -6,12 +6,13 @@ import {
     type SessionRecord,
     WsBroadcaster,
     defaultCapturesDbPath,
-    openDatabase,
+    openExistingDatabase,
     parseExport,
 } from '@acp-devtools/core';
 
 interface ReplayCommandOptions {
-    session?: string;
+    db: string;
+    file?: string;
     wsPort: string;
     wsHost: string;
 }
@@ -50,15 +51,15 @@ function loadFromJson(path: string): LoadedSource {
     };
 }
 
-function loadFromSqlite(path: string, sessionOpt: string | undefined): LoadedSource {
-    const db = openDatabase(path);
+function loadFromSqlite(dbPath: string, idArg: string | undefined): LoadedSource {
+    const db = openExistingDatabase(dbPath);
     let session: Session;
     try {
-        if (sessionOpt !== undefined) {
-            const id = Number(sessionOpt);
-            if (!Number.isInteger(id)) {
+        if (idArg !== undefined) {
+            const id = Number(idArg);
+            if (!Number.isInteger(id) || id <= 0) {
                 db.close();
-                throw new Error(`invalid --session "${sessionOpt}"`);
+                throw new Error(`invalid id "${idArg}"`);
             }
             session = Session.load(db, id);
         } else {
@@ -82,37 +83,43 @@ export function registerReplayCommand(program: Command): void {
     program
         .command('replay')
         .description(
-            'Serve a recorded session over WebSocket for replay in the UI. Accepts a SQLite database or a JSON export (auto-detected by extension). Defaults to the shared captures.db, latest session.',
+            'Serve a recorded session over WebSocket for replay in the UI. By default replays the latest session in captures.db; pass a session id, or --file to replay a JSON export.',
         )
-        .argument(
-            '[path]',
-            'path to a SQLite session database or a `.json` export file',
-            defaultCapturesDbPath(),
-        )
-        .option('--session <id>', 'session id to replay (SQLite only; default: latest)')
+        .argument('[id]', 'session id to replay (default: latest in the database)')
+        .option('--db <path>', 'captures database', defaultCapturesDbPath())
+        .option('--file <path>', 'replay a JSON export file instead of a saved session')
         .option('--ws-port <port>', 'WebSocket port', '3737')
         .option('--ws-host <host>', 'WebSocket bind address', '127.0.0.1')
-        .action(async (path: string, opts: ReplayCommandOptions) => {
+        .action(async (idArg: string | undefined, opts: ReplayCommandOptions) => {
             const wsPort = Number(opts.wsPort);
             if (!Number.isInteger(wsPort)) {
                 process.stderr.write(`acp-devtools: invalid --ws-port "${opts.wsPort}"\n`);
                 process.exit(2);
             }
-
-            const isJson = path.toLowerCase().endsWith('.json');
-            if (isJson && opts.session !== undefined) {
+            if (opts.file !== undefined && idArg !== undefined) {
                 process.stderr.write(
-                    `acp-devtools: --session is only meaningful for SQLite databases; a JSON export already contains a single session\n`,
+                    `acp-devtools: pass either a session id or --file, not both\n`,
                 );
                 process.exit(2);
+            }
+            if (idArg !== undefined) {
+                const n = Number(idArg);
+                if (!Number.isInteger(n) || n <= 0) {
+                    process.stderr.write(`acp-devtools: invalid id "${idArg}"\n`);
+                    process.exit(2);
+                }
             }
 
             let source: LoadedSource;
             try {
-                source = isJson ? loadFromJson(path) : loadFromSqlite(path, opts.session);
+                source =
+                    opts.file !== undefined
+                        ? loadFromJson(opts.file)
+                        : loadFromSqlite(opts.db, idArg);
             } catch (err) {
                 const message = err instanceof Error ? err.message : String(err);
-                process.stderr.write(`acp-devtools: cannot load ${path}: ${message}\n`);
+                const what = opts.file ?? opts.db;
+                process.stderr.write(`acp-devtools: cannot load ${what}: ${message}\n`);
                 process.exit(1);
             }
 

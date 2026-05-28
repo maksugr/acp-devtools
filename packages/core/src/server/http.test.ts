@@ -277,6 +277,53 @@ describe('POST /api/import', () => {
     });
 });
 
+describe('GET /api/sessions/:id/messages', () => {
+    it('returns the session record and its ordered frames', () => {
+        const s = Session.start(db, { name: 'work', agentCommand: 'mock' });
+        s.setClientName('Zed');
+        s.record({
+            seq: 1,
+            timestamp: 1_700_000_000_001,
+            direction: 'editor-to-agent',
+            kind: 'request',
+            method: 'initialize',
+            rpcId: 1,
+            raw: '{"jsonrpc":"2.0","id":1,"method":"initialize"}',
+            payload: { jsonrpc: '2.0', id: 1, method: 'initialize' },
+        });
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq(`/api/sessions/${s.info.id}/messages`);
+        const res = makeRes();
+        expect(handler(req as never, res as never)).toBe(true);
+        expect(res.statusCode).toBe(200);
+        const body = JSON.parse(res.body) as {
+            session: { id: number; clientName: string | null };
+            messages: Array<{ seq: number; method?: string }>;
+        };
+        expect(body.session.id).toBe(s.info.id);
+        expect(body.session.clientName).toBe('Zed');
+        expect(body.messages).toHaveLength(1);
+        expect(body.messages[0]?.method).toBe('initialize');
+    });
+
+    it('returns 404 for a missing session id', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/api/sessions/9999/messages');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(404);
+    });
+
+    it('returns 405 for non-GET on the messages endpoint', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/api/sessions/1/messages', 'POST');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(405);
+        expect(res.headers['allow']).toBe('GET');
+    });
+});
+
 describe('DELETE /api/sessions/:id', () => {
     it('deletes an existing session and returns 200', () => {
         const s = Session.start(db, { agentCommand: 'doomed' });

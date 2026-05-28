@@ -4,7 +4,7 @@ import {
     Session,
     defaultCapturesDbPath,
     extractSessionMetadata,
-    openDatabase,
+    openExistingDatabase,
 } from '@acp-devtools/core';
 
 interface SessionInfoOptions {
@@ -29,7 +29,7 @@ export function registerSessionInfoCommand(program: Command): void {
             }
             let db;
             try {
-                db = openDatabase(opts.db);
+                db = openExistingDatabase(opts.db);
             } catch (err) {
                 process.stderr.write(
                     `acp-devtools: cannot open ${opts.db}: ${err instanceof Error ? err.message : String(err)}\n`,

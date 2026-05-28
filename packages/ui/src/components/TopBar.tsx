@@ -36,6 +36,11 @@ interface TopBarProps {
      * timeline). Wired at App level.
      */
     onOpenPerf?: () => void;
+    /**
+     * Opens the full-screen diff view (align the current session against
+     * another saved session). Wired at App level.
+     */
+    onOpenDiff?: () => void;
 }
 
 export function TopBar({
@@ -48,6 +53,7 @@ export function TopBar({
     onImportResult,
     onOpenInfo,
     onOpenPerf,
+    onOpenDiff,
 }: TopBarProps) {
     const connection = useMessagesStore((s) => s.connection);
     const session = useMessagesStore((s) => s.session);
@@ -194,6 +200,17 @@ export function TopBar({
                             aria-label="Open performance dashboard"
                         >
                             perf
+                        </button>
+                    )}
+                    {onOpenDiff && session && (
+                        <button
+                            type="button"
+                            onClick={onOpenDiff}
+                            className="inline-flex h-7 items-center rounded-sm border border-line bg-surface-row px-3 font-mono text-[10px] uppercase tracking-widest text-ink-secondary transition-colors hover:bg-surface-rowHover hover:text-ink-primary"
+                            title="Compare this session against another — metadata, per-method latency, and frame-level differences"
+                            aria-label="Open session diff"
+                        >
+                            diff
                         </button>
                     )}
                     <SessionActionsMenu

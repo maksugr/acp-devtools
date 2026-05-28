@@ -1,8 +1,11 @@
+import { existsSync } from 'node:fs';
 import type { IncomingMessage, Server as HttpServer, ServerResponse } from 'node:http';
 import type { Duplex } from 'node:stream';
 import { WebSocketServer } from 'ws';
 import { listActive } from '../discovery/registry.js';
 import { ExportParseError, parseExport } from '../storage/export.js';
+import { Session } from '../storage/session.js';
+import { openDatabase } from '../storage/sqlite.js';
 import { deleteSession, insertImportedSession, listSessionsSummary } from './queries.js';
 import { streamReplay } from './replay.js';
 
@@ -42,6 +45,11 @@ export function createApiHandler(options: ApiHandlerOptions) {
         }
         if (path === '/api/import') {
             handleImport(req, res, options.capturesDbPath);
+            return true;
+        }
+        const messagesMatch = path?.match(/^\/api\/sessions\/(\d+)\/messages$/);
+        if (messagesMatch) {
+            handleSessionMessages(req, res, options.capturesDbPath, Number(messagesMatch[1]));
             return true;
         }
         const sessionMatch = path?.match(/^\/api\/sessions\/(\d+)$/);
@@ -133,6 +141,54 @@ function handleSessionItem(
         res.statusCode = 500;
         res.setHeader('content-type', 'application/json');
         res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }));
+    }
+}
+
+/**
+ * `GET /api/sessions/:id/messages` — the full ordered frame list for one saved
+ * session, plus its `SessionRecord`. The replay WS streams frames for the live
+ * timeline; the DiffPanel needs the whole set at once to align against the
+ * current session, so this is a plain one-shot JSON fetch.
+ */
+function handleSessionMessages(
+    req: IncomingMessage,
+    res: ServerResponse,
+    dbPath: string,
+    sessionId: number,
+): void {
+    if (req.method !== 'GET') {
+        res.statusCode = 405;
+        res.setHeader('allow', 'GET');
+        res.end();
+        return;
+    }
+    if (!existsSync(dbPath)) {
+        res.statusCode = 404;
+        res.setHeader('content-type', 'application/json');
+        res.end(JSON.stringify({ error: `session ${sessionId} not found` }));
+        return;
+    }
+    let db;
+    try {
+        db = openDatabase(dbPath);
+    } catch (err) {
+        res.statusCode = 500;
+        res.setHeader('content-type', 'application/json');
+        res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }));
+        return;
+    }
+    try {
+        const session = Session.load(db, sessionId);
+        const messages = [...session.messages()];
+        res.setHeader('content-type', 'application/json');
+        res.setHeader('cache-control', 'no-store');
+        res.end(JSON.stringify({ session: session.info, messages }));
+    } catch (err) {
+        res.statusCode = 404;
+        res.setHeader('content-type', 'application/json');
+        res.end(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }));
+    } finally {
+        db.close();
     }
 }
 

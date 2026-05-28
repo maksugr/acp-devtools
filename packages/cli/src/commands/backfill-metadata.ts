@@ -5,12 +5,11 @@ import {
     type SqliteDatabase,
     defaultCapturesDbPath,
     extractSessionMetadata,
-    openDatabase,
+    openExistingDatabase,
 } from '@acp-devtools/core';
 
 interface BackfillOptions {
     db: string;
-    id?: string;
     json?: boolean;
 }
 
@@ -78,13 +77,22 @@ export function registerBackfillMetadataCommand(program: Command): void {
         .description(
             'Recompute structured session metadata (client/agent/runtime) for saved sessions by re-scanning their captured messages. Used for sessions that pre-date the v4 schema or were imported from JSON.',
         )
+        .argument('[id]', 'backfill a single session only (default: all)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
-        .option('--id <id>', 'backfill a single session only (default: all)')
         .option('--json', 'machine-readable JSON output')
-        .action((opts: BackfillOptions) => {
+        .action((idArg: string | undefined, opts: BackfillOptions) => {
+            let targetId: number | null = null;
+            if (idArg !== undefined) {
+                targetId = Number(idArg);
+                if (!Number.isInteger(targetId) || targetId <= 0) {
+                    process.stderr.write(`acp-devtools: invalid id "${idArg}"\n`);
+                    process.exit(2);
+                }
+            }
+
             let db;
             try {
-                db = openDatabase(opts.db);
+                db = openExistingDatabase(opts.db);
             } catch (err) {
                 process.stderr.write(
                     `acp-devtools: cannot open ${opts.db}: ${err instanceof Error ? err.message : String(err)}\n`,
@@ -92,18 +100,8 @@ export function registerBackfillMetadataCommand(program: Command): void {
                 process.exit(1);
             }
 
-            const targetIds: number[] = [];
-            if (opts.id !== undefined) {
-                const id = Number(opts.id);
-                if (!Number.isInteger(id) || id <= 0) {
-                    process.stderr.write(`acp-devtools: invalid --id "${opts.id}"\n`);
-                    db.close();
-                    process.exit(2);
-                }
-                targetIds.push(id);
-            } else {
-                for (const id of listSessionIds(db)) targetIds.push(id);
-            }
+            const targetIds: number[] =
+                targetId !== null ? [targetId] : listSessionIds(db);
 
             const results: BackfillResult[] = [];
             for (const id of targetIds) results.push(backfillSession(db, id));

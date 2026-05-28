@@ -3,7 +3,7 @@ import { basename } from 'node:path';
 import {
     type CapturedMessage,
     Session,
-    openDatabase,
+    openExistingDatabase,
     parseExport,
 } from '@acp-devtools/core';
 
@@ -44,7 +44,7 @@ export function loadPlaybackScript(opts: PlaybackSourceOptions): LoadedPlaybackS
         return { messages: exp.messages, source: basename(opts.script) };
     }
     // DB path. --session optional; default = latest row.
-    const db = openDatabase(opts.db);
+    const db = openExistingDatabase(opts.db);
     try {
         let session: Session;
         if (opts.session !== undefined) {
