@@ -5,6 +5,8 @@ import {
     listSessionsSummary,
     openExistingDatabase,
 } from '@acp-devtools/core';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
+import { renderTable, type Column } from '../lib/table.js';
 
 interface SearchCommandOptions {
     db: string;
@@ -104,7 +106,8 @@ export function registerSearchCommand(program: Command): void {
                 process.stdout.write('no matches\n');
                 process.exit(1);
             }
-            process.stdout.write(renderHits(hits));
+            const s = createStyler(colorEnabled(process.stdout));
+            process.stdout.write(renderHits(s, hits, needle));
         });
 }
 
@@ -121,29 +124,39 @@ function makeSnippet(raw: string, needle: string): string {
     return prefix + raw.slice(start, end).replace(/\s+/g, ' ') + suffix;
 }
 
-function renderHits(hits: Hit[]): string {
-    const widths = {
-        loc: Math.max(7, ...hits.map((h) => `#${h.sessionId}/${h.seq}`.length)),
-        method: Math.min(
-            32,
-            Math.max(6, ...hits.map((h) => (h.method ?? '—').length)),
-        ),
-    };
-    return (
-        hits
-            .map((h) => {
-                const loc = `#${h.sessionId}/${h.seq}`;
-                const method = h.method ?? '—';
-                return (
-                    [
-                        loc.padEnd(widths.loc),
-                        truncate(method, widths.method).padEnd(widths.method),
-                        h.snippet,
-                    ].join('  ') + '\n'
-                );
-            })
-            .join('')
-    );
+const METHOD_MAX = 32;
+
+const COLUMNS: Column[] = [
+    { title: 'LOC', align: 'left' },
+    { title: 'METHOD', align: 'left' },
+    { title: 'MATCH', align: 'left' },
+];
+
+function renderHits(s: Styler, hits: Hit[], needle: string): string {
+    const body = hits.map((h) => [
+        s.cyan(`#${h.sessionId}/${h.seq}`),
+        truncate(h.method ?? '—', METHOD_MAX),
+        highlight(s, h.snippet, needle),
+    ]);
+    return renderTable(s, COLUMNS, body);
+}
+
+// Highlights every case-insensitive occurrence of the query inside a snippet.
+function highlight(s: Styler, snippet: string, needle: string): string {
+    if (!s.enabled || needle.length === 0) return snippet;
+    const lower = snippet.toLowerCase();
+    let out = '';
+    let i = 0;
+    for (;;) {
+        const at = lower.indexOf(needle, i);
+        if (at < 0) {
+            out += snippet.slice(i);
+            break;
+        }
+        out += snippet.slice(i, at) + s.yellow(snippet.slice(at, at + needle.length));
+        i = at + needle.length;
+    }
+    return out;
 }
 
 function truncate(s: string, max: number): string {

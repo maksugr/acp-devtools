@@ -83,7 +83,7 @@ export function registerReplayCommand(program: Command): void {
     program
         .command('replay')
         .description(
-            'Serve a recorded session over WebSocket for replay in the UI. By default replays the latest session in captures.db; pass a session id, or --file to replay a JSON export.',
+            'Serve a recorded session over WebSocket for replay in the UI. By default replays the latest session in the captures database; pass a session id, or --file to replay a JSON export.',
         )
         .argument('[id]', 'session id to replay (default: latest in the database)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())

@@ -14,6 +14,9 @@ import {
     type SessionRecord,
     validateAcpMessage,
 } from '@acp-devtools/core';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
+import { colorKind, colorLatency } from '../lib/palette.js';
+import { renderTable, type Column } from '../lib/table.js';
 
 interface StatsCommandOptions {
     db: string;
@@ -93,7 +96,8 @@ export function registerStatsCommand(program: Command): void {
                 process.stdout.write(JSON.stringify(out, null, 2) + '\n');
                 return;
             }
-            process.stdout.write(renderStats(stats, Boolean(opts.byMethod)));
+            const s = createStyler(colorEnabled(process.stdout));
+            process.stdout.write(renderStats(s, stats, Boolean(opts.byMethod)));
         });
 }
 
@@ -211,64 +215,78 @@ function shortLabel(s: SessionStats): string {
     return bits.join(' · ') || (s.sessionName ?? '—');
 }
 
-function renderStats(s: SessionStats, byMethod: boolean): string {
+function heading(s: Styler, label: string): string {
+    return s.bold(s.yellow(label));
+}
+
+function renderStats(s: Styler, stats: SessionStats, byMethod: boolean): string {
     const lines: string[] = [];
     const headerBits = [
-        `session #${s.sessionId}`,
-        `${formatAge(Date.now() - s.startedAt)} ago`,
-        s.endedAt !== null
-            ? `lasted ${formatAge(s.endedAt - s.startedAt)}`
-            : 'still open',
-        shortLabel(s),
+        s.bold(s.cyan(`session #${stats.sessionId}`)),
+        s.dim(`${formatAge(Date.now() - stats.startedAt)} ago`),
+        s.dim(
+            stats.endedAt !== null
+                ? `lasted ${formatAge(stats.endedAt - stats.startedAt)}`
+                : 'still open',
+        ),
+        shortLabel(stats),
     ];
-    lines.push(headerBits.join('  ·  ') + '\n');
-
-    lines.push('DIRECTION          COUNT\n');
-    lines.push(`→ editor → agent   ${s.direction.editorToAgent}\n`);
-    lines.push(`← agent → editor   ${s.direction.agentToEditor}\n`);
+    lines.push(headerBits.join(s.dim('  ·  ')) + '\n');
     lines.push('\n');
 
-    lines.push('KIND   COUNT\n');
-    lines.push(`REQ    ${s.kind.request}\n`);
-    lines.push(`RSP    ${s.kind.response}\n`);
-    lines.push(`NTF    ${s.kind.notification}\n`);
-    lines.push(`ERR    ${s.kind.error}\n`);
-    if (s.kind.unknown > 0) lines.push(`UNK    ${s.kind.unknown}\n`);
-    if (s.parseErrors > 0) lines.push(`PARSE  ${s.parseErrors}\n`);
+    lines.push(heading(s, 'DIRECTION') + '\n');
+    lines.push(`${s.green('→ editor → agent')}   ${stats.direction.editorToAgent}\n`);
+    lines.push(`${s.cyan('← agent → editor')}   ${stats.direction.agentToEditor}\n`);
     lines.push('\n');
 
-    if (s.spec.checked > 0) {
-        if (s.spec.violations === 0) {
-            lines.push(`SPEC   ${s.spec.checked} frames checked · all conform\n`);
+    lines.push(heading(s, 'KIND') + '\n');
+    lines.push(`${colorKind(s, 'request', 'REQ')}    ${stats.kind.request}\n`);
+    lines.push(`${colorKind(s, 'response', 'RSP')}    ${stats.kind.response}\n`);
+    lines.push(`${colorKind(s, 'notification', 'NTF')}    ${stats.kind.notification}\n`);
+    lines.push(`${colorKind(s, 'error', 'ERR')}    ${stats.kind.error}\n`);
+    if (stats.kind.unknown > 0) lines.push(`${colorKind(s, 'unknown', 'UNK')}    ${stats.kind.unknown}\n`);
+    if (stats.parseErrors > 0) lines.push(`${s.red('PARSE')}  ${stats.parseErrors}\n`);
+    lines.push('\n');
+
+    if (stats.spec.checked > 0) {
+        lines.push(heading(s, 'SPEC') + '\n');
+        if (stats.spec.violations === 0) {
+            lines.push(`${stats.spec.checked} frames checked · ${s.green('all conform')}\n`);
         } else {
+            const plural = stats.spec.violations === 1 ? '' : 's';
+            const mPlural = stats.spec.affectedMethods.length === 1 ? '' : 's';
             lines.push(
-                `SPEC   ${s.spec.checked} checked · ${s.spec.violations} violation${s.spec.violations === 1 ? '' : 's'} in ${s.spec.affectedMethods.length} method${s.spec.affectedMethods.length === 1 ? '' : 's'} (${s.spec.affectedMethods.join(', ')})\n`,
+                `${stats.spec.checked} checked · ${s.red(`${stats.spec.violations} violation${plural}`)} in ${stats.spec.affectedMethods.length} method${mPlural} (${stats.spec.affectedMethods.join(', ')})\n`,
             );
-            lines.push(`       run \`acp-devtools validate ${s.sessionId}\` for details\n`);
+            lines.push(s.dim(`run \`acp-devtools validate ${stats.sessionId}\` for details`) + '\n');
         }
         lines.push('\n');
     }
 
-    const l = s.latency;
+    const l = stats.latency;
     if (l.sampleSize === 0) {
-        lines.push('LATENCY — no paired req/rsp samples\n');
+        lines.push(heading(s, 'LATENCY') + s.dim(' — no paired req/rsp samples') + '\n');
     } else {
-        lines.push(`LATENCY (response pairs · ${l.sampleSize} sample${l.sampleSize === 1 ? '' : 's'})\n`);
-        lines.push(`p50    ${formatLatency(l.p50!)}\n`);
-        lines.push(`p90    ${formatLatency(l.p90!)}\n`);
-        lines.push(`p99    ${formatLatency(l.p99!)}\n`);
-        lines.push(`max    ${formatLatency(l.max!)}\n`);
-        lines.push(`mean   ${formatLatency(l.mean!)}\n`);
+        lines.push(
+            heading(s, 'LATENCY') +
+                s.dim(` (response pairs · ${l.sampleSize} sample${l.sampleSize === 1 ? '' : 's'})`) +
+                '\n',
+        );
+        lines.push(`p50    ${colorLatency(s, l.p50!, formatLatency(l.p50!))}\n`);
+        lines.push(`p90    ${colorLatency(s, l.p90!, formatLatency(l.p90!))}\n`);
+        lines.push(`p99    ${colorLatency(s, l.p99!, formatLatency(l.p99!))}\n`);
+        lines.push(`max    ${colorLatency(s, l.max!, formatLatency(l.max!))}\n`);
+        lines.push(`mean   ${colorLatency(s, l.mean!, formatLatency(l.mean!))}\n`);
     }
 
-    if (s.insights.length > 0) {
+    if (stats.insights.length > 0) {
         lines.push('\n');
-        lines.push(renderInsights(s.insights));
+        lines.push(renderInsights(s, stats.insights));
     }
 
-    if (byMethod && s.perMethod.length > 0) {
+    if (byMethod && stats.perMethod.length > 0) {
         lines.push('\n');
-        lines.push(renderPerMethod(s.perMethod));
+        lines.push(renderPerMethod(s, stats.perMethod));
     }
 
     return lines.join('');
@@ -290,80 +308,50 @@ const INSIGHT_LABEL: Record<PerformanceInsight['kind'], string> = {
     errors: 'ERRORS   ',
 };
 
-function renderInsights(insights: PerformanceInsight[]): string {
-    const lines: string[] = ['INSIGHTS\n'];
+const INSIGHT_COLOR: Record<PerformanceInsight['kind'], keyof Pick<Styler, 'red' | 'yellow' | 'magenta' | 'cyan'>> = {
+    hotspot: 'red',
+    'long-tail': 'yellow',
+    outlier: 'magenta',
+    busiest: 'cyan',
+    errors: 'red',
+};
+
+function renderInsights(s: Styler, insights: PerformanceInsight[]): string {
+    const lines: string[] = [heading(s, 'INSIGHTS') + '\n'];
     for (const i of insights) {
-        lines.push(`  ${INSIGHT_GLYPH[i.kind]}  ${INSIGHT_LABEL[i.kind]}  ${i.summary}\n`);
-        if (i.detail) lines.push(`                    ${i.detail}\n`);
+        const tint = s[INSIGHT_COLOR[i.kind]].bind(s);
+        const glyph = tint(INSIGHT_GLYPH[i.kind]);
+        const label = tint(INSIGHT_LABEL[i.kind]);
+        lines.push(`  ${glyph}  ${label}  ${i.summary}\n`);
+        if (i.detail) lines.push(s.dim(`                    ${i.detail}`) + '\n');
     }
     return lines.join('');
 }
 
-function renderPerMethod(rows: MethodStats[]): string {
-    type Cell = {
-        method: string;
-        kind: string;
-        count: string;
-        p50: string;
-        p99: string;
-        total: string;
-        dist: string;
-    };
-    const cells: Cell[] = rows.map((r) => ({
-        method: r.method,
-        kind: r.kind === 'request' ? 'req' : 'ntf',
-        count: String(r.count),
-        p50: r.p50 !== null ? formatLatency(r.p50) : '—',
-        p99: r.p99 !== null ? formatLatency(r.p99) : '—',
-        total: r.totalLatencyMs !== null ? formatLatency(r.totalLatencyMs) : '—',
-        dist: r.latencies.length > 0 ? asciiSparkline(r.latencies, 8) : '',
-    }));
-    const widths = {
-        method: Math.max(6, ...cells.map((c) => c.method.length)),
-        kind: 4,
-        count: Math.max(5, ...cells.map((c) => c.count.length)),
-        p50: Math.max(5, ...cells.map((c) => c.p50.length)),
-        p99: Math.max(5, ...cells.map((c) => c.p99.length)),
-        total: Math.max(5, ...cells.map((c) => c.total.length)),
-        dist: 8,
-    };
-    widths.method = Math.min(40, widths.method);
+const METHOD_MAX = 40;
 
-    const header =
-        'METHOD'.padEnd(widths.method) +
-        '  ' +
-        'KIND'.padEnd(widths.kind) +
-        '  ' +
-        'COUNT'.padStart(widths.count) +
-        '  ' +
-        'P50'.padStart(widths.p50) +
-        '  ' +
-        'P99'.padStart(widths.p99) +
-        '  ' +
-        'TOTAL'.padStart(widths.total) +
-        '  ' +
-        'DIST'.padEnd(widths.dist) +
-        '\n';
-
-    const lines = [header];
-    for (const c of cells) {
-        const method = c.method.length > widths.method ? c.method.slice(0, widths.method - 1) + '…' : c.method;
-        lines.push(
-            method.padEnd(widths.method) +
-                '  ' +
-                c.kind.padEnd(widths.kind) +
-                '  ' +
-                c.count.padStart(widths.count) +
-                '  ' +
-                c.p50.padStart(widths.p50) +
-                '  ' +
-                c.p99.padStart(widths.p99) +
-                '  ' +
-                c.total.padStart(widths.total) +
-                '  ' +
-                c.dist.padEnd(widths.dist) +
-                '\n',
-        );
-    }
-    return lines.join('');
+function renderPerMethod(s: Styler, rows: MethodStats[]): string {
+    const columns: Column[] = [
+        { title: 'METHOD', align: 'left' },
+        { title: 'KIND', align: 'left' },
+        { title: 'COUNT', align: 'right' },
+        { title: 'P50', align: 'right' },
+        { title: 'P99', align: 'right' },
+        { title: 'TOTAL', align: 'right' },
+        { title: 'DIST', align: 'left' },
+    ];
+    const body = rows.map((r) => {
+        const method =
+            r.method.length > METHOD_MAX ? r.method.slice(0, METHOD_MAX - 1) + '…' : r.method;
+        return [
+            method,
+            colorKind(s, r.kind, r.kind === 'request' ? 'req' : 'ntf'),
+            s.dim(String(r.count)),
+            r.p50 !== null ? colorLatency(s, r.p50, formatLatency(r.p50)) : s.dim('—'),
+            r.p99 !== null ? colorLatency(s, r.p99, formatLatency(r.p99)) : s.dim('—'),
+            r.totalLatencyMs !== null ? formatLatency(r.totalLatencyMs) : s.dim('—'),
+            r.latencies.length > 0 ? s.dim(asciiSparkline(r.latencies, 8)) : '',
+        ];
+    });
+    return renderTable(s, columns, body);
 }

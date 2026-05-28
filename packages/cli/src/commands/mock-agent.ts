@@ -29,9 +29,9 @@ export function registerMockAgentCommand(program: Command): void {
             'Pretend to be an ACP agent by replaying a recorded session script. ' +
                 'Reads JSON-RPC from stdin (real editor), writes recorded responses to stdout. ' +
                 'Wire it into an IDE `agent_servers` config to drive plugin tests without a live LLM. ' +
-                'By default reads from the shared captures.db (latest session); use --session for a specific id or --script for a JSON export from a teammate.',
+                'By default reads from the shared captures database (latest session); use --session for a specific id or --script for a JSON export from a teammate.',
         )
-        .option('--session <id>', 'session id from captures.db (default: latest)')
+        .option('--session <id>', 'session id from the captures database (default: latest)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
         .option('--script <file>', 'load from a JSON export instead of the database (mutually exclusive with --session)')
         .option('--log <mode>', 'echo every wire frame to stderr (json | pretty | none)', 'none')

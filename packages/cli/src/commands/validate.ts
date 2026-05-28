@@ -7,6 +7,8 @@ import {
     validateAcpMessage,
 } from '@acp-devtools/core';
 import { buildPairIndex } from './inspect.js';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
+import { renderTable, type Column } from '../lib/table.js';
 
 interface ValidateCommandOptions {
     db: string;
@@ -121,60 +123,47 @@ export function registerValidateCommand(program: Command): void {
                 return;
             }
 
+            const errStyler = createStyler(colorEnabled(process.stderr));
             const affected = new Set(violations.map((v) => v.method ?? '?'));
+            const vCount =
+                violations.length === 0
+                    ? errStyler.green('0 violations')
+                    : errStyler.red(`${violations.length} violations`);
             process.stderr.write(
-                `session #${id} · ${checked} checked · ${skipped} skipped (no schema) · ${violations.length} violations in ${affected.size} method${affected.size === 1 ? '' : 's'}\n\n`,
+                `${errStyler.bold(errStyler.cyan(`session #${id}`))} · ${checked} checked · ${skipped} skipped (no schema) · ${vCount} in ${affected.size} method${affected.size === 1 ? '' : 's'}\n\n`,
             );
             if (violations.length === 0) {
-                process.stdout.write('no violations\n');
+                process.stdout.write(errStyler.green('no violations') + '\n');
                 return;
             }
-            process.stdout.write(renderTable(violations));
+            const s = createStyler(colorEnabled(process.stdout));
+            process.stdout.write(renderViolations(s, violations));
             // Non-zero exit so CI scripts can fail on first violation.
             process.exit(1);
         });
 }
 
-interface Cell {
-    seq: string;
-    method: string;
-    schema: string;
-    path: string;
-    error: string;
-}
+const METHOD_MAX = 28;
+const SCHEMA_MAX = 28;
+const PATH_MAX = 38;
 
-function renderTable(violations: Violation[]): string {
-    const rows: Cell[] = violations.map((v) => ({
-        seq: `#${v.seq}`,
-        method: v.method ?? '—',
-        schema: v.schemaName,
-        path: v.path,
-        error: v.message,
-    }));
-    const widths = {
-        seq: Math.max(3, ...rows.map((r) => r.seq.length)),
-        method: Math.max(6, ...rows.map((r) => r.method.length)),
-        schema: Math.max(6, ...rows.map((r) => r.schema.length)),
-        path: Math.max(4, ...rows.map((r) => r.path.length)),
-    };
-    widths.method = Math.min(28, widths.method);
-    widths.schema = Math.min(28, widths.schema);
-    widths.path = Math.min(38, widths.path);
-    return (
-        rows
-            .map((r) => {
-                return (
-                    [
-                        r.seq.padStart(widths.seq),
-                        truncate(r.method, widths.method).padEnd(widths.method),
-                        truncate(r.schema, widths.schema).padEnd(widths.schema),
-                        truncate(r.path, widths.path).padEnd(widths.path),
-                        r.error,
-                    ].join('  ') + '\n'
-                );
-            })
-            .join('')
-    );
+const COLUMNS: Column[] = [
+    { title: 'SEQ', align: 'right' },
+    { title: 'METHOD', align: 'left' },
+    { title: 'SCHEMA', align: 'left' },
+    { title: 'PATH', align: 'left' },
+    { title: 'ERROR', align: 'left' },
+];
+
+function renderViolations(s: Styler, violations: Violation[]): string {
+    const body = violations.map((v) => [
+        s.dim(`#${v.seq}`),
+        truncate(v.method ?? '—', METHOD_MAX),
+        s.dim(truncate(v.schemaName, SCHEMA_MAX)),
+        s.cyan(truncate(v.path, PATH_MAX)),
+        s.red(v.message),
+    ]);
+    return renderTable(s, COLUMNS, body);
 }
 
 function truncate(s: string, max: number): string {

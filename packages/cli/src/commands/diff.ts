@@ -14,6 +14,9 @@ import {
     type SessionDiff,
     type SessionRecord,
 } from '@acp-devtools/core';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
+import { colorDirection, colorKind } from '../lib/palette.js';
+import { renderTable, type Column } from '../lib/table.js';
 
 interface DiffCommandOptions {
     db: string;
@@ -86,11 +89,25 @@ export function registerDiffCommand(program: Command): void {
                 return;
             }
 
+            const st = createStyler(colorEnabled(process.stdout));
             process.stdout.write(
-                renderDiff(infoA, infoB, msgsA.length, msgsB.length, diff, meta, perf, Boolean(opts.full)),
+                renderDiff(infoA, infoB, msgsA.length, msgsB.length, diff, meta, perf, Boolean(opts.full), st),
             );
         });
 }
+
+const defaultStyler = (): Styler => createStyler(colorEnabled(process.stdout));
+
+function heading(st: Styler, label: string): string {
+    return st.bold(st.yellow(label));
+}
+
+const OP_COLOR: Record<DiffRow['op'], (st: Styler, t: string) => string> = {
+    equal: (st, t) => st.dim(t),
+    changed: (st, t) => st.yellow(t),
+    added: (st, t) => st.green(t),
+    removed: (st, t) => st.red(t),
+};
 
 function parseId(raw: string): number {
     const id = Number(raw);
@@ -149,34 +166,35 @@ export function renderDiff(
     meta: MetadataDiff,
     perf: MethodStatsDelta[],
     full: boolean,
+    st: Styler = defaultStyler(),
 ): string {
     const lines: string[] = [];
-    lines.push(`diff  #${infoA.id}  →  #${infoB.id}\n`);
-    lines.push(`  A #${infoA.id}  ${shortLabel(infoA)}  (${countA} msg${countA === 1 ? '' : 's'})\n`);
-    lines.push(`  B #${infoB.id}  ${shortLabel(infoB)}  (${countB} msg${countB === 1 ? '' : 's'})\n`);
+    lines.push(`${st.bold('diff')}  ${st.cyan(`#${infoA.id}`)}  ${st.dim('→')}  ${st.cyan(`#${infoB.id}`)}\n`);
+    lines.push(`  ${st.cyan(`A #${infoA.id}`)}  ${shortLabel(infoA)}  ${st.dim(`(${countA} msg${countA === 1 ? '' : 's'})`)}\n`);
+    lines.push(`  ${st.cyan(`B #${infoB.id}`)}  ${shortLabel(infoB)}  ${st.dim(`(${countB} msg${countB === 1 ? '' : 's'})`)}\n`);
     lines.push('\n');
 
-    lines.push(renderInfoSection(meta));
+    lines.push(renderInfoSection(meta, st));
     lines.push('\n');
-    lines.push(renderPerfSection(perf));
+    lines.push(renderPerfSection(perf, st));
     lines.push('\n');
 
-    lines.push('FRAMES\n');
-    const s = diff.summary;
+    lines.push(heading(st, 'FRAMES') + '\n');
+    const sum = diff.summary;
     lines.push(
-        `= ${s.equal} same   ≠ ${s.changed} differs   ◂ ${s.removed} only in A   ▸ ${s.added} only in B\n`,
+        `${st.dim('=')} ${sum.equal} same   ${st.yellow('≠')} ${sum.changed} differs   ${st.red('◂')} ${sum.removed} only in A   ${st.green('▸')} ${sum.added} only in B\n`,
     );
     lines.push('\n');
 
-    if (s.changed === 0 && s.added === 0 && s.removed === 0 && !full) {
-        lines.push('sessions are identical (no field-level differences)\n');
+    if (sum.changed === 0 && sum.added === 0 && sum.removed === 0 && !full) {
+        lines.push(st.green('sessions are identical') + st.dim(' (no field-level differences)') + '\n');
         return lines.join('');
     }
 
     let equalRun = 0;
     const flushEqualRun = () => {
         if (equalRun > 0) {
-            lines.push(`   … ${equalRun} unchanged …\n`);
+            lines.push(st.dim(`   … ${equalRun} unchanged …`) + '\n');
             equalRun = 0;
         }
     };
@@ -190,14 +208,15 @@ export function renderDiff(
         const ref = row.a ?? row.b!;
         const aSeq = row.a ? `a#${row.a.seq}` : 'a#—';
         const bSeq = row.b ? `b#${row.b.seq}` : 'b#—';
-        const method = ref.method ?? (ref.parseError ? `! ${ref.parseError}` : '—');
+        const rawMethod = ref.method ?? (ref.parseError ? `! ${ref.parseError}` : '—');
+        const method = ref.parseError ? st.red(rawMethod) : rawMethod;
         lines.push(
-            `${OP_MARKER[row.op]} ${dirArrow(ref)} ${KIND_LABEL[ref.kind]} ${method}` +
-                `   ${aSeq}  ${bSeq}\n`,
+            `${OP_COLOR[row.op](st, OP_MARKER[row.op])} ${colorDirection(st, ref.direction, dirArrow(ref))} ${colorKind(st, ref.kind, KIND_LABEL[ref.kind])} ${method}` +
+                `   ${st.dim(aSeq)}  ${st.dim(bSeq)}\n`,
         );
         if (row.op === 'changed') {
             for (const c of row.changes) {
-                lines.push(`      ${renderChange(c)}\n`);
+                lines.push(`      ${renderChange(c, st)}\n`);
             }
         }
     }
@@ -206,70 +225,62 @@ export function renderDiff(
     return lines.join('');
 }
 
-export function renderChange(c: JsonChange): string {
-    if (c.kind === 'add') return `+ ${c.path}: ${fmtValue(c.b)}`;
-    if (c.kind === 'remove') return `- ${c.path}: ${fmtValue(c.a)}`;
-    return `~ ${c.path}: ${fmtValue(c.a)} → ${fmtValue(c.b)}`;
+export function renderChange(c: JsonChange, st: Styler = defaultStyler()): string {
+    if (c.kind === 'add') return `${st.green('+')} ${c.path}: ${st.dim(fmtValue(c.b))}`;
+    if (c.kind === 'remove') return `${st.red('-')} ${c.path}: ${st.dim(fmtValue(c.a))}`;
+    return `${st.yellow('~')} ${c.path}: ${st.dim(fmtValue(c.a))} ${st.dim('→')} ${st.dim(fmtValue(c.b))}`;
 }
 
-export function renderInfoSection(meta: MetadataDiff): string {
-    const lines = ['INFO\n'];
+export function renderInfoSection(meta: MetadataDiff, st: Styler = defaultStyler()): string {
+    const lines = [heading(st, 'INFO') + '\n'];
     if (meta.changes.length === 0) {
-        lines.push('  metadata identical (client, agent, capabilities, protocol, runtime)\n');
+        lines.push(
+            st.dim('  metadata identical (client, agent, capabilities, protocol, runtime)') + '\n',
+        );
     } else {
-        for (const c of meta.changes) lines.push(`  ${renderChange(c)}\n`);
+        for (const c of meta.changes) lines.push(`  ${renderChange(c, st)}\n`);
     }
     return lines.join('');
 }
 
-export function renderPerfSection(perf: MethodStatsDelta[]): string {
-    if (perf.length === 0) return 'PERF\n  no methods\n';
-    const cells = perf.map((d) => ({
-        method: d.method,
-        kind: d.kind === 'request' ? 'req' : 'ntf',
-        ap99: d.a?.p99 != null ? formatLatency(d.a.p99) : '—',
-        bp99: d.b?.p99 != null ? formatLatency(d.b.p99) : '—',
-        dp99: d.p99Delta != null ? signedLatency(d.p99Delta) : '—',
-        counts: `${d.a?.count ?? 0}→${d.b?.count ?? 0}`,
-    }));
-    const w = {
-        method: Math.min(40, Math.max(6, ...cells.map((c) => c.method.length))),
-        ap99: Math.max(5, ...cells.map((c) => c.ap99.length)),
-        bp99: Math.max(5, ...cells.map((c) => c.bp99.length)),
-        dp99: Math.max(6, ...cells.map((c) => c.dp99.length)),
-        counts: Math.max(5, ...cells.map((c) => c.counts.length)),
-    };
-    const lines = ['PERF  (p99 latency, Δ = B − A, sorted by |Δ p99|)\n'];
-    lines.push(
-        'METHOD'.padEnd(w.method) +
-            '  KIND  ' +
-            'A p99'.padStart(w.ap99) +
-            '  ' +
-            'B p99'.padStart(w.bp99) +
-            '  ' +
-            'Δ p99'.padStart(w.dp99) +
-            '  ' +
-            'COUNT'.padStart(w.counts) +
-            '\n',
+const PERF_METHOD_MAX = 40;
+
+function colorDelta(st: Styler, ms: number | null | undefined): string {
+    if (ms == null) return st.dim('—');
+    const text = signedLatency(ms);
+    if (ms > 0) return st.red(text);
+    if (ms < 0) return st.green(text);
+    return st.dim(text);
+}
+
+export function renderPerfSection(perf: MethodStatsDelta[], st: Styler = defaultStyler()): string {
+    if (perf.length === 0) return heading(st, 'PERF') + '\n' + st.dim('  no methods') + '\n';
+    const columns: Column[] = [
+        { title: 'METHOD', align: 'left' },
+        { title: 'KIND', align: 'left' },
+        { title: 'A p99', align: 'right' },
+        { title: 'B p99', align: 'right' },
+        { title: 'Δ p99', align: 'right' },
+        { title: 'COUNT', align: 'right' },
+    ];
+    const body = perf.map((d) => {
+        const method =
+            d.method.length > PERF_METHOD_MAX ? d.method.slice(0, PERF_METHOD_MAX - 1) + '…' : d.method;
+        return [
+            method,
+            colorKind(st, d.kind, d.kind === 'request' ? 'req' : 'ntf'),
+            d.a?.p99 != null ? formatLatency(d.a.p99) : st.dim('—'),
+            d.b?.p99 != null ? formatLatency(d.b.p99) : st.dim('—'),
+            colorDelta(st, d.p99Delta),
+            st.dim(`${d.a?.count ?? 0}→${d.b?.count ?? 0}`),
+        ];
+    });
+    return (
+        heading(st, 'PERF') +
+        st.dim('  (p99 latency, Δ = B − A, sorted by |Δ p99|)') +
+        '\n' +
+        renderTable(st, columns, body)
     );
-    for (const c of cells) {
-        const method = c.method.length > w.method ? c.method.slice(0, w.method - 1) + '…' : c.method;
-        lines.push(
-            method.padEnd(w.method) +
-                '  ' +
-                c.kind.padEnd(4) +
-                '  ' +
-                c.ap99.padStart(w.ap99) +
-                '  ' +
-                c.bp99.padStart(w.bp99) +
-                '  ' +
-                c.dp99.padStart(w.dp99) +
-                '  ' +
-                c.counts.padStart(w.counts) +
-                '\n',
-        );
-    }
-    return lines.join('');
 }
 
 function formatLatency(ms: number): string {

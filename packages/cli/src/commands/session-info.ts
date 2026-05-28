@@ -6,6 +6,7 @@ import {
     extractSessionMetadata,
     openExistingDatabase,
 } from '@acp-devtools/core';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 
 interface SessionInfoOptions {
     db: string;
@@ -80,20 +81,22 @@ export function registerSessionInfoCommand(program: Command): void {
 
 function renderText(session: Session, meta: ReturnType<typeof extractSessionMetadata>, msgCount: number): void {
     const w = process.stdout;
-    w.write(`SESSION #${session.info.id}\n`);
-    w.write(`${'─'.repeat(48)}\n`);
+    const s = createStyler(colorEnabled(process.stdout));
+    w.write(`${s.bold(s.cyan(`SESSION #${session.info.id}`))}\n`);
+    w.write(s.dim('─'.repeat(48)) + '\n');
     const clientLabel = meta.client.title ?? meta.client.name ?? session.info.clientName ?? '—';
     const clientVer = meta.client.version ? ` v${meta.client.version}` : '';
     const clientPlatform = meta.client.platform ? ` (${meta.client.platform})` : '';
-    w.write(pad('Client', `${clientLabel}${clientVer}${clientPlatform}`));
+    w.write(pad(s, 'Client', `${clientLabel}${clientVer}${clientPlatform}`));
 
     const agentLabel = meta.agent.name ?? shortAgent(session.info.agentCommand) ?? '—';
     const agentVer = meta.agent.version ? ` v${meta.agent.version}` : '';
-    w.write(pad('Agent', `${agentLabel}${agentVer}`));
+    w.write(pad(s, 'Agent', `${agentLabel}${agentVer}`));
 
-    w.write(pad('Protocol', meta.protocolVersion !== null ? `ACP v${meta.protocolVersion}` : '—'));
+    w.write(pad(s, 'Protocol', meta.protocolVersion !== null ? `ACP v${meta.protocolVersion}` : '—'));
     w.write(
         pad(
+            s,
             'Started',
             new Date(session.info.startedAt).toISOString() +
                 (session.info.endedAt !== null
@@ -101,44 +104,48 @@ function renderText(session: Session, meta: ReturnType<typeof extractSessionMeta
                     : ''),
         ),
     );
-    w.write(pad('Messages', String(msgCount)));
+    w.write(pad(s, 'Messages', String(msgCount)));
 
-    w.write(`\nCLIENT CAPABILITIES\n`);
-    w.write(capLine('fs.readTextFile', meta.clientCapabilities.fsReadTextFile));
-    w.write(capLine('fs.writeTextFile', meta.clientCapabilities.fsWriteTextFile));
-    w.write(capLine('terminal', meta.clientCapabilities.terminal));
-    w.write(capLine('auth.terminal', meta.clientCapabilities.authTerminal));
-    w.write(capLine('auth.gateway', meta.clientCapabilities.authGateway));
+    w.write(`\n${heading(s, 'CLIENT CAPABILITIES')}\n`);
+    w.write(capLine(s, 'fs.readTextFile', meta.clientCapabilities.fsReadTextFile));
+    w.write(capLine(s, 'fs.writeTextFile', meta.clientCapabilities.fsWriteTextFile));
+    w.write(capLine(s, 'terminal', meta.clientCapabilities.terminal));
+    w.write(capLine(s, 'auth.terminal', meta.clientCapabilities.authTerminal));
+    w.write(capLine(s, 'auth.gateway', meta.clientCapabilities.authGateway));
 
-    w.write(`\nAGENT CAPABILITIES\n`);
-    w.write(capLine('prompt', meta.agentCapabilities.prompt));
-    w.write(capLine('loadSession', meta.agentCapabilities.loadSession));
-    w.write(`  auth methods       ${meta.agent.authMethods}\n`);
+    w.write(`\n${heading(s, 'AGENT CAPABILITIES')}\n`);
+    w.write(capLine(s, 'prompt', meta.agentCapabilities.prompt));
+    w.write(capLine(s, 'loadSession', meta.agentCapabilities.loadSession));
+    w.write(`  ${s.dim('auth methods'.padEnd(18))} ${meta.agent.authMethods}\n`);
 
-    w.write(`\nRUNTIME STATE\n`);
-    const modeSuffix = meta.runtime.modeChanges > 0 ? `  (changed ${meta.runtime.modeChanges}×)` : '';
+    w.write(`\n${heading(s, 'RUNTIME STATE')}\n`);
+    const modeSuffix = meta.runtime.modeChanges > 0 ? s.dim(`  (changed ${meta.runtime.modeChanges}×)`) : '';
     const modelSuffix =
-        meta.runtime.modelChanges > 0 ? `  (changed ${meta.runtime.modelChanges}×)` : '';
-    w.write(`  current mode       ${meta.runtime.currentMode ?? '—'}${modeSuffix}\n`);
-    w.write(`  current model      ${meta.runtime.currentModel ?? '—'}${modelSuffix}\n`);
+        meta.runtime.modelChanges > 0 ? s.dim(`  (changed ${meta.runtime.modelChanges}×)`) : '';
+    w.write(`  ${s.dim('current mode'.padEnd(18))} ${meta.runtime.currentMode ?? '—'}${modeSuffix}\n`);
+    w.write(`  ${s.dim('current model'.padEnd(18))} ${meta.runtime.currentModel ?? '—'}${modelSuffix}\n`);
     w.write(
-        `  available cmds     ${meta.runtime.availableCommands.length > 0 ? meta.runtime.availableCommands.join(', ') : '—'}\n`,
+        `  ${s.dim('available cmds'.padEnd(18))} ${meta.runtime.availableCommands.length > 0 ? meta.runtime.availableCommands.join(', ') : '—'}\n`,
     );
 
     if (meta.extensions.jetbrainsProxyConfig !== null) {
-        w.write(`\nJETBRAINS EXTENSIONS\n`);
+        w.write(`\n${heading(s, 'JETBRAINS EXTENSIONS')}\n`);
         w.write(
-            `  proxyConfig        ${JSON.stringify(meta.extensions.jetbrainsProxyConfig)}\n`,
+            `  ${s.dim('proxyConfig'.padEnd(18))} ${JSON.stringify(meta.extensions.jetbrainsProxyConfig)}\n`,
         );
     }
 }
 
-function pad(label: string, value: string): string {
-    return `  ${label.padEnd(18)} ${value}\n`;
+function heading(s: Styler, label: string): string {
+    return s.bold(s.yellow(label));
 }
 
-function capLine(label: string, enabled: boolean): string {
-    return `  ${label.padEnd(18)} ${enabled ? '✓' : '—'}\n`;
+function pad(s: Styler, label: string, value: string): string {
+    return `  ${s.dim(label.padEnd(18))} ${value}\n`;
+}
+
+function capLine(s: Styler, label: string, enabled: boolean): string {
+    return `  ${s.dim(label.padEnd(18))} ${enabled ? s.green('✓') : s.dim('—')}\n`;
 }
 
 function shortAgent(agentCommand: string | null): string | null {

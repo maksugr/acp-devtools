@@ -14,7 +14,7 @@ export function registerDeleteCommand(program: Command): void {
     program
         .command('delete')
         .description(
-            'Delete one or more saved sessions from captures.db forever. Cascades to messages via the schema. No interactive prompt — pair with `acp-devtools list` to verify ids before invoking.',
+            'Delete one or more saved sessions from the captures database forever. Cascades to messages via the schema. No interactive prompt — pair with `acp-devtools list` to verify ids before invoking.',
         )
         .argument('<id...>', 'one or more session ids to delete')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())

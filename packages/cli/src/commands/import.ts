@@ -16,7 +16,7 @@ export function registerImportCommand(program: Command): void {
     program
         .command('import')
         .description(
-            'Insert a JSON session export into captures.db as a new saved session. The new session appears in the inspector picker under its IMPORTED section, with imported_at set to now.',
+            'Insert a JSON session export into the captures database as a new saved session. The new session appears in the inspector picker under its IMPORTED section, with imported_at set to now.',
         )
         .argument('<file>', 'path to a JSON export produced by `acp-devtools export`')
         .option(

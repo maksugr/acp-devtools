@@ -32,12 +32,12 @@ export function registerMockEditorCommand(program: Command): void {
                 'Spawns the given agent as a child process, sends it the recorded editor-side ' +
                 'frames in order, and reads agent responses. Useful for CI tests of your own ' +
                 'ACP agent without a real IDE. ' +
-                'By default reads from the shared captures.db (latest session); use --session for a specific id or --script for a JSON export from a teammate.',
+                'By default reads from the shared captures database (latest session); use --session for a specific id or --script for a JSON export from a teammate.',
         )
         .passThroughOptions()
         .argument('<agent>', 'agent executable (e.g. `node fixtures/mock-agent.js` or the path to a real ACP agent)')
         .argument('[agent-args...]', 'arguments forwarded to the agent')
-        .option('--session <id>', 'session id from captures.db (default: latest)')
+        .option('--session <id>', 'session id from the captures database (default: latest)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
         .option('--script <file>', 'load from a JSON export instead of the database (mutually exclusive with --session)')
         .option('--cwd <dir>', 'working directory for the agent')

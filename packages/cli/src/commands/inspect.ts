@@ -9,6 +9,9 @@ import {
     openExistingDatabase,
     validateAcpMessage,
 } from '@acp-devtools/core';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
+import { colorDirection, colorKind, colorLatency } from '../lib/palette.js';
+import { renderTable, type Column } from '../lib/table.js';
 
 // Preserve the existing import path `./inspect.js` for downstream consumers
 // (`stats.ts`, `inspect.test.ts`) — source of truth lives in core.
@@ -152,8 +155,9 @@ export function registerInspectCommand(program: Command): void {
                     tableBuf.push(toTableRow(m, pairs.get(m.seq), specCell));
                 }
                 printed = tableBuf.length;
+                const s = createStyler(colorEnabled(process.stdout));
                 process.stdout.write(
-                    renderTable(tableBuf, opts.preview !== false, Boolean(opts.spec)),
+                    renderInspectTable(s, tableBuf, opts.preview !== false, Boolean(opts.spec)),
                 );
             }
 
@@ -234,6 +238,10 @@ interface TableRow {
     size: string;
     preview: string;
     spec: string;
+    direction: CapturedMessage['direction'];
+    kindEnum: CapturedMessage['kind'];
+    latencyMs: number | null;
+    isParseError: boolean;
 }
 
 const KIND_LABEL: Record<CapturedMessage['kind'], string> = {
@@ -247,18 +255,22 @@ const KIND_LABEL: Record<CapturedMessage['kind'], string> = {
 function toTableRow(m: CapturedMessage, pair: PairInfo | undefined, specCell: string = ''): TableRow {
     let paired = '—';
     let latency = '—';
+    let latencyMs: number | null = null;
     if (pair !== undefined) {
         if (m.kind === 'request') paired = `→${pair.pairSeq}`;
         else if (m.kind === 'response' || m.kind === 'error') paired = `←${pair.pairSeq}`;
         latency = formatLatency(pair.latencyMs);
+        latencyMs = pair.latencyMs;
     }
     // Parse failures surface in the METHOD column with a `!` prefix so they
     // stand out at a glance; the full error text is in jsonl/raw output.
     let method: string;
+    let isParseError = false;
     if (m.method) {
         method = m.method;
     } else if (m.parseError) {
         method = `! ${m.parseError}`;
+        isParseError = true;
     } else {
         method = '—';
     }
@@ -275,6 +287,10 @@ function toTableRow(m: CapturedMessage, pair: PairInfo | undefined, specCell: st
         size: formatBytes(Buffer.byteLength(m.raw, 'utf8')),
         preview: previewText ? `"${collapseWhitespace(previewText)}"` : '',
         spec: specCell,
+        direction: m.direction,
+        kindEnum: m.kind,
+        latencyMs,
+        isParseError,
     };
 }
 
@@ -303,53 +319,57 @@ function formatBytes(n: number): string {
 }
 
 const PREVIEW_MAX = 50;
+const METHOD_MAX = 40; // a single weird method shouldn't blow the layout
+const RPC_MAX = 10; // uuids in clientInfo._meta can be 36 chars long
 
-function renderTable(rows: TableRow[], includePreview: boolean, includeSpec: boolean = false): string {
+function colorSpec(s: Styler, cell: string): string {
+    if (cell === '✓') return s.green(cell);
+    if (cell.startsWith('⚠')) return s.red(cell);
+    return cell;
+}
+
+function renderInspectTable(
+    s: Styler,
+    rows: TableRow[],
+    includePreview: boolean,
+    includeSpec: boolean,
+): string {
     if (rows.length === 0) return '';
-    const widths = {
-        seq: Math.max(3, ...rows.map((r) => r.seq.length)),
-        time: 12, // fixed HH:MM:SS.mmm
-        dir: 2,
-        kind: 3,
-        method: Math.max(6, ...rows.map((r) => r.method.length)),
-        rpcId: Math.max(2, ...rows.map((r) => r.rpcId.length)),
-        paired: Math.max(4, ...rows.map((r) => r.paired.length)),
-        latency: Math.max(7, ...rows.map((r) => r.latency.length)),
-        size: Math.max(4, ...rows.map((r) => r.size.length)),
-        spec: Math.max(3, ...rows.map((r) => r.spec.length)),
-    };
-    // Cap method column at 40 chars so a single weird method doesn't blow the
-    // layout. Truncation uses ellipsis; raw output stays addressable via jsonl.
-    widths.method = Math.min(40, widths.method);
-    // Cap rpcId at 10 chars — uuids in `clientInfo._meta` can be 36 chars long.
-    widths.rpcId = Math.min(10, widths.rpcId);
 
-    return (
-        rows
-            .map((r) => {
-                const method = truncate(r.method, widths.method);
-                const rpcId = truncate(r.rpcId, widths.rpcId);
-                const cells = [
-                    r.seq.padStart(widths.seq),
-                    r.time.padEnd(widths.time),
-                    r.dir.padEnd(widths.dir),
-                    r.kind.padEnd(widths.kind),
-                    method.padEnd(widths.method),
-                    rpcId.padEnd(widths.rpcId),
-                    r.paired.padEnd(widths.paired),
-                    r.latency.padStart(widths.latency),
-                    r.size.padEnd(widths.size),
-                ];
-                if (includeSpec) {
-                    cells.push(r.spec.padEnd(widths.spec));
-                }
-                if (includePreview && r.preview) {
-                    cells.push(truncate(r.preview, PREVIEW_MAX + 2 /* quotes */));
-                }
-                return cells.join('  ') + '\n';
-            })
-            .join('')
-    );
+    const columns: Column[] = [
+        { title: 'SEQ', align: 'right' },
+        { title: 'TIME', align: 'left' },
+        { title: 'DIR', align: 'left' },
+        { title: 'KIND', align: 'left' },
+        { title: 'METHOD', align: 'left' },
+        { title: 'RPC', align: 'right' },
+        { title: 'PAIR', align: 'left' },
+        { title: 'LATENCY', align: 'right' },
+        { title: 'SIZE', align: 'right' },
+    ];
+    if (includeSpec) columns.push({ title: 'SPEC', align: 'left' });
+    const showPreview = includePreview && rows.some((r) => r.preview);
+    if (showPreview) columns.push({ title: 'PREVIEW', align: 'left' });
+
+    const body = rows.map((r) => {
+        const method = truncate(r.method, METHOD_MAX);
+        const cells = [
+            s.dim(r.seq),
+            s.dim(r.time),
+            colorDirection(s, r.direction, r.dir),
+            colorKind(s, r.kindEnum, r.kind),
+            r.isParseError ? s.red(method) : method,
+            s.dim(truncate(r.rpcId, RPC_MAX)),
+            s.dim(r.paired),
+            r.latencyMs === null ? s.dim(r.latency) : colorLatency(s, r.latencyMs, r.latency),
+            s.dim(r.size),
+        ];
+        if (includeSpec) cells.push(colorSpec(s, r.spec));
+        if (showPreview) cells.push(s.dim(truncate(r.preview, PREVIEW_MAX + 2)));
+        return cells;
+    });
+
+    return renderTable(s, columns, body);
 }
 
 function truncate(s: string, max: number): string {

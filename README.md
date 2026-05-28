@@ -313,12 +313,14 @@ acp-devtools list --limit 5 --json         # machine-readable
 | `--client <s>` | — | case-insensitive substring match on `client_name`/`client_version`/`client_platform` |
 | `--json` | — | emit JSON instead of an aligned table |
 
-Sample output:
+Sample output (colorized on a TTY — `#id` cyan, `saved` green / `imported`
+amber; plain when piped or under `NO_COLOR`):
 
 ```
-#25  20h3m  imported  5msg   acp-session-16-2026-05-27-...json
-#23  50m    saved     20msg  WebStorm 2026.1.2 · npx -y @agentclientprotocol/claude-agent-acp
-#22  56m    saved     0msg   npx -y @agentclientprotocol/claude-agent-acp
+ID   AGE    KIND      MSGS  SESSION
+#25  20h3m  imported     5  acp-session-16-2026-05-27-...json
+#23  50m    saved       20  WebStorm 2026.1.2 · npx -y @agentclientprotocol/claude-agent-acp
+#22  56m    saved        0  npx -y @agentclientprotocol/claude-agent-acp
 ```
 
 Live captures don't appear here — they're process descriptors, not database
@@ -495,20 +497,24 @@ acp-devtools stats 23 --json | jq '.latency.p99'
 | `--by-method` | — | append per-method table (method · count · p50 · p99 · total · ASCII latency distribution) |
 | `--json` | — | machine-readable JSON instead of human-readable text |
 
-Sample output:
+Sample output (section labels and latency tones are colorized on a TTY; plain
+when piped or under `NO_COLOR`):
 
 ```
 session #23  ·  1h14m ago  ·  lasted 2m37s  ·  WebStorm 2026.1.2 · Claude Code
 
-DIRECTION          COUNT
+DIRECTION
 → editor → agent   6
 ← agent → editor   14
 
-KIND   COUNT
+KIND
 REQ    6
 RSP    6
 NTF    8
 ERR    0
+
+SPEC
+20 frames checked · all conform
 
 LATENCY (response pairs · 6 samples)
 p50    470ms

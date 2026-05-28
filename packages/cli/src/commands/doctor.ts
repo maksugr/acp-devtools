@@ -8,6 +8,7 @@ import {
     listActive,
     openDatabase,
 } from '@acp-devtools/core';
+import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 
 type Status = 'ok' | 'warn' | 'fail' | 'info';
 
@@ -29,16 +30,17 @@ const STATUS_MARK: Record<Status, string> = {
     info: '·',
 };
 
-const COLOR: Record<Status, string> = {
-    ok: '\x1b[32m',
-    warn: '\x1b[33m',
-    fail: '\x1b[31m',
-    info: '\x1b[90m',
-};
-const RESET = '\x1b[0m';
-
-function color(status: Status, text: string, useColor: boolean): string {
-    return useColor ? `${COLOR[status]}${text}${RESET}` : text;
+function colorStatus(s: Styler, status: Status, text: string): string {
+    switch (status) {
+        case 'ok':
+            return s.green(text);
+        case 'warn':
+            return s.yellow(text);
+        case 'fail':
+            return s.red(text);
+        default:
+            return s.dim(text);
+    }
 }
 
 function checkEnvironment(): CheckResult[] {
@@ -92,20 +94,20 @@ function checkState(): CheckResult[] {
             const size = statSync(dbPath).size;
             results.push({
                 status: 'ok',
-                label: `captures.db: ${row.sessions} session${row.sessions === 1 ? '' : 's'}, ${row.messages} message${row.messages === 1 ? '' : 's'}`,
+                label: `captures database: ${row.sessions} session${row.sessions === 1 ? '' : 's'}, ${row.messages} message${row.messages === 1 ? '' : 's'}`,
                 detail: `${formatBytes(size)} at ${dbPath}`,
             });
         } catch (err) {
             results.push({
                 status: 'fail',
-                label: `captures.db unreadable`,
+                label: `captures database unreadable`,
                 detail: err instanceof Error ? err.message : String(err),
             });
         }
     } else {
         results.push({
             status: 'info',
-            label: 'captures.db not created yet',
+            label: 'captures database not created yet',
             detail: 'first `acp-devtools proxy` run will create it',
         });
     }
@@ -236,15 +238,14 @@ function formatBytes(n: number): string {
     return `${(n / 1024 / 1024).toFixed(1)}MB`;
 }
 
-function printSections(sections: DoctorSection[], useColor: boolean): void {
+function printSections(sections: DoctorSection[], s: Styler): void {
     for (const section of sections) {
-        process.stdout.write(`\n${section.title}\n`);
+        process.stdout.write(`\n${s.bold(s.yellow(section.title))}\n`);
         for (const r of section.results) {
-            const mark = color(r.status, STATUS_MARK[r.status], useColor);
-            const labelLine = `  ${mark} ${r.label}`;
-            process.stdout.write(`${labelLine}\n`);
+            const mark = colorStatus(s, r.status, STATUS_MARK[r.status]);
+            process.stdout.write(`  ${mark} ${r.label}\n`);
             if (r.detail) {
-                process.stdout.write(`      ${color('info', r.detail, useColor)}\n`);
+                process.stdout.write(`      ${s.dim(r.detail)}\n`);
             }
         }
     }
@@ -275,11 +276,14 @@ export function registerDoctorCommand(program: Command): void {
             if (opts.json) {
                 process.stdout.write(JSON.stringify(sections, null, 2) + '\n');
             } else {
-                const useColor = opts.color && process.stdout.isTTY === true;
-                printSections(sections, useColor);
+                const s = createStyler(opts.color && colorEnabled(process.stdout));
+                printSections(sections, s);
                 process.stdout.write(
-                    'Tip: run `acp-devtools ui` to open the inspector, or see\n' +
-                        '`examples/zed-config.md` and `examples/jetbrains-config.md` for IDE setup.\n\n',
+                    s.dim('Tip: run `acp-devtools ui` to open the inspector, or see\n') +
+                        s.dim(
+                            '`examples/zed-config.md` and `examples/jetbrains-config.md` for IDE setup.',
+                        ) +
+                        '\n\n',
                 );
             }
             process.exit(exitCodeFromSections(sections));

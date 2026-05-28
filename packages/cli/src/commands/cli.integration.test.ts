@@ -403,7 +403,7 @@ describe('CLI integration — per-command behavior', () => {
             const r = await run(['doctor']);
             expect(r.code).toBe(0);
             expect(r.out).toMatch(/Environment/);
-            expect(r.out).toMatch(/captures\.db/);
+            expect(r.out).toMatch(/captures database/);
         }, TIMEOUT);
     });
 
@@ -543,4 +543,30 @@ describe('CLI integration — exit-code contract (all commands)', () => {
         );
         expect(strays).toEqual([]);
     });
+});
+
+describe('CLI integration — help output', () => {
+    it('the overview groups commands and shows examples', async () => {
+        const r = await run(['--help']);
+        expect(r.code).toBe(0);
+        expect(r.out).toContain('acp.devtools');
+        for (const section of ['CAPTURE', 'INSPECT', 'VIEW', 'MANAGE', 'SETUP', 'EXAMPLES']) {
+            expect(r.out).toContain(section);
+        }
+        expect(r.out).toContain('acp-devtools proxy npx -y @zed-industries/claude-code-acp');
+    }, TIMEOUT);
+
+    it('a leaf command uses the custom renderer (USAGE/OPTIONS/EXAMPLES, no commander default)', async () => {
+        const r = await run(['list', '--help']);
+        expect(r.code).toBe(0);
+        expect(r.out).toContain('USAGE');
+        expect(r.out).toContain('OPTIONS');
+        expect(r.out).toContain('EXAMPLES');
+        expect(r.out).not.toContain('Usage:');
+    }, TIMEOUT);
+
+    it('emits no ANSI escapes when piped (non-TTY stdout)', async () => {
+        const r = await run(['--help']);
+        expect(r.out.includes(String.fromCharCode(27))).toBe(false);
+    }, TIMEOUT);
 });

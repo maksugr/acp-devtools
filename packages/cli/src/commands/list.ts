@@ -4,6 +4,9 @@ import {
     listSessionsSummary,
     type SessionSummary,
 } from '@acp-devtools/core';
+import { colorEnabled, createStyler } from '../lib/style.js';
+import { colorSessionKind } from '../lib/palette.js';
+import { renderTable, type Column } from '../lib/table.js';
 
 interface ListCommandOptions {
     db: string;
@@ -18,7 +21,7 @@ export function registerListCommand(program: Command): void {
     program
         .command('list')
         .description(
-            'List saved sessions in captures.db, newest first. Use `acp-devtools doctor` for live captures (those are not in the database).',
+            'List saved sessions in the captures database, newest first. Use `acp-devtools doctor` for live captures (those are not in the database).',
         )
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
         .option('--limit <n>', 'maximum rows to show', '50')
@@ -60,24 +63,6 @@ export function registerListCommand(program: Command): void {
         });
 }
 
-interface Row {
-    id: string;
-    age: string;
-    kind: string;
-    msgs: string;
-    label: string;
-}
-
-function rowFor(s: SessionSummary, now: number): Row {
-    return {
-        id: `#${s.id}`,
-        age: formatAge(now - s.started_at),
-        kind: s.imported_at !== null ? 'imported' : 'saved',
-        msgs: `${s.message_count}msg`,
-        label: labelOf(s),
-    };
-}
-
 function labelOf(s: SessionSummary): string {
     if (s.name) return s.name;
     if (s.client_name && s.agent_command) return `${s.client_name} · ${s.agent_command}`;
@@ -95,26 +80,26 @@ function formatAge(deltaMs: number): string {
     return `${Math.floor(h / 24)}d`;
 }
 
+const COLUMNS: Column[] = [
+    { title: 'ID', align: 'left' },
+    { title: 'AGE', align: 'right' },
+    { title: 'KIND', align: 'left' },
+    { title: 'MSGS', align: 'right' },
+    { title: 'SESSION', align: 'left' },
+];
+
 function formatTable(rows: SessionSummary[]): string {
+    const s = createStyler(colorEnabled(process.stdout));
     const now = Date.now();
-    const cells = rows.map((r) => rowFor(r, now));
-    const widths = {
-        id: Math.max(2, ...cells.map((c) => c.id.length)),
-        age: Math.max(3, ...cells.map((c) => c.age.length)),
-        kind: Math.max(4, ...cells.map((c) => c.kind.length)),
-        msgs: Math.max(4, ...cells.map((c) => c.msgs.length)),
-    };
-    const lines: string[] = [];
-    for (const c of cells) {
-        lines.push(
-            [
-                c.id.padEnd(widths.id),
-                c.age.padEnd(widths.age),
-                c.kind.padEnd(widths.kind),
-                c.msgs.padEnd(widths.msgs),
-                c.label,
-            ].join('  ') + '\n',
-        );
-    }
-    return lines.join('');
+    const body = rows.map((r) => {
+        const imported = r.imported_at !== null;
+        return [
+            s.cyan(`#${r.id}`),
+            formatAge(now - r.started_at),
+            colorSessionKind(s, imported, imported ? 'imported' : 'saved'),
+            String(r.message_count),
+            labelOf(r),
+        ];
+    });
+    return renderTable(s, COLUMNS, body);
 }

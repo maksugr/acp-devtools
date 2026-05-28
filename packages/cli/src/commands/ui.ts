@@ -158,7 +158,7 @@ export function registerUiCommand(program: Command): void {
             const boundPort = typeof address === 'object' && address ? address.port : port;
             const url = `http://${opts.host}:${boundPort}/`;
             process.stderr.write(`acp-devtools: UI listening on ${url}\n`);
-            process.stderr.write(`acp-devtools: captures.db = ${capturesDbPath}\n`);
+            process.stderr.write(`acp-devtools: captures database = ${capturesDbPath}\n`);
             if (opts.open) {
                 openBrowser(url);
             } else {
