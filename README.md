@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <a href="package.json"><img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A520-brightgreen"></a>
+  <a href="package.json"><img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A522-brightgreen"></a>
 </p>
 
 A transparent stdio proxy between your editor and an ACP coding agent that
@@ -139,7 +139,7 @@ cd packages/cli && npm link     # exposes `acp-devtools` globally via symlink
 which acp-devtools              # → varies by your Node install location
 ```
 
-Requires Node 20+ and macOS / Linux / WSL. Build takes about ten seconds end
+Requires Node 22+ and macOS / Linux / WSL. Build takes about ten seconds end
 to end.
 
 ### Install option B — npx / global npm (after v0.1.0 publish)
@@ -1265,31 +1265,6 @@ and `@agentclientprotocol/sdk`.
 `npm install` registers it. The hook runs `npm run precommit`. To skip it
 on a single commit (genuine emergencies only):
 `SKIP_SIMPLE_GIT_HOOKS=1 git commit ...`.
-
----
-
-## Roadmap
-
-After v0.1.0 ships, in rough priority order:
-
-1. **`acp-devtools` as MCP server.** A built-in MCP server that exposes
-   captures.db over MCP tools (`list_sessions`, `search_messages`,
-   `get_latency_stats`, …). Closes the loop: debug Claude with Claude.
-2. **`acp-devtools install <ide>`.** Patches Zed / JetBrains settings
-   automatically with a sensible agent_servers entry. Backup before write.
-3. **Schema validation against the ACP spec.** Spec violations get badges in
-   the inspector; perfect quality-bar tool for agent maintainers.
-4. **Performance dashboard.** Per-method p50 / p99 / max latency tables and
-   payload-size histograms, with `--group-by client_name` so you can see how
-   the same agent behaves under different IDEs.
-5. **Session info panel.** Surface every piece of metadata the editor and
-   agent already send during `initialize` — client / agent versions,
-   capability matrix, current mode and model, JetBrains-specific
-   `_meta.proxyConfig`.
-6. **Plugin system.** Per-agent renderers — pretty Edit/Bash views for
-   Claude Code, MCP-aware decoding, redactors for cloud sharing.
-7. **Homebrew tap.** Single-command install for non-Node users
-   (`brew install acp-devtools/tap/acp-devtools`).
 
 ---
 

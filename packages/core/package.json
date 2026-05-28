@@ -16,7 +16,7 @@
         "url": "https://github.com/maksugr/acp-devtools/issues"
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",

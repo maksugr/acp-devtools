@@ -47,9 +47,9 @@ function checkEnvironment(): CheckResult[] {
     const results: CheckResult[] = [];
     const nodeMajor = Number(process.versions.node.split('.')[0]);
     results.push({
-        status: nodeMajor >= 20 ? 'ok' : 'fail',
+        status: nodeMajor >= 22 ? 'ok' : 'fail',
         label: `Node ${process.version}`,
-        detail: nodeMajor >= 20 ? undefined : 'requires Node 20 or newer',
+        detail: nodeMajor >= 22 ? undefined : 'requires Node 22 or newer',
     });
     results.push({
         status: 'info',
