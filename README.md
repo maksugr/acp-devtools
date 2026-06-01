@@ -29,7 +29,7 @@ acp-devtools ui                 # → http://127.0.0.1:3737/
 ```
 
 <p align="center">
-  <video src="assets/demo.mp4" autoplay loop muted playsinline width="820" aria-label="A 16-second tour: pick a session, click a frame to see its payload, cycle the Tree/Raw/Meta/Spec tabs, open the session-info drawer, open the performance dashboard with its waterfall, diff two sessions, switch theme."></video>
+  <video src="https://github.com/user-attachments/assets/a43f74ee-db25-4961-bf09-f085ab676634" autoplay loop muted playsinline width="820" aria-label="A 16-second tour: pick a session, click a frame to see its payload, cycle the Tree/Raw/Meta/Spec tabs, open the session-info drawer, open the performance dashboard with its waterfall, diff two sessions, switch theme."></video>
 </p>
 
 ## What is ACP?
