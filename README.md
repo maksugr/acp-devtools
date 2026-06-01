@@ -52,46 +52,107 @@ middle of that stdio pipe — neither side knows it's there.
 
 ## Features
 
-- **Transparent proxy** — sits between editor and agent over stdio, capturing
-  every newline-delimited JSON-RPC frame in both directions. Neither side knows
-  it's there.
-- **Timeline + JSON detail** — vertical scroll of every frame with direction,
-  kind, method, rpc id, size, and latency to its paired request. Click a row to
-  see the full payload as a spec-aware tree.
-- **Stream clusters** — consecutive `agent_message_chunk` notifications collapse
-  into one `STR` row with a chunk count and a shimmer bar while still streaming.
-  Click to expand the individual chunks.
-- **Spec validation** — every frame validated against the official ACP JSON
-  schema. Invalid frames get a red `⚠ SPEC N` badge in the timeline, per-error
-  ajv details in the detail panel, and a footer aggregate. CLI: `validate <id>`.
-- **Performance dashboard** — per-method p50/p99/max table with sparklines,
-  auto-detected insights (hotspot, long-tail, outlier, busiest, errors), and a
-  waterfall canvas with gap-compression for multi-hour sessions. CLI mirror:
-  `stats <id> --by-method`.
-- **Multi-session diff** — LCS-aligned frames with field-level changes, plus a
-  metadata diff layer (versions, capabilities) and a per-method p99-delta layer.
-  CLI: `diff <a> <b>`.
-- **Session metadata** — derived client/agent versions, capability matrix,
-  runtime mode/model, available slash commands, JetBrains `_meta.proxyConfig`.
-  Drawer in the UI; CLI: `session-info <id>`.
-- **Cross-session search** — full-text across every saved frame; jumps to the
-  result on click. CLI: `search <pattern>` with grep-style exit codes.
-- **Replay** — play/pause/speed (1× / 2× / 4×) / seek through a saved session.
-  CLI: `replay <id>` rebroadcasts over WebSocket on a fixed port for repeatable
-  demos.
-- **Export / import** — JSON dumps. Two engineers can debug the same capture
-  without spinning up an editor; imported sessions appear in the picker tagged
-  `IMPORTED`.
-- **Mock agent / editor** — record-replay primitives for CI. `mock-editor
-  --script <export.json>` drives a real agent with recorded editor traffic (no
-  IDE, no tokens burned); `mock-agent` does the inverse. Pair with `validate`
-  and `stats --json` for headless spec/latency gating.
-- **Read-only MCP server** — 11 tools (`list_sessions`, `get_session_summary`,
-  `find_spec_violations`, `diff_sessions`, …) so an AI agent can query your
-  captures the same way you can. Wire via `acp-devtools mcp`.
-- **Concurrent captures** — every editor window gets its own ephemeral port,
-  registers in `~/.acp-devtools/active/<pid>.json`, and appears in the session
-  picker. Multiple chats in one inspector tab.
+<details>
+<summary><b>Transparent proxy</b> — captures every frame in both directions</summary>
+
+Sits between editor and agent over stdio (newline-delimited JSON-RPC 2.0).
+Neither side knows it's there.
+</details>
+
+<details>
+<summary><b>Timeline + JSON detail</b> — vertical scroll of every frame, click for the payload</summary>
+
+Each row shows direction, kind, method, rpc id, size, and latency to its paired
+request. The detail panel renders the full payload as a spec-aware tree —
+hover any field for its schema description, `⚠ ext` badges mark `_meta` and
+fields not declared in the spec.
+</details>
+
+<details>
+<summary><b>Stream clusters</b> — <code>agent_message_chunk</code> runs collapse to one <code>STR</code> row</summary>
+
+A shimmer bar marks the cluster while chunks are still arriving — tells
+«agent thinking» apart from «agent stuck». Click to expand the individual
+chunks.
+</details>
+
+<details>
+<summary><b>Spec validation</b> — every frame against the official ACP JSON schema</summary>
+
+Invalid frames get a red `⚠ SPEC N` badge in the timeline, per-error ajv
+details in the detail panel, and a footer aggregate across the session. CLI:
+`acp-devtools validate <id>` exits 1 on violations — wire into CI.
+</details>
+
+<details>
+<summary><b>Performance dashboard</b> — per-method p50/p99/max + waterfall + insights</summary>
+
+Sortable table with latency sparklines, auto-detected insights (hotspot,
+long-tail, outlier, busiest, errors), and a waterfall canvas with
+gap-compression for multi-hour sessions. CLI mirror: `stats <id> --by-method`
+— same percentile algorithm, same numbers to the millisecond.
+</details>
+
+<details>
+<summary><b>Multi-session diff</b> — frame-level + metadata + per-method p99 deltas</summary>
+
+LCS-aligned frame view with click-to-expand field-level changes, plus a
+metadata diff layer (versions, capabilities) and a per-method p99-delta layer.
+CLI: `diff <a> <b>` (add `--json` for machine output).
+</details>
+
+<details>
+<summary><b>Session metadata</b> — versions, capabilities, mode/model, slash commands</summary>
+
+Derived from the captured frames — client/agent versions, capability matrix,
+runtime mode/model, available slash commands, JetBrains `_meta.proxyConfig`.
+Drawer in the UI; CLI: `session-info <id>`; MCP: `get_session_summary`.
+</details>
+
+<details>
+<summary><b>Cross-session search</b> — full-text across every saved frame</summary>
+
+Click a result to jump to that row in the timeline. CLI: `search <pattern>`
+with grep-style exit codes (1 if no match).
+</details>
+
+<details>
+<summary><b>Replay</b> — play/pause/speed/seek through a saved session</summary>
+
+UI scrubber with 1× / 2× / 4× speeds. CLI: `replay <id>` rebroadcasts over
+WebSocket on a fixed port for repeatable demos.
+</details>
+
+<details>
+<summary><b>Export / import</b> — JSON dumps you can share or re-import</summary>
+
+Two engineers can debug the same capture without spinning up an editor.
+Imported sessions appear in the picker tagged `IMPORTED`.
+</details>
+
+<details>
+<summary><b>Mock agent / editor</b> — record-replay primitives for CI</summary>
+
+`mock-editor --script <export.json>` drives a real agent with recorded editor
+traffic (no IDE, no tokens burned); `mock-agent` does the inverse. Pair with
+`validate` and `stats --json` for headless spec/latency gating.
+</details>
+
+<details>
+<summary><b>Read-only MCP server</b> — 11 tools so an AI agent can query your captures</summary>
+
+Tools: `list_sessions`, `get_session_summary`, `find_spec_violations`,
+`diff_sessions`, `search_messages`, and 6 more. Wire via `acp-devtools mcp`
+and add to your AI agent's MCP config.
+</details>
+
+<details>
+<summary><b>Concurrent captures</b> — multiple editor windows in one inspector tab</summary>
+
+Every capture registers in `~/.acp-devtools/active/<pid>.json` with an
+ephemeral port. The session picker auto-discovers them — no port conflicts
+even with several chats open.
+</details>
 
 ## Quickstart
 
