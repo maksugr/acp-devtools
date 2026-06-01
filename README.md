@@ -18,15 +18,9 @@
   </picture>
 </p>
 
-See exactly what your editor and your coding agent say to each other. ACP
-Devtools captures every JSON-RPC frame between them, stores each session in
-SQLite, and streams it to a live web inspector — replay, diff, spec-validation,
-plus a CLI and a read-only MCP server.
+<p align="center"><strong>See exactly what your editor and your coding agent say to each other.</strong></p>
 
-```bash
-npm install -g acp-devtools     # or: brew install maksugr/tap/acp-devtools
-acp-devtools ui                 # → http://127.0.0.1:3737/
-```
+<p align="center">ACP Devtools captures every JSON-RPC frame between them, stores each session in SQLite, and streams it to a live web inspector — replay, diff, spec-validation, plus a CLI and a read-only MCP server.</p>
 
 <p align="center">
   <img alt="A 16-second tour: pick a session, click a frame to see its payload, cycle the Tree/Raw/Meta/Spec tabs, open the session-info drawer, open the performance dashboard with its waterfall, diff two sessions, switch theme." src="assets/demo.webp" width="640">
