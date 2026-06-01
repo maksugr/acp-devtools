@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-label="ACP Devtools architecture: editor and agent exchange ACP frames through the proxy, which feeds three consumer interfaces — CLI, UI, and MCP." fill="none" stroke="#d4d4d4" stroke-width="1.4" font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace" font-size="13" text-anchor="middle">
+    <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+            <path d="M 0 1 L 9 5 L 0 9" fill="none" stroke="context-stroke" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <style>
+            text { stroke: none; fill: #e8e8e8; }
+            .label { font-size: 13px; font-weight: 600; letter-spacing: 0.14em; }
+            .sub { font-size: 11px; fill: #9a9a9a; letter-spacing: 0.02em; }
+            .edge { font-size: 10.5px; fill: #9a9a9a; letter-spacing: 0.08em; }
+        </style>
+    </defs>
+
+    <rect x="60" y="60" width="200" height="110" rx="2"/>
+    <text x="160" y="100" class="label">EDITOR</text>
+    <text x="160" y="128" class="sub">Zed · WebStorm</text>
+    <text x="160" y="146" class="sub">Neovim · VS</text>
+
+    <rect x="380" y="60" width="200" height="110" rx="2"/>
+    <text x="480" y="100" class="label">ACP DEVTOOLS</text>
+    <text x="480" y="128" class="sub">transparent proxy</text>
+    <text x="480" y="146" class="sub">captures every frame</text>
+
+    <rect x="700" y="60" width="200" height="110" rx="2"/>
+    <text x="800" y="100" class="label">AGENT</text>
+    <text x="800" y="128" class="sub">Claude · Codex</text>
+    <text x="800" y="146" class="sub">Goose · 30+ others</text>
+
+    <line x1="262" y1="100" x2="377" y2="100" marker-end="url(#arrow)"/>
+    <line x1="378" y1="130" x2="263" y2="130" marker-end="url(#arrow)"/>
+    <text x="320" y="50" class="edge">ACP / stdio</text>
+
+    <line x1="582" y1="100" x2="697" y2="100" marker-end="url(#arrow)"/>
+    <line x1="698" y1="130" x2="583" y2="130" marker-end="url(#arrow)"/>
+    <text x="640" y="50" class="edge">ACP / stdio</text>
+
+    <line x1="480" y1="170" x2="480" y2="220"/>
+    <line x1="160" y1="220" x2="800" y2="220"/>
+    <line x1="160" y1="220" x2="160" y2="254" marker-end="url(#arrow)"/>
+    <line x1="480" y1="220" x2="480" y2="254" marker-end="url(#arrow)"/>
+    <line x1="800" y1="220" x2="800" y2="254" marker-end="url(#arrow)"/>
+
+    <rect x="60" y="258" width="200" height="110" rx="2"/>
+    <text x="160" y="298" class="label">CLI</text>
+    <text x="160" y="326" class="sub">terminal</text>
+
+    <rect x="380" y="258" width="200" height="110" rx="2"/>
+    <text x="480" y="298" class="label">UI</text>
+    <text x="480" y="326" class="sub">browser</text>
+
+    <rect x="700" y="258" width="200" height="110" rx="2"/>
+    <text x="800" y="298" class="label">MCP</text>
+    <text x="800" y="326" class="sub">AI tools</text>
+</svg>

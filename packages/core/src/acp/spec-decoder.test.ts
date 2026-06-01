@@ -93,10 +93,6 @@ describe('resolveSpecForMessage', () => {
     });
 
     it('discriminates tagged-union variants by `const` value (the boolean-vs-string config bug)', () => {
-        // `session/set_config_option` is an anyOf of variants, each tagged by
-        // a `type: "boolean" | "string" | …` const. Naive resolvers pick the
-        // first variant and surface "BOOLEAN: The boolean value." over a
-        // string value — what Roman saw in the screenshot.
         const stringConfig: CapturedMessage = {
             seq: 1,
             timestamp: 0,

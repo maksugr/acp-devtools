@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-label="ACP Devtools architecture: editor and agent exchange ACP frames through the proxy, which feeds three consumer interfaces — CLI, UI, and MCP." font-family="ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace" text-anchor="middle">
+    <defs>
+        <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.6"/>
+            <feOffset dx="0" dy="2"/>
+            <feComponentTransfer><feFuncA type="linear" slope="0.14"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <marker id="arrowEnd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0.5 1 L 9 5 L 0.5 9" fill="none" stroke="#4a4a4a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <pattern id="dotgrid" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+            <circle cx="11" cy="11" r="0.55" fill="#cdcdc8"/>
+        </pattern>
+        <style>
+            .title { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; }
+            .sub { font-size: 11px; letter-spacing: 0.02em; }
+            .role { font-size: 9px; letter-spacing: 0.22em; font-style: italic; }
+            .edge { font-size: 10.5px; font-style: italic; letter-spacing: 0.06em; fill: #6b6b6b; }
+            .chip-text { font-size: 9.5px; letter-spacing: 0.02em; fill: #4a4a4a; }
+            .flow { stroke: #4a4a4a; stroke-width: 1.4; fill: none; stroke-linecap: round; }
+            .bus { stroke: #6b6b6b; stroke-width: 1; fill: none; }
+        </style>
+    </defs>
+
+    <!-- Paper background + dot grid -->
+    <rect width="100%" height="100%" fill="#fbfbfa"/>
+    <rect width="100%" height="100%" fill="url(#dotgrid)" opacity="0.55"/>
+
+    <!-- ============ TOP ROW : EDITOR · PROXY · AGENT ============ -->
+    <g filter="url(#cardShadow)">
+        <rect x="60" y="70" width="220" height="130" rx="6" fill="#e8f0fa" stroke="#3a6eb8" stroke-width="1"/>
+    </g>
+    <rect x="60" y="70" width="220" height="4" rx="2" fill="#3a6eb8"/>
+    <text x="170" y="110" class="title" fill="#1a3470">EDITOR</text>
+    <text x="170" y="138" class="sub" fill="#46506a">Zed · JetBrains IDEs</text>
+    <text x="170" y="156" class="sub" fill="#46506a">Neovim · VS</text>
+    <text x="170" y="184" class="role" fill="#4a6da8">CLIENT SIDE</text>
+
+    <g filter="url(#cardShadow)">
+        <rect x="390" y="70" width="220" height="130" rx="6" fill="#fff0d2" stroke="#b08020" stroke-width="1"/>
+    </g>
+    <rect x="390" y="70" width="220" height="4" rx="2" fill="#b08020"/>
+    <text x="500" y="110" class="title" fill="#5a3f10">ACP DEVTOOLS</text>
+    <text x="500" y="138" class="sub" fill="#6a4f1a">transparent proxy</text>
+    <text x="500" y="156" class="sub" fill="#6a4f1a">captures every frame</text>
+    <text x="500" y="184" class="role" fill="#a07820">MIDDLEWARE</text>
+
+    <g filter="url(#cardShadow)">
+        <rect x="720" y="70" width="220" height="130" rx="6" fill="#e2f0e6" stroke="#3d8050" stroke-width="1"/>
+    </g>
+    <rect x="720" y="70" width="220" height="4" rx="2" fill="#3d8050"/>
+    <text x="830" y="110" class="title" fill="#1f4d2e">AGENT</text>
+    <text x="830" y="138" class="sub" fill="#385248">Claude · Codex</text>
+    <text x="830" y="156" class="sub" fill="#385248">Goose · 30+ others</text>
+    <text x="830" y="184" class="role" fill="#3d8050">SERVER SIDE</text>
+
+    <!-- ============ ACP arrows : editor ↔ proxy ============ -->
+    <line x1="282" y1="115" x2="388" y2="115" class="flow" marker-end="url(#arrowEnd)"/>
+    <line x1="388" y1="155" x2="282" y2="155" class="flow" marker-end="url(#arrowEnd)"/>
+    <text x="335" y="50" class="edge">ACP / stdio</text>
+
+    <!-- ============ ACP arrows : proxy ↔ agent ============ -->
+    <line x1="612" y1="115" x2="718" y2="115" class="flow" marker-end="url(#arrowEnd)"/>
+    <line x1="718" y1="155" x2="612" y2="155" class="flow" marker-end="url(#arrowEnd)"/>
+    <text x="665" y="50" class="edge">ACP / stdio</text>
+
+    <!-- ============ BRANCH BUS : proxy → 3 consumers ============ -->
+    <line x1="500" y1="200" x2="500" y2="244" class="bus"/>
+    <line x1="170" y1="244" x2="830" y2="244" class="bus"/>
+    <line x1="170" y1="244" x2="170" y2="278" class="flow" marker-end="url(#arrowEnd)"/>
+    <line x1="500" y1="244" x2="500" y2="278" class="flow" marker-end="url(#arrowEnd)"/>
+    <line x1="830" y1="244" x2="830" y2="278" class="flow" marker-end="url(#arrowEnd)"/>
+
+    <!-- ============ BOTTOM ROW : CLI · UI · MCP ============ -->
+    <g filter="url(#cardShadow)">
+        <rect x="60" y="282" width="220" height="110" rx="6" fill="#f1ede5" stroke="#7a6e58" stroke-width="1"/>
+    </g>
+    <rect x="60" y="282" width="220" height="4" rx="2" fill="#7a6e58"/>
+    <text x="170" y="328" class="title" fill="#3a342a">CLI</text>
+    <text x="170" y="356" class="sub" fill="#5a5345">terminal</text>
+
+    <g filter="url(#cardShadow)">
+        <rect x="390" y="282" width="220" height="110" rx="6" fill="#f1ede5" stroke="#7a6e58" stroke-width="1"/>
+    </g>
+    <rect x="390" y="282" width="220" height="4" rx="2" fill="#7a6e58"/>
+    <text x="500" y="328" class="title" fill="#3a342a">UI</text>
+    <text x="500" y="356" class="sub" fill="#5a5345">browser</text>
+
+    <g filter="url(#cardShadow)">
+        <rect x="720" y="282" width="220" height="110" rx="6" fill="#f1ede5" stroke="#7a6e58" stroke-width="1"/>
+    </g>
+    <rect x="720" y="282" width="220" height="4" rx="2" fill="#7a6e58"/>
+    <text x="830" y="328" class="title" fill="#3a342a">MCP</text>
+    <text x="830" y="356" class="sub" fill="#5a5345">AI tools</text>
+</svg>

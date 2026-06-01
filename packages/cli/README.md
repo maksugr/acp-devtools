@@ -1,4 +1,4 @@
-# ACP Devtools
+# ACP Devtools CLI
 
 A transparent stdio proxy between your editor and an ACP coding agent that
 captures every JSON-RPC frame, stores sessions in SQLite, and streams them
@@ -13,7 +13,7 @@ The `acp-devtools` binary is one CLI with subcommands plus a bundled UI:
 
 - **`proxy`** — wraps any ACP agent and passes stdio through verbatim.
   Logs every frame to `~/.acp-devtools/captures.db` and broadcasts to a
-  local WebSocket on an ephemeral port; several IDEs run side by side
+  local WebSocket on an ephemeral port; several editors run side by side
   without port conflicts.
 - **`ui`** — web inspector at `http://127.0.0.1:3737/`. Vertical timeline,
   J/K navigation, Cmd+K palette, performance dashboard with p50/p99/max
@@ -39,7 +39,7 @@ Code, Codex, Goose, OpenCode, and 30+ other agents.
 
 ```bash
 npm install -g acp-devtools
-which acp-devtools   # absolute path for IDE configs that need it
+which acp-devtools   # absolute path for editor configs that need it
 ```
 
 Or run the UI without installing:
@@ -71,15 +71,20 @@ Add ACP Devtools to your editor as an agent server. The minimum Zed config
 }
 ```
 
-Pick your IDE in the inspector's empty state and copy the pre-filled
+Pick your editor in the inspector's empty state and copy the pre-filled
 snippet (the absolute binary path is auto-resolved). Recipes for
 WebStorm / IntelliJ / PyCharm, Neovim, and Claude Code multi-profile
 setups are in the GitHub repo.
 
 ## MCP server
 
-`acp-devtools mcp` runs over stdio. Drop this into `.claude/mcp_servers.json`
-(project or user-wide):
+`acp-devtools mcp` runs over stdio. Add it from the CLI:
+
+```bash
+claude mcp add acp-devtools -- acp-devtools mcp
+```
+
+Or check a project-scoped `.mcp.json` into the repo root:
 
 ```json
 {
@@ -92,7 +97,8 @@ setups are in the GitHub repo.
 }
 ```
 
-After restarting Claude Code the eleven tools above appear in `/tools`. Every
+After restarting Claude Code the eleven tools above become available (check
+`/mcp`). Every
 tool advertises `readOnlyHint: true`, `idempotentHint: true`,
 `openWorldHint: false` per the MCP annotations spec, and the server emits
 an `instructions` block on `initialize` so the connecting LLM knows where

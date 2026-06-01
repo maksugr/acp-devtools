@@ -1,135 +1,137 @@
 # Connecting JetBrains IDEs through ACP Devtools
 
-ACP support landed in JetBrains AI Assistant / Junie in early 2026 and ships
-with WebStorm, IntelliJ IDEA, PyCharm, RubyMine, Rider, GoLand, and others.
-The configuration concept is the same as in Zed (an "agent server" entry with
-a `command`, `args`, and optional `env`), but JetBrains has two important
-quirks:
+ACP support ships in JetBrains AI Assistant / Junie across WebStorm, IntelliJ
+IDEA, PyCharm, RubyMine, Rider, GoLand, and others. Agent servers are
+configured in a JSON file:
 
-1. **`command` must be an absolute path.** PATH lookup is not done. Use
-   `which acp-devtools` to get the path, or symlink it deliberately.
-2. **The settings UI hides the field.** It is reachable via Settings search
-   (`Cmd+,` then type "agent"), but the path differs between IDE versions and
-   between AI Assistant vs Junie.
+```
+~/.jetbrains/acp.json
+```
 
-## 1. Install `acp-devtools` and capture its absolute path
+Each entry under `agent_servers` is one agent — a `command`, optional `args`,
+and optional `env`. The agent is chosen by `args`; the no-`args` default runs
+Claude Code.
+
+> **Use an absolute `command`.** JetBrains' GUI process inherits a restricted
+> PATH, so a bare `"acp-devtools"` often won't resolve. Paste the absolute path
+> from `which acp-devtools`. (Bare works only if the IDE can find it on PATH.)
+
+## 1. Install acp-devtools and capture its absolute path
 
 ```bash
-# From a checkout of this repo:
-npm install && npm run build:full
-cd packages/cli && npm link
+npm install -g acp-devtools          # or: brew install maksugr/tap/acp-devtools
 
-# Once published to npm:
-npm install -g acp-devtools
-
-# Then — capture the resolved path (it varies by Node install location):
+# Capture the resolved path — varies by Node install location:
 which acp-devtools
 # Homebrew Node: /opt/homebrew/bin/acp-devtools
 # nvm:           /Users/you/.nvm/versions/node/v22.17.1/bin/acp-devtools
 # system Node:   /usr/local/bin/acp-devtools
 ```
 
-JetBrains requires this **absolute path** — there is no `PATH` fallback like
-in Zed.
+Building from a checkout instead? See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-## 2. Open the JetBrains agent-server settings
+## 2. Add an agent to `~/.jetbrains/acp.json`
 
-Easiest universal recipe — let the IDE find it:
+Create the file if it doesn't exist. Each key under `agent_servers` is the name
+shown in the IDE's agent picker. Across the examples below only `args` changes —
+`command` is always your absolute `acp-devtools` path.
 
-1. `Cmd+,` (macOS) / `Ctrl+Alt+S` (Linux/Windows) → opens Settings.
-2. In the search bar at the top, type **`agent`** or **`ACP`**.
-3. Open the matching settings page. Depending on your IDE/version it appears
-   under one of:
-   - **Tools → AI Assistant → Agent Servers**
-   - **Tools → Junie → Custom Agents**
-   - **Languages & Frameworks → AI Configuration → Agent Providers**
-4. Click **+** to add a new entry.
+### Codex
 
-Fill in the fields for the default Claude Code setup:
+```json
+{
+    "agent_servers": {
+        "Codex": {
+            "type": "custom",
+            "command": "/abs/path/to/acp-devtools",
+            "args": ["codex"]
+        }
+    }
+}
+```
 
-| Field | Value |
-|---|---|
-| **Name** | `Claude Code (via ACP Devtools)` |
-| **Command** | `/abs/path/to/acp-devtools` *(your absolute path)* |
-| **Arguments** | *(leave empty — ACP Devtools auto-runs Claude Code when an IDE pipes stdin)* |
-| **Environment** | *(leave empty, or `CLAUDE_CONFIG_DIR=/Users/you/.claude` for profile pinning)* |
-| **Working directory** | *(leave default — agent runs in the project root)* |
+Codex installs automatically via npx on first run. `goose` (`"args": ["goose"]`)
+and `opencode` (`"args": ["opencode"]`) work the same way — their binary just
+has to be on PATH.
 
-For a non-default agent, set **Arguments** to one of:
+### A custom agent (not in the registry)
 
-- `codex` — OpenAI Codex (`npx -y @zed-industries/codex-acp`, npm-installed)
-- `goose` — Block Goose (must be on PATH; expands to `goose acp`)
-- `opencode` — SST OpenCode (must be on PATH; expands to `opencode acp`)
-- `--agent <name>` — explicit form, same effect
-- `proxy <your-binary> <args>` — explicit form for custom agents
+```json
+{
+    "agent_servers": {
+        "My agent": {
+            "type": "custom",
+            "command": "/abs/path/to/acp-devtools",
+            "args": ["proxy", "npx", "-y", "@your-scope/your-acp"]
+        }
+    }
+}
+```
 
-For the full list of ACP agents — including Cursor, GitHub Copilot, Cline,
-Junie, Mistral, Qwen, and 25+ others — see [the official ACP agents
-directory](https://agentclientprotocol.com/get-started/agents). Anything not
-in our built-in registry just needs the explicit `proxy <command>` form.
+The explicit `proxy <command>` form wraps anything outside the built-in
+registry — an npm package as above, or a local binary
+(`["proxy", "/path/to/your-agent", "acp"]`). For the full list of ACP agents —
+Cursor, GitHub Copilot, Cline, Junie, Mistral, Qwen, and 25+ others — see
+[the ACP agents directory](https://agentclientprotocol.com/get-started/agents).
 
-Apply, then restart the AI chat panel (close and reopen the tool window).
+### Claude Code (the no-`args` default)
 
-## 3. File-based configuration (advanced, version-dependent)
+```json
+{
+    "agent_servers": {
+        "Claude Code": {
+            "type": "custom",
+            "command": "/abs/path/to/acp-devtools"
+        }
+    }
+}
+```
 
-If you prefer to edit the config file directly — useful for committing it
-to your dotfiles repo, or for older IDE versions whose settings UI omits the
-agent-servers section — the file lives in one of:
+With no `args`, ACP Devtools runs Claude Code. Pin a profile by adding `env`:
 
-- **macOS:** `~/Library/Application Support/JetBrains/<IDE><Version>/options/`
-- **Linux:** `~/.config/JetBrains/<IDE><Version>/options/`
-- **Windows:** `%APPDATA%/JetBrains/<IDE><Version>/options/`
+```json
+"env": { "CLAUDE_CONFIG_DIR": "/Users/you/.claude-work" }
+```
 
-For example, WebStorm 2026.1.2 on macOS:
-`~/Library/Application Support/JetBrains/WebStorm2026.1/options/`
+Multi-profile and auth details: [claude-code-setup.md](claude-code-setup.md).
 
-The file name varies by plugin (`ai-assistant.xml`, `junie.xml`,
-`agent-servers.xml`). Inside, the entry follows the JetBrains XML
-serialization for a list of agent server records — JetBrains-specific, not
-the Zed-style JSON. The exact schema is documented in JetBrains' AI plugin
-release notes for your IDE version.
+Add as many entries side by side as you like, then restart the AI chat panel
+(close and reopen the tool window).
 
-**If the file is missing or the schema looks unfamiliar, stick to the
-Settings UI route above** — it's stable across versions and the IDE handles
-serialization for you.
-
-## 4. Verify
+## 3. Verify
 
 In a separate terminal:
 
 ```bash
 acp-devtools ui
+# → browser auto-opens on http://127.0.0.1:3737/
 ```
 
-The UI opens in your browser. Now switch to the IDE, open the AI chat,
-select your new agent from the model picker, and send any prompt
-("ping"). Within a second the UI should show:
+The inspector opens in your browser. Switch back to the IDE, open the AI chat,
+pick your new agent from the model picker, and send any prompt ("ping"). Within
+a second the inspector shows a new entry in the session picker (top right,
+auto-discovered via `~/.acp-devtools/active/<pid>.json`) and a live timeline
+filling with `initialize`, `session/prompt`, `session/update`, and so on.
 
-1. A new entry in the session picker (top right) — auto-discovered via
-   `~/.acp-devtools/active/<pid>.json`.
-2. The live timeline filling with `initialize`, `session/set_mode`,
-   `session/set_model`, `session/prompt`, `session/update`, and so on.
-
-If nothing shows up, run `acp-devtools doctor` for a diagnostic of your
-local state and detected IDE config files.
+If nothing shows up, run `acp-devtools doctor` for a diagnostic of your local
+state. Full tour of the inspector: [docs/ui.md](../docs/ui.md).
 
 ## Troubleshooting
 
-**"Agent server not starting" or "command failed".** Almost always a wrong
-path. Verify `ls -l "$(which acp-devtools)"` returns a file. If it's a
-`npm link` symlink, confirm the target still exists.
+**"Agent server not starting" / "command failed".** Almost always a wrong path
+— a bare `"acp-devtools"` that the IDE can't resolve. Use the absolute path from
+`which acp-devtools`; verify `ls -l` on it returns a file (if it's an `npm link`
+symlink, confirm the target still exists).
 
-**"Authentication required" in the captured trace.** Claude Code's ACP
-wrapper looks for credentials in `$CLAUDE_CONFIG_DIR` (default `~/.claude`).
-Either authenticate that profile (`claude /login` after pointing
-`CLAUDE_CONFIG_DIR`) or set `ANTHROPIC_API_KEY` in the Environment field of
-the agent server entry.
+**"Authentication required" in the captured trace.** Claude Code's wrapper looks
+for credentials in `$CLAUDE_CONFIG_DIR` (default `~/.claude`). Either
+authenticate that profile (`claude /login` after pointing `CLAUDE_CONFIG_DIR`)
+or set `ANTHROPIC_API_KEY` in the entry's `env`.
 
 **WebStorm sends `session/set_mode` and `session/set_model` on every prompt,
-flooding the UI.** That's WebStorm's actual behaviour, not a bug. ACP Devtools
-hides them by default through the "Boilerplate" filter chip — toggle it back
-on if you want to see them.
+flooding the timeline.** That's WebStorm's actual behaviour, not a bug — the
+inspector hides them by default behind the "Boilerplate" filter chip.
 
-**Multiple JetBrains IDEs at once.** Each IDE chat session creates a separate
-proxy on its own ephemeral port; they all show up in the UI's session picker
-simultaneously, labelled with the agent command.
+**Multiple JetBrains IDEs at once.** Each chat session spawns its own proxy on
+an ephemeral port; they all appear in the session picker simultaneously,
+labelled with the agent command.

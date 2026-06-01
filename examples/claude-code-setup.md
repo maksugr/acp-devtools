@@ -1,9 +1,15 @@
 # Connecting Claude Code through ACP Devtools
 
-`@zed-industries/claude-code-acp` is the standard ACP wrapper for Claude Code.
-It bundles `@anthropic-ai/claude-agent-sdk`, which reads its OAuth token and
-project state from the directory pointed at by **`CLAUDE_CONFIG_DIR`**
+`@agentclientprotocol/claude-agent-acp` is the default ACP wrapper for Claude
+Code (the older `@zed-industries/claude-code-acp` still works — it's recognized
+as an alias). It's powered by the Claude Agent SDK, which reads its OAuth token
+and project state from the directory pointed at by **`CLAUDE_CONFIG_DIR`**
 (defaulting to `~/.claude`).
+
+The config snippets below are in Zed's `agent_servers` format for concreteness,
+but the profile / env / auth recipes are editor-agnostic. JetBrains users put
+the same **Command / Arguments / Environment** into the agent-server fields —
+see [jetbrains-config.md](jetbrains-config.md).
 
 ## Single-profile setup
 
@@ -12,30 +18,33 @@ binds an ephemeral port (default `--ws-port 0`) and registers itself in
 `~/.acp-devtools/active/<pid>.json`, so the UI auto-discovers it — you do not
 have to pick a port by hand.
 
-```json
+```jsonc
 {
     "agent_servers": {
         "Claude Code": {
             "type": "custom",
-            "command": "/abs/path/to/acp-devtools"
+            // The default: bare command — the editor resolves it on PATH. Use
+            // the absolute path from `which acp-devtools` only if the editor's
+            // GUI can't find it. (JetBrains always needs the absolute path.)
+            "command": "acp-devtools"
         }
     }
 }
 ```
 
-ACP Devtools detects that an IDE spawned it (stdin is a pipe) and
+ACP Devtools detects that an editor spawned it (stdin is a pipe) and
 auto-expands to `proxy --agent claude-code`. No `args` needed — and captures
-go to the shared `~/.acp-devtools/captures.db` by default. The
-`"type": "custom"` field tells Zed this is a user-defined entry (as opposed
-to one of Zed's built-in agents like Cursor).
+go to the shared `~/.acp-devtools/captures.db` by default. (In Zed's format,
+`"type": "custom"` marks this as a user-defined agent entry; JetBrains has no
+equivalent field — you just fill in the agent-server form.)
 
-Then run `npm run dev:ui` (or open whichever URL serves the UI) and pick the
-capture from the **session picker** in the top-right of the inspector.
+Then run `acp-devtools ui` and pick the capture from the **session picker** in
+the top-right of the inspector.
 
 ## Multiple chats / multiple profiles
 
 Because each proxy binds its own ephemeral port and writes a discovery
-descriptor, you can open as many IDE chats as you like and all of them show up
+descriptor, you can open as many editor chats as you like and all of them show up
 in the picker simultaneously. For multiple Claude Code OAuth profiles
 (e.g. `claude-personal` aliased to `CLAUDE_CONFIG_DIR=~/.claude-personal claude`),
 point each `agent_servers` entry at the right profile through the `env` block:
@@ -45,14 +54,14 @@ point each `agent_servers` entry at the right profile through the `env` block:
     "agent_servers": {
         "Claude Code (personal)": {
             "type": "custom",
-            "command": "/abs/path/to/acp-devtools",
+            "command": "acp-devtools",
             "env": {
                 "CLAUDE_CONFIG_DIR": "/Users/you/.claude-personal"
             }
         },
         "Claude Code (work)": {
             "type": "custom",
-            "command": "/abs/path/to/acp-devtools",
+            "command": "acp-devtools",
             "env": {
                 "CLAUDE_CONFIG_DIR": "/Users/you/.claude"
             }
@@ -73,7 +82,7 @@ For a predictable demo or for an external tool that hard-codes the URL, set
 ```json
 {
     "type": "custom",
-    "command": "/abs/path/to/acp-devtools",
+    "command": "acp-devtools",
     "args": ["proxy", "--ws-port", "3737", "--agent", "claude-code"]
 }
 ```
