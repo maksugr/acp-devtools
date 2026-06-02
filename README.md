@@ -33,8 +33,7 @@ is an open, newline-delimited JSON-RPC wire format that lets an editor (Zed,
 WebStorm, IntelliJ, Neovim, Visual Studio via ReSharper) drive a coding agent
 (Claude Code, Codex, Goose, OpenCode, and
 [30+ others](https://agentclientprotocol.com/get-started/agents)) over stdio,
-without either side knowing the other's implementation. ACP Devtools sits in the
-middle of that stdio pipe — neither side knows it's there.
+without either side knowing the other's implementation. **ACP Devtools sits in the middle of that stdio pipe — neither side knows it's there.**
 
 ## Who it's for
 
@@ -154,19 +153,35 @@ even with several chats open.
 
 ## Quickstart
 
+### Install via npm
+
 ```bash
-# Install (zero-install via npx also works)
-npm install -g acp-devtools          # or: brew install maksugr/tap/acp-devtools
-npx acp-devtools ui                  # no install — downloads on first run
+npm install -g acp-devtools
+```
 
-# Verify
-acp-devtools doctor                  # Node, binary path, state, detected editors
+`-g` is the recommended install — it puts `acp-devtools` on your `PATH`, which
+is how editors (Zed, JetBrains, Neovim) find it when they spawn the proxy as a
+subprocess. Without it, every editor config has to use an absolute path.
 
-# Open the inspector
+If you only want to try the inspector once without installing, `npx` works too:
+
+```bash
+npx acp-devtools ui                  # downloads on first run, slower start; cache path is not PATH-discoverable
+```
+
+### Install via Homebrew
+
+```bash
+brew install maksugr/tap/acp-devtools
+```
+
+### Run the inspector
+
+```bash
 acp-devtools ui                      # → http://127.0.0.1:3737/ (auto-opens)
 ```
 
-Connect Zed (as an example) — open `~/.config/zed/settings.json` (`Cmd+,`) and merge:
+Connect any editor (Zed as an example) — open `~/.config/zed/settings.json` (`Cmd+,`) and merge:
 
 ```json
 {
@@ -184,7 +199,7 @@ detects it was spawned by an editor (stdin is a pipe) and runs
 `proxy --agent claude-code` internally. Send a prompt → the proxy spawns the
 agent, and the inspector picks up the live capture.
 
-> If Zed reports "agent command not found", replace `"acp-devtools"` with the
+> If editor reports "agent command not found", replace `"acp-devtools"` with the
 > absolute path from `which acp-devtools` — GUI apps inherit a minimal `PATH`
 > that often misses Node binaries.
 
@@ -200,30 +215,12 @@ wrap a custom agent — plus a Claude Code multi-profile / auth recipe:
 A vertical timeline of every frame plus a JSON detail panel. Frames stream in
 live; clicking a row expands its payload, with latency annotations, stream
 clustering, spec badges, a performance waterfall, replay controls, and a
-session diff view.
-
-```
- ◢◣◢◣ acp.devtools  v0.1.0   SESSION #21 · alive 12m · idle 4s    ● LIVE  ⌘K
-
-[→ OUT] [← IN]    REQ  RSP  NTF  ERR  STR    □ hide set_mode/set_model
-
- 003  19:01:09.527  → AGENT  REQ  session/new          id:2    159B
- 004  19:01:10.503  ← AGENT  RSP  —                    id:2   2.6KB  +976ms
- 006  19:01:13.721  → AGENT  REQ  session/prompt  "hi" id:3    188B
- ▎07  19:01:16.520  ← AGENT  STR  Hi! What would you like to   236ms
- 010  19:01:16.931  ← AGENT  RSP  —                    id:3     59B  +3.21s
-
- MSGS 13  REQ 3  RSP 3  NTF 7  ERR 0    P50 976MS  P99 3.21S
-```
-
-Full tour — labels, detail tabs, perf dashboard, diff panel, shortcuts:
+session diff view. Full tour — labels, detail tabs, perf dashboard, diff panel, shortcuts:
 **[docs/ui.md](docs/ui.md)**.
 
 ## The CLI
 
-One binary, eighteen subcommands — every UI control has a headless equivalent,
-colorized and grep/jq-friendly. The inspector is one frontend, not a hard
-dependency.
+Every UI control has a headless equivalent, colorized and grep/jq-friendly.
 
 ```bash
 acp-devtools list                                  # saved sessions, newest first
@@ -244,7 +241,7 @@ so you can ask:
 > «find spec violations in the last 10 sessions» ·
 > «compare p99 of `session/prompt` between WebStorm and Zed»
 
-Setup and the eleven tools: **[docs/mcp.md](docs/mcp.md)**.
+Setup: **[docs/mcp.md](docs/mcp.md)**.
 
 ## Supported agents
 
