@@ -37,7 +37,10 @@ jobs:
             - name: Build UI (playground)
               env:
                   VITE_PLAYGROUND: '1'
-                  VITE_BASE: /${{ github.event.repository.name }}/
+                  # Custom domain (playground.acp-devtools.dev) serves at root,
+                  # not under /<repo>/. CNAME file in packages/ui/public/
+                  # tells GitHub Pages to bind the deployment to that host.
+                  VITE_BASE: /
               run: npm --workspace @acp-devtools/ui run build
 
             # GitHub Pages serves a 404.html for unknown routes. Mirroring
