@@ -56,4 +56,41 @@ describe('buildExportJson', () => {
         expect(parsed.messages).toHaveLength(1);
         expect(parsed.messages[0]?.raw).toBe(message.raw);
     });
+
+    it('redacts WebStorm proxy_key tokens by default (UI has no --raw escape)', () => {
+        const secret = 'jetbrains-token-must-not-leak';
+        const payload = {
+            jsonrpc: '2.0' as const,
+            id: 1,
+            method: 'initialize',
+            params: {
+                _meta: {
+                    proxyConfig: {
+                        proxies: [
+                            {
+                                proxy: {
+                                    url: 'http://127.0.0.1:50001',
+                                    headers: { proxy_key: secret },
+                                },
+                            },
+                        ],
+                    },
+                },
+            },
+        };
+        const msg: CapturedMessage = {
+            seq: 1,
+            timestamp: 1_700_000_000_500,
+            direction: 'editor-to-agent',
+            kind: 'request',
+            method: 'initialize',
+            rpcId: 1,
+            raw: JSON.stringify(payload),
+            payload,
+        };
+
+        const json = buildExportJson(session, [msg], Date.UTC(2026, 4, 27));
+        expect(json).not.toContain(secret);
+        expect(json).toContain('<REDACTED>');
+    });
 });

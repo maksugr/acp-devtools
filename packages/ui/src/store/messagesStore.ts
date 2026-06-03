@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CapturedMessage, SessionRecord, WsEvent } from '@acp-devtools/core';
+import type { SessionExport } from '@acp-devtools/core/storage/export';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error';
 export type DetailTab = 'tree' | 'raw' | 'meta' | 'spec';
@@ -47,6 +48,13 @@ interface MessagesState {
      * suppressed by `clearedUpToSeq` are dropped.
      */
     appendMessages: (msgs: CapturedMessage[]) => void;
+    /**
+     * One-shot replacement of session + messages from a static `SessionExport`
+     * (drag-drop file, `?url=` fetch, etc.). Marks the load as terminal —
+     * playback cap is cleared and `replayDone: true` so the UI never waits
+     * for more frames.
+     */
+    loadFromExport: (exp: SessionExport) => void;
     setConnection: (status: ConnectionStatus, error?: string | null) => void;
     select: (seq: number | null) => void;
     setSearch: (q: string) => void;
@@ -182,6 +190,34 @@ export const useMessagesStore = create<MessagesState>()(
                     : msgs;
             if (filtered.length === 0) return state;
             return { messages: [...state.messages, ...filtered] };
+        });
+    },
+    loadFromExport: (exp) => {
+        set({
+            session: {
+                id: exp.session.id,
+                name: exp.session.name,
+                agentCommand: exp.session.agentCommand,
+                startedAt: exp.session.startedAt,
+                endedAt: exp.session.endedAt,
+                clientName: exp.session.clientName,
+                importedAt: exp.exportedAt,
+                clientVersion: null,
+                clientPlatform: null,
+                agentName: null,
+                agentVersion: null,
+                protocolVersion: null,
+                currentMode: null,
+                currentModel: null,
+                agentCapabilitiesJson: null,
+            },
+            messages: exp.messages,
+            selectedSeq: null,
+            replayDone: true,
+            clearedUpToSeq: null,
+            playback: { cap: null, playing: false, speed: 1 },
+            connection: 'idle',
+            lastError: null,
         });
     },
     clear: () =>

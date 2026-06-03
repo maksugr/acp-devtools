@@ -1,0 +1,62 @@
+name: Deploy playground
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+# Only one playground deploy at a time; never cancel a deploy in flight.
+concurrency:
+    group: pages
+    cancel-in-progress: false
+
+jobs:
+    build:
+        name: Build static UI
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'npm'
+
+            - run: npm ci
+
+            # tsup-built CLI not needed, but core's dist is — `packages/ui`
+            # imports `@acp-devtools/core/storage/export` at build time.
+            - name: Build core
+              run: npx tsc -b packages/core
+
+            - name: Build UI (playground)
+              env:
+                  VITE_PLAYGROUND: '1'
+                  VITE_BASE: /${{ github.event.repository.name }}/
+              run: npm --workspace @acp-devtools/ui run build
+
+            # GitHub Pages serves a 404.html for unknown routes. Mirroring
+            # index.html into 404.html turns Pages into an SPA fallback
+            # without needing _redirects (which Pages ignores anyway).
+            - name: SPA fallback
+              run: cp packages/ui/dist/index.html packages/ui/dist/404.html
+
+            - uses: actions/upload-pages-artifact@v3
+              with:
+                  path: packages/ui/dist
+
+    deploy:
+        name: Deploy to GitHub Pages
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - id: deployment
+              uses: actions/deploy-pages@v4

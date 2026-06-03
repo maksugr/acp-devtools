@@ -135,3 +135,20 @@ inspector hides them by default behind the "Boilerplate" filter chip.
 **Multiple JetBrains IDEs at once.** Each chat session spawns its own proxy on
 an ephemeral port; they all appear in the session picker simultaneously,
 labelled with the agent command.
+
+## A note on captured secrets
+
+JetBrains sends `_meta.proxyConfig.proxies[].proxy.headers.proxy_key` on every
+`initialize` — auth tokens for the JetBrains AI gateway, one per provider
+(OpenAI / Anthropic / Google). The proxy captures them verbatim into
+`~/.acp-devtools/captures.db` — that's by design, the inspector can't tell
+which `_meta` extension is sensitive at capture time.
+
+These tokens are redacted by default on every sharing surface: `acp-devtools
+export`, the UI's "Download as JSON" button, and every MCP tool that returns
+frame contents or derived views (full list in
+[`docs/mcp.md`](../docs/mcp.md)). `acp-devtools export <id> --raw` is the
+only path that produces an un-redacted JSON — use it only when the export
+stays on your machine. See the README's
+["Security & privacy"](../README.md#security--privacy) section for the full
+threat model.

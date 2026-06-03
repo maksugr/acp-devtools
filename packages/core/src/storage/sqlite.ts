@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { chmodSync, existsSync, statSync } from 'node:fs';
 import Database from 'better-sqlite3';
 
 export type SqliteDatabase = Database.Database;
@@ -52,12 +52,35 @@ function hasColumn(db: SqliteDatabase, table: string, column: string): boolean {
 }
 
 /**
+ * Tighten a captures.db file (or WAL/SHM sidecar) to owner-only read/write.
+ * No-op on Windows and for `:memory:`. Failures are swallowed — the DB still
+ * works at whatever mode the OS chose, we just lose this defense in depth.
+ */
+function restrictDbFile(path: string): void {
+    if (path === ':memory:' || process.platform === 'win32') return;
+    try {
+        if (!existsSync(path)) return;
+        const mode = statSync(path).mode & 0o777;
+        if (mode !== 0o600) chmodSync(path, 0o600);
+    } catch {
+        // best effort
+    }
+}
+
+/**
  * Open (or create) the acp-devtools session database and run schema migrations.
  *
  * Pass `:memory:` for an in-memory database (useful in tests).
  */
 export function openDatabase(path: string): SqliteDatabase {
     const db = new Database(path);
+    // SECURITY: captures.db holds every JSON-RPC frame including
+    // _meta.proxyConfig.proxies[*].proxy.headers.proxy_key (JetBrains AI
+    // gateway tokens) and any Authorization headers — better-sqlite3 creates
+    // files at the user's default umask (typically 0o644), which means
+    // group/other on the system can read. Restrict to owner-only.
+    // Skipped on Windows (NTFS ACLs ≠ POSIX modes) and for in-memory DBs.
+    restrictDbFile(path);
     // busy_timeout MUST be set before any pragma that needs an exclusive lock
     // (journal_mode=WAL, schema migrations) — otherwise concurrent processes
     // opening the same captures.db race on the upgrade and one immediately
@@ -66,6 +89,11 @@ export function openDatabase(path: string): SqliteDatabase {
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
     db.pragma('synchronous = NORMAL');
+    // WAL creates `-wal` / `-shm` sidecars at the same default umask; they
+    // transiently hold the same JSON-RPC bytes the main DB does. Tighten
+    // them right after journal_mode flips to WAL.
+    restrictDbFile(`${path}-wal`);
+    restrictDbFile(`${path}-shm`);
     db.exec(SCHEMA_SQL);
     // CREATE TABLE IF NOT EXISTS doesn't add new columns to an existing table,
     // so older databases need an in-place ALTER for each post-v1 column.

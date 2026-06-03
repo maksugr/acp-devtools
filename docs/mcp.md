@@ -62,6 +62,23 @@ bundles metadata, totals, latency, and insights in one round-trip. Drill in with
   `tools/list` and read every description to know where to start.
 - **Stdio only** — no network surface.
 
+## Redaction
+
+Six tools touch frame contents or derived views; **all six redact unconditionally**. There is no opt-out flag because the LLM consuming the tool cannot judge whether the user wants to share a `proxy_key` with the model — that decision belongs to the human, exercised through `acp-devtools export <id> --raw` on the CLI when the export stays on their machine.
+
+| Tool | Redacted surface |
+|---|---|
+| `get_message` | `message.payload` and `message.raw` |
+| `get_session_messages` | each `messages[]` entry's payload and raw |
+| `search_messages` | matches `raw` (the original bytes) so a token-fragment query still finds its frame, but returns the redacted `raw` so the LLM can't quote the live secret |
+| `get_session_metadata` | `metadata.extensions.jetbrainsProxyConfig.proxies[*].proxy.headers.*` |
+| `get_session_summary` | same metadata layer + the embedded view |
+| `diff_sessions` | both sides redacted before alignment — `JsonChange.a/b` carry `<REDACTED>` for any auth field, so a rotated token shows as equal rather than as a value change |
+
+Replaced values appear as `"<REDACTED>"`. Allowlist of header names: `Authorization`, `Proxy-Authorization`, `Proxy-Authentication`, `X-Api-Key`, `X-Api-Token`, `X-Auth-Token`, `api-key`, `api_key`, `proxy_key`, `Cookie`, `Set-Cookie`. Plus every string-valued field inside a `headers` block under any `proxyConfig` subtree, to catch future JetBrains fields.
+
+What is **not** redacted: file contents loaded via `fs/read_text_file`, prompts you typed, and agent responses — those are user content and only the human can judge what's shareable. If a session contains source code or data you don't want the LLM to see, drop the session before connecting MCP rather than relying on tool-level masking.
+
 ## Flags
 
 ```bash

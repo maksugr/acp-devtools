@@ -146,3 +146,30 @@ commit (genuine emergencies only): `SKIP_SIMPLE_GIT_HOOKS=1 git commit ...`.
   type-only imports.
 - Tests are colocated `*.test.ts`; ship a test in the same change as the code.
 - Comments only for non-obvious *why* — no narration of what the code does.
+
+## Security design rules
+
+These are **constraints**, not guidelines — apply before touching anything
+that exports session data or returns frame contents to a consumer. User-
+facing context is in the README's
+[Security & privacy](README.md#security--privacy) section; the rules
+themselves live here so they're the first thing a contributor sees:
+
+1. **`acp-devtools export --raw` is the only path that produces an
+   un-redacted JSON export.** Don't add a `raw` toggle to the UI, MCP, or any
+   future share channel. UI's `downloadExport.ts` and the MCP tool handlers
+   carry `SECURITY:` comments at the redaction call sites — keep them.
+2. **MCP redaction has no opt-out.** Every tool that returns frame contents
+   or a view derived from them (currently `get_message`,
+   `get_session_messages`, `search_messages`, `get_session_metadata`,
+   `get_session_summary`, `diff_sessions`) routes through
+   `redactedReadMessages` or post-processes its output via `redactMessage`.
+   Adding a new MCP tool that returns frames? Same rule.
+3. **`search_messages` matches the pre-redaction bytes but returns the
+   redacted copy** — without this, an LLM asked to find by a token fragment
+   would quote the live token back to the user.
+
+The single source of truth for what counts as "sensitive" lives in
+`packages/core/src/storage/redact.ts` (`SENSITIVE_HEADER_NAMES` +
+`proxyConfig` subtree rule). When you discover a new auth-bearing field
+that should be masked, add it there once and every channel inherits.

@@ -128,7 +128,7 @@ export function SessionActionsMenu({ onImportResult }: SessionActionsMenuProps) 
                         label="export"
                         onClick={onExportClick}
                         disabled={!exportable}
-                        title="Download this session as self-contained JSON."
+                        title="Download this session as JSON. Auth headers and proxy tokens (Authorization, X-Api-Key, JetBrains proxy_key) are redacted — safe to attach to a bug report. For an un-redacted copy (self-debug only), use 'acp-devtools export <id> --raw' in the CLI."
                         disabledTitle="Nothing to export yet — wait for the first message."
                     />
                 </div>

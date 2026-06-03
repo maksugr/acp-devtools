@@ -16,6 +16,7 @@ import {
     listSessionsSummary,
     openDatabase,
     percentile,
+    redactMessage,
     Session,
     validateAcpMessage,
 } from '@acp-devtools/core';
@@ -68,7 +69,23 @@ it avoids re-parsing the text payload.
 Schema notes: sessions have a structured-metadata layer populated by the
 \`backfill-metadata\` CLI; \`client_name\` / \`client_version\` /
 \`client_platform\` may be null on freshly imported captures until that
-command runs.`;
+command runs.
+
+Redaction: every tool that returns frame contents OR derived views
+of them (\`get_message\`, \`get_session_messages\`, \`search_messages\`,
+\`get_session_metadata\`, \`get_session_summary\`, \`diff_sessions\`)
+redacts auth headers and proxy tokens (\`Authorization\`,
+\`X-Api-Key\`, JetBrains \`_meta.proxyConfig.proxies[*].proxy.headers.*\`,
+etc). Sensitive fields appear as \`<REDACTED>\`. This is
+unconditional; there is no opt-out flag, because the human owns the
+share decision (use \`acp-devtools export <id> --raw\` on the CLI when
+the export stays on your machine). \`search_messages\` indexes the
+pre-redaction bytes so you can still find a frame by a token fragment,
+but the returned \`raw\` is the redacted copy — do not quote the live
+secret back to the user. \`diff_sessions\` operates on already-redacted
+frames, so a token that rotated between two sessions shows up as equal
+("<REDACTED>" on both sides) rather than as a change — this is
+intentional, treating "token rotated" as a leaked side channel.`;
 
 interface ToolMeta {
     readOnly?: boolean;
@@ -263,7 +280,9 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             annotations: annotations({ title: 'Get session metadata' }),
         },
         async ({ session_id }) => {
-            const messages = readMessages(opts.db, session_id);
+            // SECURITY: redact before metadata extraction so the returned
+            // `extensions.jetbrainsProxyConfig` carries <REDACTED> headers.
+            const messages = redactedReadMessages(opts.db, session_id);
             return structuredResult({
                 session_id,
                 metadata: extractSessionMetadata(messages) as unknown,
@@ -350,7 +369,11 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             annotations: annotations({ title: 'One-call session digest' }),
         },
         async ({ session_id }) => {
-            const messages = readMessages(opts.db, session_id);
+            // SECURITY: redact before any derived view (metadata bundled
+            // into the summary would otherwise carry proxy_key in
+            // extensions.jetbrainsProxyConfig). Latency / per-method stats
+            // don't read field values so the redaction is transparent.
+            const messages = redactedReadMessages(opts.db, session_id);
             const perMethod = buildPerMethodStats(messages);
             const insights = buildPerformanceInsights(messages, perMethod);
             const pairs = buildPairIndex(messages);
@@ -447,12 +470,14 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             const total = filtered.length;
             const start = offset ?? 0;
             const end = Math.min(start + (limit ?? 100), total);
+            // SECURITY: redact auth tokens before they reach the LLM. No
+            // opt-out — the LLM cannot judge the user's share intent.
             return structuredResult({
                 session_id,
                 total,
                 offset: start,
                 returned: end - start,
-                messages: filtered.slice(start, end),
+                messages: filtered.slice(start, end).map((m) => redactMessage(m).redacted),
             });
         },
     );
@@ -486,7 +511,8 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             if (!msg) {
                 return errorResult(`session ${session_id} has no message #${seq}`);
             }
-            return structuredResult({ session_id, message: msg });
+            // SECURITY: same redaction rule as get_session_messages.
+            return structuredResult({ session_id, message: redactMessage(msg).redacted });
         },
     );
 
@@ -566,8 +592,12 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             const needle = query.toLowerCase();
             const matches: Array<{ seq: number; method: string | null; raw: string }> = [];
             for (const m of messages) {
+                // SECURITY: match on the original raw (so a token fragment can
+                // still locate its frame), but return the redacted raw so the
+                // LLM can't quote the live secret back to the user.
                 if (m.raw.toLowerCase().includes(needle)) {
-                    matches.push({ seq: m.seq, method: m.method ?? null, raw: m.raw });
+                    const safe = redactMessage(m).redacted;
+                    matches.push({ seq: m.seq, method: m.method ?? null, raw: safe.raw });
                     if (matches.length >= (limit ?? 50)) break;
                 }
             }
@@ -715,8 +745,16 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             annotations: annotations({ title: 'Diff two sessions' }),
         },
         async ({ session_a, session_b, include_equal }) => {
-            const a = readMessages(opts.db, session_a);
-            const b = readMessages(opts.db, session_b);
+            // SECURITY: redact both sides before diffing. Otherwise
+            // JsonChange.a/b in `rows[].changes[]` carry live token values
+            // for any field that differed (e.g. proxy_key rotated between
+            // sessions). After redaction, two different tokens both
+            // collapse to "<REDACTED>" — the diff loses the "this field
+            // changed" signal for the redacted slot, which is the
+            // correct trade-off (informing the LLM that a token rotated
+            // is itself a side channel).
+            const a = redactedReadMessages(opts.db, session_a);
+            const b = redactedReadMessages(opts.db, session_b);
             const diff = buildSessionDiff(a, b);
             const meta = buildMetadataDiff(a, b);
             const perMethod = buildMethodStatsDiff(a, b);
@@ -865,6 +903,18 @@ function registerPrompts(server: McpServer): void {
             ],
         }),
     );
+}
+
+// SECURITY: every helper that derives output for MCP consumers from
+// captured messages MUST pull through redactedReadMessages, not
+// readMessages, unless it already redacts at output (get_session_messages,
+// get_message, search_messages do this per-call to preserve search-on-
+// original semantics). All derived views — metadata extraction,
+// session-diff, session-summary — operate on already-redacted frames so
+// that derived fields (JsonChange.a/b, extensions.jetbrainsProxyConfig
+// headers, …) can never carry a live proxy_key into the LLM context.
+function redactedReadMessages(dbPath: string, sessionId: number): CapturedMessage[] {
+    return readMessages(dbPath, sessionId).map((m) => redactMessage(m).redacted);
 }
 
 function readMessages(dbPath: string, sessionId: number): CapturedMessage[] {
