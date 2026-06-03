@@ -23,7 +23,7 @@
 <p align="center">ACP Devtools captures every JSON-RPC frame between them, stores each session in SQLite, and streams it to a live web inspector — replay, diff, spec-validation, plus a CLI and a read-only MCP server.</p>
 
 <p align="center">
-  <a href="https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/840f455a6fa17ad0b8f02d238aa6a5b660e0fba0/gistfile1.txt"><strong>Try it in your browser →</strong></a>&nbsp; opens the playground pre-loaded with a 57-frame sample session — see the timeline, inspect frames, open the perf panel. Drop your own <code>session.json</code> to inspect your traffic. No install. Useful for bug reports: attach the JSON to your issue, reviewers drop it in the playground.
+  <a href="https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/840f455a6fa17ad0b8f02d238aa6a5b660e0fba0/gistfile1.txt"><strong>Try it in your browser →</strong></a>&nbsp; opens the playground pre-loaded with a sample session. See the timeline, inspect frames, open the perf panel. Drop your own <code>session.json</code> to inspect your traffic. <a href="#playground">More about the playground ↓</a>
 </p>
 
 <p align="center">
@@ -362,21 +362,15 @@ browser and see the same timeline you saw — no install on their side.
 
 The inspector also runs as a static page at
 [**playground.acp-devtools.dev**](https://playground.acp-devtools.dev) —
-drop a `session.json` export into a browser and you get the same
-timeline you'd get locally. No backend; nothing uploaded to any server
-we run (we don't run any). Built from this repo with
-`VITE_PLAYGROUND=1` and published to GitHub Pages on every push to
+drop a `session.json` export (or a public gist URL) into a browser and
+you get the same timeline you'd get locally. No backend; nothing
+uploaded to any server we run (we don't run any). Built from this repo
+with `VITE_PLAYGROUND=1` and published to GitHub Pages on every push to
 `main` via [`.github/workflows/deploy-playground.yml`](.github/workflows/deploy-playground.yml).
 
-Two entry points:
-
-- [`playground.acp-devtools.dev`](https://playground.acp-devtools.dev) —
-  empty drop-zone. Bring your own `session.json`.
-- [`playground.acp-devtools.dev/?url=…`](https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/840f455a6fa17ad0b8f02d238aa6a5b660e0fba0/gistfile1.txt) —
-  same page pre-loaded with a 57-frame sample session (from a public gist).
-  One click and you see the timeline.
-
-The `?url=` flow fetches a JSON export from a **public GitHub gist** and
+A sample [`?url=` link](https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/840f455a6fa17ad0b8f02d238aa6a5b660e0fba0/gistfile1.txt)
+pre-loads a session from a public gist on click. Here's how that flow
+works: the playground fetches the JSON export from the gist URL and
 renders it client-side — the gist is the storage, GitHub serves it over
 CORS, the playground just renders. The host allowlist
 (`raw.githubusercontent.com`, `gist.githubusercontent.com`) is enforced
