@@ -124,7 +124,9 @@ WebSocket on a fixed port for repeatable demos.
 <summary><b>Export / import</b> — JSON dumps you can share or re-import</summary>
 
 Two engineers can debug the same capture without spinning up an editor.
-Imported sessions appear in the picker tagged `IMPORTED`.
+Imported sessions appear in the picker tagged `IMPORTED`. `export` redacts
+auth headers and proxy tokens (including JetBrains `proxy_key`) by default
+— see [Security & privacy](#security--privacy).
 </details>
 
 <details>
@@ -284,6 +286,95 @@ use the explicit form: `acp-devtools proxy <your-command> [args…]`.
 Neither side of the pipe knows the proxy exists. Multiple captures (one chat per
 editor window) coexist on independent ephemeral ports and all appear in the
 inspector's session picker.
+
+## Security & privacy
+
+ACP traffic carries real secrets. Anything sent on the wire is captured
+verbatim into `captures.db`, including the JetBrains AI gateway token
+WebStorm puts on every `initialize`. `acp-devtools` is local-first by
+design — nothing leaves your machine unless you choose to share an export.
+This section spells out what's at risk and what the tool does about it.
+
+### What ACP captures contain
+
+| Source | Lives in | Sensitive? |
+|---|---|---|
+| `initialize._meta.proxyConfig.proxies[].proxy.headers` | every WebStorm session | **YES** — JetBrains LLM gateway auth (`proxy_key`) |
+| HTTP-style `Authorization` / `X-Api-Key` / `Cookie` headers in any field | uncommon but possible in custom agents / `_meta` extensions | **YES** |
+| `fs/read_text_file` results | every session that opens files | depends — proprietary source vs. public code |
+| Prompts you typed and model responses | every session | depends — internal context vs. generic question |
+| Method names, latencies, frame counts, schema shapes | every session | no — useful for bug reports |
+
+The capture file stays on your machine; nothing in the tool uploads it.
+The risk surface is when **you** share an export — and that's what default
+redaction targets.
+
+### `acp-devtools export` — redacts by default
+
+```bash
+acp-devtools export 21 > capture.json    # safe-by-default for sharing
+acp-devtools export 21 --raw             # opt-in: keep everything (self-debug only)
+```
+
+What gets replaced with `<REDACTED>`: every string value under any
+`proxyConfig.proxies[*].proxy.headers.*` subtree (catches future JetBrains
+fields, not just `proxy_key`), plus standard HTTP auth headers
+(`Authorization`, `X-Api-Key`, `Cookie`, …) anywhere in the JSON. Full list
+lives in [`packages/core/src/storage/redact.ts`](packages/core/src/storage/redact.ts).
+
+Redaction rewrites **both** `payload` (parsed) and `raw` (wire string), so
+the secret can't leak via either field. A summary lands on stderr:
+`redacted N field(s) across M message(s) — re-run with --raw to keep them`.
+
+### What it does **not** redact (your call)
+
+File contents loaded via `fs/read_text_file` and the prompts / responses
+stay as-is. There's no reliable heuristic for "is this code proprietary" —
+that's a judgement call. Before sharing, audit with:
+
+```bash
+acp-devtools inspect 21 --kind ntf  # all notifications (responses, streaming, tool calls)
+acp-devtools inspect 21 --grep proxy_key  # confirm tokens are masked
+```
+
+If something in those fields shouldn't ship, either drop the offending
+messages with `jq` before sharing, or capture a smaller reproducer with
+fresh sessions.
+
+### Sharing for a bug report
+
+A typical Zed / agent-author bug report:
+
+```bash
+acp-devtools export 21 > acp-bug.json     # auto-redacted
+acp-devtools inspect 21 --grep <secret>   # double-check nothing slipped through
+# Attach acp-bug.json to the GitHub issue.
+```
+
+The playground (see below) lets the reviewer drop `acp-bug.json` into a
+browser and see the same timeline you saw — no install on their side.
+
+### Playground
+
+The inspector also runs as a static page — drop a `session.json` export
+into a browser and you get the same timeline you'd get locally. No
+backend; nothing uploaded to any server we run (we don't run any). Built
+from this repo with `VITE_PLAYGROUND=1` and published to GitHub Pages on
+every push to `main` via [`.github/workflows/deploy-playground.yml`](.github/workflows/deploy-playground.yml).
+
+The `?url=` flow fetches a JSON export from a **public GitHub gist** and
+renders it client-side — the gist is the storage, GitHub serves it over
+CORS, the playground just renders. The host allowlist
+(`raw.githubusercontent.com`, `gist.githubusercontent.com`) is enforced
+client-side so the playground can't be turned into a generic web
+fetcher. **Reminder: gists are public by default — don't use `?url=` for
+anything you wouldn't post on Twitter.**
+
+### Reporting a security issue
+
+Email security concerns to <maksugr@gmail.com> with subject prefix
+`[acp-devtools security]`. Please don't open a public issue for actual
+disclosures.
 
 ## Documentation
 

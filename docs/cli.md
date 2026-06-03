@@ -432,14 +432,28 @@ acp-devtools ui --port 3737
 ## `export [id]`
 
 Writes one session as a self-contained JSON file — metadata plus every captured
-frame, losslessly. Useful for attaching to GitHub issues, offline analysis with
-`jq`, or building per-agent fixtures.
+frame. Useful for attaching to GitHub issues, offline analysis with `jq`, or
+building per-agent fixtures.
+
+**Auth headers / proxy tokens are redacted by default.** WebStorm sessions
+carry `_meta.proxyConfig.proxies[].proxy.headers.proxy_key` (JetBrains AI
+gateway token) on every `initialize`; without redaction those would land in
+every shared export. Standard HTTP auth headers (`Authorization`,
+`Proxy-Authorization`, `X-Api-Key`, `X-Api-Token`, `Cookie`) are also masked
+anywhere they appear. A short summary goes to stderr: `redacted N field(s)
+across M message(s) — re-run with --raw to keep them`.
+
+What the default does NOT redact: file contents loaded via
+`fs/read_text_file`, prompts, and agent responses — those are user content
+and only you can judge whether they're shareable. Audit with
+`acp-devtools inspect <id>` first.
 
 ```bash
-acp-devtools export                                  # latest session, JSON to stdout
+acp-devtools export                                  # latest session, JSON to stdout (redacted)
 acp-devtools export 21 -o capture.json               # specific session
 acp-devtools export 21 > capture.json                # equivalent via shell redirect
 acp-devtools export 5 --db /tmp/session.db -o c.json # session 5 from a custom DB
+acp-devtools export 21 --raw                         # keep all secrets (self-debug only)
 ```
 
 | Flag | Default | Meaning |
@@ -447,6 +461,7 @@ acp-devtools export 5 --db /tmp/session.db -o c.json # session 5 from a custom D
 | `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
 | `-o, --output <file>` | stdout | write JSON to a file |
 | `--no-pretty` | — | compact one-line JSON (diff / grep friendly) |
+| `--raw` | off (redacts) | keep auth headers and proxy tokens — use only when the export stays on YOUR machine |
 
 ## `import <file>`
 

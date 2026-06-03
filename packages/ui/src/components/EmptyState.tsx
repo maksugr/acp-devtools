@@ -35,7 +35,7 @@ export function EmptyState({ status, lastError, url, captureCount }: EmptyStateP
                         acp.devtools
                     </span>
                     <span className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">
-                        v0.1.0 / pre-alpha
+                        v0.2.0 / pre-alpha
                     </span>
                 </div>
                 <h2 className={cn('font-display text-2xl uppercase tracking-tight', headlineTone)}>

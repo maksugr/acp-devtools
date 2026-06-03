@@ -104,6 +104,8 @@ let repoSnapshot: Set<string>;
 let id1: number; // clean Zed session
 let id2: number; // clean WebStorm session (differs from id1 in clientInfo)
 let id3: number; // broken: invalid initialize (schema violation)
+let id4: number; // WebStorm with _meta.proxyConfig (for export redaction tests)
+const SECRET_TOKEN = 'super-secret-jetbrains-proxy-key-12345';
 
 beforeAll(() => {
     home = mkdtempSync(join(tmpdir(), 'acp-cli-it-home-'));
@@ -140,6 +142,31 @@ beforeAll(() => {
     s3.record(req('initialize', {})); // missing required protocolVersion → schema violation
     s3.close();
     id3 = s3.info.id;
+
+    seq = 0;
+    const s4 = Session.start(db, { name: 'webstorm-with-proxyconfig', agentCommand: 'mock' });
+    s4.setClientName('WebStorm');
+    s4.record(
+        req('initialize', {
+            ...validInitParams,
+            _meta: {
+                proxyConfig: {
+                    proxies: [
+                        {
+                            apiType: { provider: 'anthropic' },
+                            proxy: {
+                                url: 'http://127.0.0.1:50001',
+                                headers: { proxy_key: SECRET_TOKEN },
+                            },
+                        },
+                    ],
+                },
+            },
+        }),
+    );
+    s4.record(resp(1, validInitResult));
+    s4.close();
+    id4 = s4.info.id;
 
     db.close();
 });
@@ -192,7 +219,31 @@ describe('CLI integration — per-command behavior', () => {
             const r = await run(['export', '--db', dbPath]);
             expect(r.code).toBe(0);
             const j = JSON.parse(r.out) as { session: { id: number } };
-            expect(j.session.id).toBe(id3); // newest
+            expect(j.session.id).toBe(id4); // newest
+        }, TIMEOUT);
+
+        it('redacts auth tokens by default and reports the count on stderr', async () => {
+            const r = await run(['export', String(id4), '--db', dbPath]);
+            expect(r.code).toBe(0);
+            expect(r.out).not.toContain(SECRET_TOKEN);
+            expect(r.out).toContain('<REDACTED>');
+            expect(r.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
+            expect(r.err).toMatch(/--raw/);
+        }, TIMEOUT);
+
+        it('--raw keeps tokens and warns explicitly on stderr', async () => {
+            const r = await run(['export', String(id4), '--db', dbPath, '--raw']);
+            expect(r.code).toBe(0);
+            expect(r.out).toContain(SECRET_TOKEN);
+            expect(r.out).not.toContain('<REDACTED>');
+            expect(r.err).toMatch(/--raw was set/);
+            expect(r.err).toMatch(/do not share publicly/);
+        }, TIMEOUT);
+
+        it('emits no redaction summary when there is nothing to redact', async () => {
+            const r = await run(['export', String(id1), '--db', dbPath]);
+            expect(r.code).toBe(0);
+            expect(r.err).not.toMatch(/redacted/);
         }, TIMEOUT);
     });
 

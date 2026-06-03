@@ -28,8 +28,17 @@ function discoveryPlugin(): PluginOption {
     };
 }
 
+// `VITE_PLAYGROUND=1` produces the static GitHub Pages build:
+// skip the dev-only discovery plugin (no backend in playground) and
+// apply the repo-name base path so assets resolve under
+// `<user>.github.io/acp-devtools/`. `VITE_BASE` overrides the path
+// if the playground ever lands on a custom domain.
+const PLAYGROUND = process.env.VITE_PLAYGROUND === '1';
+const PLAYGROUND_BASE = process.env.VITE_BASE ?? '/acp-devtools/';
+
 export default defineConfig({
-    plugins: [react(), discoveryPlugin()],
+    base: PLAYGROUND ? PLAYGROUND_BASE : '/',
+    plugins: PLAYGROUND ? [react()] : [react(), discoveryPlugin()],
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),

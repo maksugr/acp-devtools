@@ -10,6 +10,7 @@ import {
 import { buildValidationMap } from './lib/validation';
 import { useDiscoveryStore } from './store/discoveryStore';
 import { captureLabel, sessionHeader } from './lib/captureLabel';
+import { isPlaygroundMode } from './lib/playgroundMode';
 import { parseUrlState, writeUrlState } from './lib/urlState';
 import { CommandPalette } from './components/CommandPalette';
 import { ConnectingState } from './components/ConnectingState';
@@ -18,6 +19,7 @@ import { DiffPanel } from './components/DiffPanel';
 import { EmptyState } from './components/EmptyState';
 import { FilterBar } from './components/FilterBar';
 import { PerformancePanel } from './components/PerformancePanel';
+import { PlaygroundEntry } from './components/PlaygroundEntry';
 import { ReplayControls } from './components/ReplayControls';
 import { SessionInfoPanel } from './components/SessionInfoPanel';
 import { SplitPane } from './components/SplitPane';
@@ -25,6 +27,11 @@ import { StatsBar } from './components/StatsBar';
 import { Timeline } from './components/Timeline';
 import { Toast } from './components/Toast';
 import { TopBar } from './components/TopBar';
+
+const PLAYGROUND = isPlaygroundMode();
+const INITIAL_PLAYGROUND_URL = PLAYGROUND
+    ? new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('url')
+    : null;
 
 export function App() {
     const captures = useDiscoveryStore((s) => s.captures);
@@ -38,6 +45,7 @@ export function App() {
     const isImported = sessionImportedAt !== null;
 
     useEffect(() => {
+        if (PLAYGROUND) return;
         const stop = startDiscoveryPolling();
         return stop;
     }, []);
@@ -241,6 +249,10 @@ export function App() {
 
     // Connect / reconnect whenever the chosen URL changes.
     useEffect(() => {
+        if (PLAYGROUND) {
+            disconnect();
+            return;
+        }
         if (!wsUrl) {
             disconnect();
             return;
@@ -335,8 +347,12 @@ export function App() {
     // no captures to attach to — i.e. real first-launch onboarding. Once a
     // capture URL is selected (e.g. after hydration from `?ws=`), we show a
     // calm `ConnectingState` instead of the big CLI card to avoid flashing.
-    const showTutorial = hasNoData && wsUrl === null && captures.length === 0;
-    const showConnecting = hasNoData && !showTutorial;
+    // In playground mode there is no backend → the file-drop entry replaces
+    // both the tutorial and the connecting state.
+    const showPlayground = PLAYGROUND && hasNoData;
+    const showTutorial =
+        !PLAYGROUND && hasNoData && wsUrl === null && captures.length === 0;
+    const showConnecting = !PLAYGROUND && hasNoData && !showTutorial;
 
     return (
         <div className="flex h-full flex-col bg-surface-base text-ink-primary">
@@ -366,7 +382,9 @@ export function App() {
             />
             <FilterBar />
             <main className="flex-1 overflow-hidden">
-                {showTutorial ? (
+                {showPlayground ? (
+                    <PlaygroundEntry initialUrl={INITIAL_PLAYGROUND_URL} />
+                ) : showTutorial ? (
                     <EmptyState
                         status={status}
                         lastError={lastError}

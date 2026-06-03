@@ -1,6 +1,6 @@
 {
     "name": "@acp-devtools/core",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "private": true,
     "description": "Core ACP proxy, parser, and types for acp-devtools",
     "type": "module",
@@ -88,6 +88,10 @@
         "./storage/export": {
             "types": "./dist/storage/export.d.ts",
             "import": "./dist/storage/export.js"
+        },
+        "./storage/redact": {
+            "types": "./dist/storage/redact.d.ts",
+            "import": "./dist/storage/redact.js"
         }
     },
     "files": [

@@ -185,7 +185,7 @@ function buildCommands(onClose: () => void): Command[] {
     if (msgState.session !== null && msgState.messages.length > 0) {
         cmds.push({
             id: 'session.export',
-            label: 'Export current session as JSON',
+            label: 'Export current session as JSON (redacted — auth tokens hidden)',
             section: 'session',
             run: () => downloadSessionExport(msgState.session!, msgState.messages),
         });

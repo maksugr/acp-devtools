@@ -381,3 +381,51 @@ describe('selectMessage', () => {
         expect(selectMessage([], 5)).toBeNull();
     });
 });
+
+describe('loadFromExport — static load from SessionExport', () => {
+    it('replaces session + messages and marks the load terminal', () => {
+        seqCounter = 0;
+        const m1 = mkMessage();
+        const m2 = mkMessage({ direction: 'agent-to-editor', kind: 'response', method: undefined });
+        const m3 = mkMessage({ kind: 'notification', method: 'session/update', rpcId: undefined });
+
+        // Pre-existing state from a prior session shouldn't bleed through.
+        send({ type: 'session.start', session: sessionFixture({ id: 99 }) });
+        useMessagesStore.setState({
+            selectedSeq: 17,
+            clearedUpToSeq: 9,
+            playback: { cap: 4, playing: true, speed: 4 },
+            replayDone: false,
+            connection: 'open',
+            lastError: 'old error',
+        });
+
+        useMessagesStore.getState().loadFromExport({
+            version: 1,
+            exportedAt: 1_700_000_005_000,
+            tool: { name: 'acp-devtools', version: '0.1.0' },
+            session: {
+                id: 7,
+                name: 'imported-from-file',
+                agentCommand: 'mock',
+                clientName: 'Zed',
+                startedAt: 1_700_000_000_000,
+                endedAt: 1_700_000_002_000,
+            },
+            messages: [m1, m2, m3],
+        });
+
+        const s = useMessagesStore.getState();
+        expect(s.session?.id).toBe(7);
+        expect(s.session?.name).toBe('imported-from-file');
+        expect(s.session?.clientName).toBe('Zed');
+        expect(s.session?.importedAt).toBe(1_700_000_005_000);
+        expect(s.messages).toEqual([m1, m2, m3]);
+        expect(s.selectedSeq).toBeNull();
+        expect(s.clearedUpToSeq).toBeNull();
+        expect(s.replayDone).toBe(true);
+        expect(s.playback).toEqual({ cap: null, playing: false, speed: 1 });
+        expect(s.connection).toBe('idle');
+        expect(s.lastError).toBeNull();
+    });
+});

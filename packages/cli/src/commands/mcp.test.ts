@@ -597,4 +597,195 @@ describe('MCP server — tools/call', () => {
             await close();
         }
     });
+
+    describe('redaction of message-returning tools', () => {
+        const SECRET = 'mcp-test-jetbrains-token-xyz';
+
+        beforeEach(() => {
+            // Replace the standard seed with one initialize carrying a real-
+            // shape proxyConfig + Authorization header, so all three message-
+            // returning tools (get_message, get_session_messages,
+            // search_messages) exercise the redaction path.
+            const db = openDatabase(dbPath);
+            const session = Session.start(db, { name: 'redact-test', agentCommand: 'mock' });
+            session.setClientName('WebStorm');
+            const payload = {
+                jsonrpc: '2.0' as const,
+                id: 1,
+                method: 'initialize',
+                params: {
+                    protocolVersion: 1,
+                    clientInfo: { name: 'webstorm', title: 'WebStorm', version: '2026.1.2' },
+                    _meta: {
+                        proxyConfig: {
+                            proxies: [
+                                {
+                                    apiType: { provider: 'anthropic' },
+                                    proxy: {
+                                        url: 'http://127.0.0.1:50001',
+                                        headers: { proxy_key: SECRET },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+            };
+            session.record({
+                seq: 1,
+                timestamp: 1_700_000_000_000,
+                direction: 'editor-to-agent',
+                kind: 'request',
+                method: 'initialize',
+                rpcId: '1',
+                raw: JSON.stringify(payload),
+                payload: payload as unknown as CapturedMessage['payload'],
+            });
+            session.close();
+            sessionId = session.info.id;
+            db.close();
+        });
+
+        it('get_message returns <REDACTED> for proxy_key (both payload and raw)', async () => {
+            const { client, close } = await withClient();
+            try {
+                const res = await client.callTool({
+                    name: 'get_message',
+                    arguments: { session_id: sessionId, seq: 1 },
+                });
+                const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
+                expect(text).not.toContain(SECRET);
+                expect(text).toContain('<REDACTED>');
+            } finally {
+                await close();
+            }
+        });
+
+        it('get_session_messages redacts every returned message', async () => {
+            const { client, close } = await withClient();
+            try {
+                const res = await client.callTool({
+                    name: 'get_session_messages',
+                    arguments: { session_id: sessionId },
+                });
+                const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
+                expect(text).not.toContain(SECRET);
+                expect(text).toContain('<REDACTED>');
+            } finally {
+                await close();
+            }
+        });
+
+        it('search_messages matches a token-fragment query but returns the redacted raw', async () => {
+            const { client, close } = await withClient();
+            try {
+                const res = await client.callTool({
+                    name: 'search_messages',
+                    arguments: { session_id: sessionId, query: SECRET.slice(0, 8) },
+                });
+                const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
+                const body = parseJsonContent(text) as {
+                    matches: Array<{ raw: string }>;
+                    total: number;
+                };
+                // Searching by token fragment still finds the frame...
+                expect(body.total).toBeGreaterThan(0);
+                // ...but the returned raw bytes are the sanitized copy.
+                expect(text).not.toContain(SECRET);
+                expect(body.matches[0]?.raw).toContain('<REDACTED>');
+            } finally {
+                await close();
+            }
+        });
+
+        it('get_session_metadata redacts proxyConfig headers in extensions', async () => {
+            const { client, close } = await withClient();
+            try {
+                const res = await client.callTool({
+                    name: 'get_session_metadata',
+                    arguments: { session_id: sessionId },
+                });
+                const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
+                expect(text).not.toContain(SECRET);
+                // The proxyConfig structure remains, only header values masked.
+                expect(text).toContain('jetbrainsProxyConfig');
+                expect(text).toContain('<REDACTED>');
+            } finally {
+                await close();
+            }
+        });
+
+        it('get_session_summary redacts proxyConfig in the embedded metadata', async () => {
+            const { client, close } = await withClient();
+            try {
+                const res = await client.callTool({
+                    name: 'get_session_summary',
+                    arguments: { session_id: sessionId },
+                });
+                const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
+                expect(text).not.toContain(SECRET);
+                expect(text).toContain('<REDACTED>');
+            } finally {
+                await close();
+            }
+        });
+
+        it('diff_sessions never carries live token values in JsonChange.a/b', async () => {
+            // Seed a second WebStorm-shape session with a DIFFERENT proxy_key
+            // so that, without redaction, the diff would emit
+            // { path: "...proxy_key", a: SECRET, b: SECRET2 } — a double leak.
+            const SECRET2 = 'second-session-jetbrains-token';
+            const db = openDatabase(dbPath);
+            const session = Session.start(db, { name: 'redact-test-b', agentCommand: 'mock' });
+            session.setClientName('WebStorm');
+            const payload = {
+                jsonrpc: '2.0' as const,
+                id: 1,
+                method: 'initialize',
+                params: {
+                    protocolVersion: 1,
+                    clientInfo: { name: 'webstorm', title: 'WebStorm', version: '2026.1.2' },
+                    _meta: {
+                        proxyConfig: {
+                            proxies: [
+                                {
+                                    apiType: { provider: 'anthropic' },
+                                    proxy: {
+                                        url: 'http://127.0.0.1:50001',
+                                        headers: { proxy_key: SECRET2 },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+            };
+            session.record({
+                seq: 1,
+                timestamp: 1_700_000_000_000,
+                direction: 'editor-to-agent',
+                kind: 'request',
+                method: 'initialize',
+                rpcId: '1',
+                raw: JSON.stringify(payload),
+                payload: payload as unknown as CapturedMessage['payload'],
+            });
+            session.close();
+            const sessionIdB = session.info.id;
+            db.close();
+
+            const { client, close } = await withClient();
+            try {
+                const res = await client.callTool({
+                    name: 'diff_sessions',
+                    arguments: { session_a: sessionId, session_b: sessionIdB, include_equal: false },
+                });
+                const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
+                expect(text).not.toContain(SECRET);
+                expect(text).not.toContain(SECRET2);
+            } finally {
+                await close();
+            }
+        });
+    });
 });
