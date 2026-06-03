@@ -366,17 +366,13 @@ drop a `session.json` export (or a public gist URL) into a browser and
 you get the same timeline you'd get locally. No backend; nothing
 uploaded to any server we run (we don't run any). Built from this repo
 with `VITE_PLAYGROUND=1` and published to GitHub Pages on every push to
-`main` via [`.github/workflows/deploy-playground.yml`](.github/workflows/deploy-playground.yml).
+`main`.
 
-A sample [`?url=` link](https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/840f455a6fa17ad0b8f02d238aa6a5b660e0fba0/gistfile1.txt)
-pre-loads a session from a public gist on click. Here's how that flow
-works: the playground fetches the JSON export from the gist URL and
-renders it client-side — the gist is the storage, GitHub serves it over
-CORS, the playground just renders. The host allowlist
-(`raw.githubusercontent.com`, `gist.githubusercontent.com`) is enforced
-client-side so the playground can't be turned into a generic web
-fetcher. **Reminder: gists are public by default — don't use `?url=` for
-anything you wouldn't post on Twitter.**
+This [gist sample](https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/840f455a6fa17ad0b8f02d238aa6a5b660e0fba0/gistfile1.txt)
+pre-loads a session from a public gist. Here's how that flow works: the
+playground fetches the JSON export from the gist URL and renders it
+client-side — the gist is the storage, GitHub serves it over CORS, the
+playground just renders.
 
 ### Reporting a security issue
 
