@@ -239,15 +239,27 @@ acp-devtools <command> --help                       # grouped, colorized help
 Full reference: **[docs/cli.md](docs/cli.md)**. Task-driven walkthroughs
 (headless debugging, A/B two agents, mock-based CI): **[docs/recipes.md](docs/recipes.md)**.
 
-## Debug Claude with Claude (MCP)
+## MCP
 
-`acp-devtools mcp` exposes saved captures to Claude Code as read-only MCP tools,
-so you can ask:
+`acp-devtools mcp` exposes saved captures to an AI agent (Claude Code, Claude
+Desktop, …) as eleven read-only tools so you can ask it to investigate your own
+traces:
 
 > «find spec violations in the last 10 sessions» ·
-> «compare p99 of `session/prompt` between WebStorm and Zed»
+> «compare p99 of `session/prompt` between WebStorm and Zed» ·
+> «diff sessions 41 and 42 — what changed?»
 
-Setup: **[docs/mcp.md](docs/mcp.md)**.
+Setup in one command (Claude Code as an example):
+
+```bash
+claude mcp add acp-devtools -- acp-devtools mcp
+```
+
+Stdio only; no network surface. Auth tokens and proxy keys are unconditionally
+redacted in every tool response — see [Security & privacy](#security--privacy).
+
+Full tool reference and setup variants for other MCP clients:
+**[docs/mcp.md](docs/mcp.md)**.
 
 ## Supported agents
 
@@ -355,10 +367,16 @@ acp-devtools inspect 21 --grep <secret>   # double-check nothing slipped through
 # Attach acp-bug.json to the GitHub issue.
 ```
 
-The playground (see below) lets the reviewer drop `acp-bug.json` into a
-browser and see the same timeline you saw — no install on their side.
+The [playground](#playground) lets the reviewer drop `acp-bug.json` into
+a browser and see the same timeline you saw — no install on their side.
 
-### Playground
+### Reporting a security issue
+
+Email security concerns to <maksugr@gmail.com> with subject prefix
+`[acp-devtools security]`. Please don't open a public issue for actual
+disclosures.
+
+## Playground
 
 The inspector also runs as a static page at
 [**playground.acp-devtools.dev**](https://playground.acp-devtools.dev) —
@@ -373,12 +391,6 @@ pre-loads a session from a public gist. Here's how that flow works: the
 playground fetches the JSON export from the gist URL and renders it
 client-side — the gist is the storage, GitHub serves it over CORS, the
 playground just renders.
-
-### Reporting a security issue
-
-Email security concerns to <maksugr@gmail.com> with subject prefix
-`[acp-devtools security]`. Please don't open a public issue for actual
-disclosures.
 
 ## Documentation
 
