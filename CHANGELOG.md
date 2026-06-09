@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-06-09
+
+### Fixed
+
+- **Homebrew install no longer ships a broken `better-sqlite3`.** Homebrew's
+  `std_npm_args` runs `npm install --ignore-scripts`, which silently skipped
+  the postinstall step that fetches the SQLite native binding. Every
+  command then failed with `Could not locate the bindings file`. The
+  formula now runs `npm rebuild better-sqlite3` after install, and the
+  `test do` block invokes `acp-devtools doctor` (which opens
+  `captures.db`) so a missing binding fails the bottle build rather than
+  reaching users.
+
+### Added
+
+- **CI smoke-tests the publishable artifact** on every supported platform
+  × Node major. Each job runs `npm pack`, installs the resulting tarball
+  into a throwaway prefix with default lifecycle scripts, then exercises
+  `better-sqlite3` directly plus `acp-devtools doctor`. A missing
+  prebuild, ABI mismatch, or broken postinstall now blocks merge instead
+  of breaking users post-publish.
+- **Friendly diagnostic when `better-sqlite3` fails to load.** Any
+  command that hits a missing native binding now prints
+  install-path-aware remediation (`npm rebuild -g better-sqlite3` for
+  npm-global, `brew reinstall acp-devtools` for Homebrew) plus runtime
+  details, instead of a raw stack trace listing every path the bindings
+  loader probed.
+
 ## [0.2.0] — 2026-06-03
 
 ### Added

@@ -35,3 +35,40 @@ jobs:
             - run: npm test
 
             - run: npm run build:full
+
+            - name: Smoke-test packed tarball (POSIX)
+              if: runner.os != 'Windows'
+              shell: bash
+              run: |
+                  set -euxo pipefail
+                  cd packages/cli
+                  npm pack --pack-destination "$RUNNER_TEMP"
+                  TGZ=$(ls "$RUNNER_TEMP"/acp-devtools-*.tgz | head -1)
+                  PREFIX="$RUNNER_TEMP/smoke"
+                  mkdir -p "$PREFIX"
+                  cd "$PREFIX"
+                  npm init -y >/dev/null
+                  npm install "$TGZ"
+                  # Direct probe of the native binding — fails fast with a
+                  # bindings-file error if the postinstall didn't produce
+                  # build/Release/better_sqlite3.node.
+                  node -e "const D = require('better-sqlite3'); const db = new D(':memory:'); db.exec('CREATE TABLE t (x)'); db.close(); console.log('better-sqlite3 OK');"
+                  ./node_modules/.bin/acp-devtools --version
+                  ./node_modules/.bin/acp-devtools doctor
+
+            - name: Smoke-test packed tarball (Windows)
+              if: runner.os == 'Windows'
+              shell: pwsh
+              run: |
+                  $ErrorActionPreference = 'Stop'
+                  Set-Location packages/cli
+                  npm pack --pack-destination $env:RUNNER_TEMP
+                  $tgz = (Get-ChildItem "$env:RUNNER_TEMP/acp-devtools-*.tgz" | Select-Object -First 1).FullName
+                  $prefix = Join-Path $env:RUNNER_TEMP 'smoke'
+                  New-Item -ItemType Directory -Force -Path $prefix | Out-Null
+                  Set-Location $prefix
+                  npm init -y | Out-Null
+                  npm install $tgz
+                  node -e "const D = require('better-sqlite3'); const db = new D(':memory:'); db.exec('CREATE TABLE t (x)'); db.close(); console.log('better-sqlite3 OK');"
+                  & "./node_modules/.bin/acp-devtools.cmd" --version
+                  & "./node_modules/.bin/acp-devtools.cmd" doctor
