@@ -1,6 +1,6 @@
 {
     "name": "acp-devtools",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Visual debugger and inspector for the Agent Client Protocol (ACP) — capture every JSON-RPC frame between your editor and your coding agent, replay sessions, validate against the spec.",
     "type": "module",
     "main": "./dist/index.js",
