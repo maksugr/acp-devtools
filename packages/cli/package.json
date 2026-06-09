@@ -54,7 +54,7 @@
         "zod": "^4.4.3"
     },
     "devDependencies": {
-        "@acp-devtools/core": "0.2.0",
+        "@acp-devtools/core": "0.2.1",
         "@types/node": "^22.10.0",
         "tsup": "^8.5.1"
     }
