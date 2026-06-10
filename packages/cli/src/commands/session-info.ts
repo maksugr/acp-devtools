@@ -5,12 +5,14 @@ import {
     defaultCapturesDbPath,
     extractSessionMetadata,
     openExistingDatabase,
+    redactMessage,
 } from '@acp-devtools/core';
 import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 
 interface SessionInfoOptions {
     db: string;
     json?: boolean;
+    raw: boolean;
 }
 
 export function registerSessionInfoCommand(program: Command): void {
@@ -22,6 +24,11 @@ export function registerSessionInfoCommand(program: Command): void {
         .argument('<id>', 'session id (see `acp-devtools list`)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
         .option('--json', 'machine-readable JSON instead of human-readable text')
+        .option(
+            '--raw',
+            'skip default redaction of auth headers / proxy tokens (use only when the output stays on YOUR machine)',
+            false,
+        )
         .action((rawId: string, opts: SessionInfoOptions) => {
             const id = Number(rawId);
             if (!Number.isInteger(id) || id <= 0) {
@@ -50,8 +57,34 @@ export function registerSessionInfoCommand(program: Command): void {
 
             const messages: CapturedMessage[] = [];
             for (const m of session.messages()) messages.push(m);
-            const meta = extractSessionMetadata(messages);
             db.close();
+
+            // SECURITY: redact before metadata extraction so the proxyConfig
+            // extension (JetBrains gateway token) prints as <REDACTED>.
+            let fieldsRedacted = 0;
+            let messagesAffected = 0;
+            const display = opts.raw
+                ? messages
+                : messages.map((m) => {
+                      const r = redactMessage(m);
+                      if (r.count > 0) {
+                          messagesAffected += 1;
+                          fieldsRedacted += r.count;
+                      }
+                      return r.redacted;
+                  });
+            const meta = extractSessionMetadata(display);
+            const writeRedactionNote = () => {
+                if (opts.raw) {
+                    process.stderr.write(
+                        'acp-devtools: --raw was set; output may contain auth headers / proxy tokens — do not share publicly\n',
+                    );
+                } else if (fieldsRedacted > 0) {
+                    process.stderr.write(
+                        `acp-devtools: redacted ${fieldsRedacted} field(s) across ${messagesAffected} message(s) — re-run with --raw to print them\n`,
+                    );
+                }
+            };
 
             if (opts.json) {
                 process.stdout.write(
@@ -72,10 +105,12 @@ export function registerSessionInfoCommand(program: Command): void {
                         2,
                     ) + '\n',
                 );
+                writeRedactionNote();
                 return;
             }
 
             renderText(session, meta, messages.length);
+            writeRedactionNote();
         });
 }
 
@@ -85,13 +120,11 @@ function renderText(session: Session, meta: ReturnType<typeof extractSessionMeta
     w.write(`${s.bold(s.cyan(`SESSION #${session.info.id}`))}\n`);
     w.write(s.dim('─'.repeat(48)) + '\n');
     const clientLabel = meta.client.title ?? meta.client.name ?? session.info.clientName ?? '—';
-    const clientVer = meta.client.version ? ` v${meta.client.version}` : '';
     const clientPlatform = meta.client.platform ? ` (${meta.client.platform})` : '';
-    w.write(pad(s, 'Client', `${clientLabel}${clientVer}${clientPlatform}`));
+    w.write(pad(s, 'Client', `${withVersion(clientLabel, meta.client.version)}${clientPlatform}`));
 
     const agentLabel = meta.agent.name ?? shortAgent(session.info.agentCommand) ?? '—';
-    const agentVer = meta.agent.version ? ` v${meta.agent.version}` : '';
-    w.write(pad(s, 'Agent', `${agentLabel}${agentVer}`));
+    w.write(pad(s, 'Agent', withVersion(agentLabel, meta.agent.version)));
 
     w.write(pad(s, 'Protocol', meta.protocolVersion !== null ? `ACP v${meta.protocolVersion}` : '—'));
     w.write(
@@ -134,6 +167,13 @@ function renderText(session: Session, meta: ReturnType<typeof extractSessionMeta
             `  ${s.dim('proxyConfig'.padEnd(18))} ${JSON.stringify(meta.extensions.jetbrainsProxyConfig)}\n`,
         );
     }
+}
+
+// WebStorm's clientInfo.title already embeds the version ("WebStorm 2026.1.2"
+// + version "2026.1.2") — appending v<version> again would print it twice.
+function withVersion(label: string, version: string | null | undefined): string {
+    if (!version || label.includes(version)) return label;
+    return `${label} v${version}`;
 }
 
 function heading(s: Styler, label: string): string {

@@ -7,9 +7,10 @@ and project state from the directory pointed at by **`CLAUDE_CONFIG_DIR`**
 (defaulting to `~/.claude`).
 
 The config snippets below are in Zed's `agent_servers` format for concreteness,
-but the profile / env / auth recipes are editor-agnostic. JetBrains users put
-the same **Command / Arguments / Environment** into the agent-server fields —
-see [jetbrains-config.md](jetbrains-config.md).
+but the profile / env / auth recipes are editor-agnostic. JetBrains reads the
+same `agent_servers` JSON shape from `~/.jetbrains/acp.json`, with one
+difference — `command` must be an absolute path. See
+[jetbrains-config.md](jetbrains-config.md).
 
 ## Single-profile setup
 
@@ -34,9 +35,10 @@ have to pick a port by hand.
 
 ACP Devtools detects that an editor spawned it (stdin is a pipe) and
 auto-expands to `proxy --agent claude-code`. No `args` needed — and captures
-go to the shared `~/.acp-devtools/captures.db` by default. (In Zed's format,
-`"type": "custom"` marks this as a user-defined agent entry; JetBrains has no
-equivalent field — you just fill in the agent-server form.)
+go to the shared `~/.acp-devtools/captures.db` by default. (`"type": "custom"`
+marks this as a user-defined agent entry; the same entry works verbatim in
+JetBrains' `~/.jetbrains/acp.json`, with `command` switched to an absolute
+path.)
 
 Then run `acp-devtools ui` and pick the capture from the **session picker** in
 the top-right of the inspector.
@@ -94,9 +96,8 @@ multi-session setups.
 ## Auth troubleshooting
 
 If you see `{"code":-32000, "message":"Authentication required"}` in the
-captured trace (visible in the inspector or in `fixtures/ws-client.js`
-output), the SDK could not find a valid token in the chosen config dir.
-Pick one:
+captured trace (visible in the inspector timeline), the SDK could not find a
+valid token in the chosen config dir. Pick one:
 
 - Authenticate that profile interactively: `CLAUDE_CONFIG_DIR=/path claude /login`
 - Or set `ANTHROPIC_API_KEY` (or `CLAUDE_CODE_OAUTH_TOKEN`) in the `env` block.

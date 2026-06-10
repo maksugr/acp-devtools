@@ -42,13 +42,16 @@ const KNOWN_SUBCOMMANDS = new Set([
  *   acp-devtools claude-code [extra]                → proxy --agent claude-code [extra]
  *   acp-devtools proxy ...                          → unchanged
  *   acp-devtools ui|replay|doctor ...               → unchanged
- *   acp-devtools <unknown> ...                      → proxy <unknown> ...
+ *   acp-devtools <unknown> ...                      → unchanged (commander errors)
  *
  * The TTY check is the only piece of "magic": when an IDE spawns the binary
  * it pipes stdio, so `process.stdin.isTTY` is `false`. A human in a shell
- * sees `--help`, as expected.
+ * sees `--help`, as expected. Custom agent binaries must be passed through
+ * `proxy` explicitly — a bare unknown first arg used to fall through to
+ * `proxy <unknown>` and silently spawn it (creating a stray session row on
+ * ENOENT), so a typo like `acp-devtools list_session` polluted the DB.
  */
-function expandArgv(
+export function expandArgv(
     rawArgs: string[],
     defaultAgent: string,
     isAgentShortcut: (s: string) => boolean,
@@ -66,8 +69,7 @@ function expandArgv(
     if (isAgentShortcut(first)) {
         return ['proxy', '--agent', first, ...rawArgs.slice(1)];
     }
-    // Everything else: assume it's a custom agent command (or args) for proxy.
-    return ['proxy', ...rawArgs];
+    return rawArgs;
 }
 
 function reportFatal(err: unknown, prefix = 'acp-devtools'): never {

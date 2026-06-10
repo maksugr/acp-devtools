@@ -61,7 +61,7 @@ describe('root overview', () => {
             expect(help).toContain(group.title.toUpperCase());
         }
         expect(help).toContain('EXAMPLES');
-        expect(help).toContain('acp-devtools proxy npx -y @zed-industries/claude-code-acp');
+        expect(help).toContain('acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp');
     });
 
     it('lists each command with its summary', () => {

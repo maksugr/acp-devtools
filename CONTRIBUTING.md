@@ -14,7 +14,8 @@ cd packages/cli && npm link     # exposes `acp-devtools` globally via symlink
 which acp-devtools              # varies by your Node install location
 ```
 
-Requires Node 22+ and macOS / Linux / WSL.
+Requires Node 22+. CI runs this exact sequence on macOS, Linux, and Windows
+(Node 22 and 24), so all three are fair game for development.
 
 ## Everyday commands
 
@@ -36,6 +37,14 @@ show up in the inspector's session picker:
 ```bash
 npm run fixtures:seed          # generate + import all seven into captures.db
 acp-devtools ui                # open the inspector and pick one
+```
+
+To keep demo data out of your real capture store, point both commands at a
+throwaway home — the seeder and the inspector must agree on it:
+
+```bash
+ACP_DEVTOOLS_HOME=/tmp/acp-demo npm run fixtures:seed
+ACP_DEVTOOLS_HOME=/tmp/acp-demo acp-devtools ui
 ```
 
 Generate just one instead:

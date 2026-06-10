@@ -72,7 +72,7 @@ export function TopBar({
                     </span>
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-ink-dim">
-                    v0.2.1
+                    v0.3.0
                 </span>
             </div>
 

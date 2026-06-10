@@ -52,9 +52,10 @@ delivered. Every label has a tooltip on hover.
   request, tone-colored fast→slow.
 - **Sticky-bottom scroll** keeps the newest frame in view during a live
   capture; scroll up to pause autoscroll.
-- **FilterBar** — direction chips, kind chips, a `hide set_mode/set_model`
-  boilerplate toggle, and a search box. Every filter has a CLI equivalent on
-  `acp-devtools inspect`.
+- **FilterBar** — direction chips (`→ OUT` / `← IN`), kind chips
+  (REQ / RSP / NTF / ERR), a `stream` toggle that collapses
+  `agent_message_chunk` runs into one row, and a payload search box. Every
+  filter has a CLI equivalent on `acp-devtools inspect`.
 
 ## Detail panel
 
@@ -163,4 +164,14 @@ the page.
 | `DELETE /api/sessions/:id` | remove a session and cascade-delete its messages |
 | `WS /replay/:id` | stream a saved session |
 
-Everything binds to `127.0.0.1` only — there is no network surface.
+Everything binds to `127.0.0.1` by default, and every `/api/*` request plus
+the replay WebSocket upgrade must carry a loopback `Host` header
+(`127.0.0.1` / `localhost` / `[::1]`) — anything else gets `403`. That
+closes the classic DNS-rebinding hole where a hostile page resolves its
+own domain to `127.0.0.1` and reads the API from your browser. Two honest
+caveats remain: the API has no authentication (any *local* process can
+read it — same trust level as the database file itself), and
+`/api/sessions/:id/messages` returns frames as captured, unredacted.
+Binding a non-loopback address with `--host` extends the allowed `Host`
+to that address; a wildcard bind (`0.0.0.0`) disables the check — only do
+that on a network you trust.

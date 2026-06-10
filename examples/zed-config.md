@@ -128,7 +128,9 @@ acp-devtools ui
 ```
 
 The session picker (top right) auto-discovers the live capture; click the entry
-to start streaming. Full tour of the inspector: [docs/ui.md](../docs/ui.md).
+and the timeline fills with `initialize`, `session/new`, `session/prompt`, and
+streaming `session/update` chunks. Full tour of the inspector:
+[docs/ui.md](../docs/ui.md).
 
 ## Troubleshooting
 

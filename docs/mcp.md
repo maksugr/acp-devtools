@@ -2,9 +2,9 @@
 
 `acp-devtools mcp` runs a Model Context Protocol server over stdio that exposes your saved captures as **read-only** tools. Wire it into any MCP client and debug your ACP traffic by asking Agent:
 
-> «find spec violations in the last 10 sessions»
-> «compare p99 of `session/prompt` between WebStorm and Zed»
-> «show every message where the agent called `Edit` on `package.json`»
+> "find spec violations in the last 10 sessions"
+> "compare p99 of `session/prompt` between WebStorm and Zed"
+> "show every message where the agent called `Edit` on `package.json`"
 
 ## Setup (Claude Code)
 

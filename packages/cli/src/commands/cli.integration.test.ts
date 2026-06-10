@@ -130,7 +130,8 @@ beforeAll(() => {
     s2.record(
         req('initialize', {
             ...validInitParams,
-            clientInfo: { name: 'webstorm', title: 'WebStorm', version: '2.0' },
+            // title embeds the version, like real WebStorm clientInfo
+            clientInfo: { name: 'webstorm', title: 'WebStorm 2.0', version: '2.0' },
         }),
     );
     s2.record(resp(1, validInitResult));
@@ -203,6 +204,29 @@ describe('CLI integration — per-command behavior', () => {
             const r = await run(['diff', String(id1), String(id1), '--db', dbPath]);
             expect(r.code).toBe(0);
             expect(r.out).toMatch(/identical/i);
+        }, TIMEOUT);
+
+        it('redacts auth tokens by default and reports the count on stderr', async () => {
+            const r = await run(['diff', String(id4), String(id2), '--db', dbPath, '--json']);
+            expect(r.code).toBe(0);
+            expect(r.out).not.toContain(SECRET_TOKEN);
+            expect(r.out).toContain('<REDACTED>');
+            expect(r.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
+            expect(r.err).toMatch(/--raw/);
+        }, TIMEOUT);
+
+        it('--raw keeps tokens and warns explicitly on stderr', async () => {
+            const r = await run(['diff', String(id4), String(id2), '--db', dbPath, '--json', '--raw']);
+            expect(r.code).toBe(0);
+            expect(r.out).toContain(SECRET_TOKEN);
+            expect(r.err).toMatch(/--raw was set/);
+            expect(r.err).toMatch(/do not share publicly/);
+        }, TIMEOUT);
+
+        it('emits no redaction summary when there is nothing to redact', async () => {
+            const r = await run(['diff', String(id1), String(id2), '--db', dbPath]);
+            expect(r.code).toBe(0);
+            expect(r.err).not.toMatch(/redacted/);
         }, TIMEOUT);
     });
 
@@ -370,6 +394,20 @@ describe('CLI integration — per-command behavior', () => {
             expect(r.code).toBe(0);
             expect(existsSync(missingDb)).toBe(false);
         }, TIMEOUT);
+
+        it('--client with a small --limit still finds buried matches (filter before LIMIT)', async () => {
+            // id1 (Zed) is the OLDEST session; newest-2 are WebStorm/broken.
+            const r = await run(['list', '--db', dbPath, '--client', 'Zed', '--limit', '2', '--json']);
+            expect(r.code).toBe(0);
+            const rows = JSON.parse(r.out) as Array<{ id: number }>;
+            expect(rows.map((s) => s.id)).toEqual([id1]);
+        }, TIMEOUT);
+
+        it('rejects --saved --imported together with exit 2', async () => {
+            const r = await run(['list', '--db', dbPath, '--saved', '--imported']);
+            expect(r.code).toBe(2);
+            expect(r.err).toMatch(/mutually exclusive/);
+        }, TIMEOUT);
     });
 
     describe('inspect', () => {
@@ -411,6 +449,30 @@ describe('CLI integration — per-command behavior', () => {
             expect(text.out).toMatch(/Zed/);
             const json = await run(['session-info', String(id1), '--db', dbPath, '--json']);
             expect(() => JSON.parse(json.out)).not.toThrow();
+        }, TIMEOUT);
+
+        it('does not repeat the version when the client title embeds it', async () => {
+            const r = await run(['session-info', String(id2), '--db', dbPath]);
+            expect(r.code).toBe(0);
+            expect(r.out).toContain('WebStorm 2.0');
+            expect(r.out).not.toContain('WebStorm 2.0 v2.0');
+        }, TIMEOUT);
+
+        it('redacts proxyConfig tokens by default (text and --json)', async () => {
+            const text = await run(['session-info', String(id4), '--db', dbPath]);
+            expect(text.code).toBe(0);
+            expect(text.out).not.toContain(SECRET_TOKEN);
+            expect(text.out).toContain('<REDACTED>');
+            expect(text.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
+            const json = await run(['session-info', String(id4), '--db', dbPath, '--json']);
+            expect(json.out).not.toContain(SECRET_TOKEN);
+        }, TIMEOUT);
+
+        it('--raw keeps tokens and warns explicitly on stderr', async () => {
+            const r = await run(['session-info', String(id4), '--db', dbPath, '--raw']);
+            expect(r.code).toBe(0);
+            expect(r.out).toContain(SECRET_TOKEN);
+            expect(r.err).toMatch(/--raw was set/);
         }, TIMEOUT);
     });
 
@@ -604,7 +666,7 @@ describe('CLI integration — help output', () => {
         for (const section of ['CAPTURE', 'INSPECT', 'VIEW', 'MANAGE', 'SETUP', 'EXAMPLES']) {
             expect(r.out).toContain(section);
         }
-        expect(r.out).toContain('acp-devtools proxy npx -y @zed-industries/claude-code-acp');
+        expect(r.out).toContain('acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp');
     }, TIMEOUT);
 
     it('a leaf command uses the custom renderer (USAGE/OPTIONS/EXAMPLES, no commander default)', async () => {
@@ -619,5 +681,126 @@ describe('CLI integration — help output', () => {
     it('emits no ANSI escapes when piped (non-TTY stdout)', async () => {
         const r = await run(['--help']);
         expect(r.out.includes(String.fromCharCode(27))).toBe(false);
+    }, TIMEOUT);
+});
+
+// Regression: `acp-devtools list_session` (typo of `list`) used to fall
+// through to `proxy list_session`, which inserted a stray sessions row
+// before spawn ENOENT'd. Unknown commands must now error out cleanly,
+// touching neither captures.db nor process.exit==0.
+describe('CLI integration — unknown command', () => {
+    it('rejects an unknown subcommand without writing to captures.db', async () => {
+        const db = openDatabase(dbPath);
+        const before = (db.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number }).n;
+        db.close();
+
+        const r = await run(['list_session']);
+        expect(r.code).not.toBe(0);
+        expect(r.err).toMatch(/unknown command/i);
+
+        const db2 = openDatabase(dbPath);
+        const after = (db2.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number }).n;
+        const strays = (db2
+            .prepare('SELECT id FROM sessions WHERE agent_command = ?')
+            .all('list_session') as Array<{ id: number }>);
+        db2.close();
+
+        expect(after).toBe(before);
+        expect(strays).toEqual([]);
+    }, TIMEOUT);
+});
+
+// Regression: mock-agent --realtime used to emit NOTHING when stdin closed
+// before the recording-paced timers fired (the file-fed CI case) — the
+// stdin 'end' handler called process.exit(0) and killed every pending
+// setTimeout. Also pins the mock arg-validation exit code at 2 (invalid
+// usage), which both mocks previously returned as 1.
+describe('CLI integration — mock commands', () => {
+    function writeScript(path: string): void {
+        // ourDirection for role 'agent' is agent-to-editor: the engine waits
+        // for the editor request, then emits the recorded response. The 40ms
+        // gap is what --realtime defers on — long enough that a premature exit
+        // would drop the frame, short enough to keep the test fast.
+        const exp = {
+            version: 1,
+            exportedAt: 1_700_000_000_000,
+            tool: { name: 'test', version: '0.0.0' },
+            session: {
+                id: 1,
+                name: 'rt',
+                agentCommand: 'mock',
+                clientName: null,
+                startedAt: 1_700_000_000_000,
+                endedAt: null,
+            },
+            messages: [
+                {
+                    seq: 1,
+                    timestamp: 1_700_000_000_000,
+                    direction: 'editor-to-agent',
+                    kind: 'request',
+                    method: 'initialize',
+                    rpcId: 1,
+                    raw: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}',
+                    payload: { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+                },
+                {
+                    seq: 2,
+                    timestamp: 1_700_000_000_040,
+                    direction: 'agent-to-editor',
+                    kind: 'response',
+                    rpcId: 1,
+                    raw: '{"jsonrpc":"2.0","id":1,"result":{"ok":"REALTIME_MARKER"}}',
+                    payload: { jsonrpc: '2.0', id: 1, result: { ok: 'REALTIME_MARKER' } },
+                },
+            ],
+        };
+        writeFileSync(path, JSON.stringify(exp));
+    }
+
+    const editorLine = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n';
+
+    it('mock-agent --realtime emits recorded frames even when stdin closes immediately', async () => {
+        const scriptPath = join(home, 'rt-script.json');
+        writeScript(scriptPath);
+        const r = await run(['mock-agent', '--script', scriptPath, '--realtime'], {
+            stdin: editorLine,
+        });
+        expect(r.code).toBe(0);
+        expect(r.out).toContain('REALTIME_MARKER');
+    }, TIMEOUT);
+
+    it('mock-agent (instant, no --realtime) also emits the recorded frame', async () => {
+        const scriptPath = join(home, 'instant-script.json');
+        writeScript(scriptPath);
+        const r = await run(['mock-agent', '--script', scriptPath], { stdin: editorLine });
+        expect(r.code).toBe(0);
+        expect(r.out).toContain('REALTIME_MARKER');
+    }, TIMEOUT);
+
+    it('mock-agent rejects --script + --session with exit 2 (invalid usage)', async () => {
+        const scriptPath = join(home, 'mx-script.json');
+        writeScript(scriptPath);
+        const r = await run(['mock-agent', '--script', scriptPath, '--session', '1', '--db', dbPath]);
+        expect(r.code).toBe(2);
+        expect(r.err).toMatch(/mutually exclusive/);
+    }, TIMEOUT);
+
+    it('mock-editor rejects --script + --session with exit 2 (invalid usage)', async () => {
+        const scriptPath = join(home, 'mx-script-2.json');
+        writeScript(scriptPath);
+        const r = await run([
+            'mock-editor',
+            '--script',
+            scriptPath,
+            '--session',
+            '1',
+            '--db',
+            dbPath,
+            'node',
+            join(repoRoot, 'fixtures/mock-agent.js'),
+        ]);
+        expect(r.code).toBe(2);
+        expect(r.err).toMatch(/mutually exclusive/);
     }, TIMEOUT);
 });

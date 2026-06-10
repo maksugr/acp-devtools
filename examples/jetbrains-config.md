@@ -128,9 +128,10 @@ for credentials in `$CLAUDE_CONFIG_DIR` (default `~/.claude`). Either
 authenticate that profile (`claude /login` after pointing `CLAUDE_CONFIG_DIR`)
 or set `ANTHROPIC_API_KEY` in the entry's `env`.
 
-**WebStorm sends `session/set_mode` and `session/set_model` on every prompt,
-flooding the timeline.** That's WebStorm's actual behaviour, not a bug — the
-inspector hides them by default behind the "Boilerplate" filter chip.
+**WebStorm sends `session/set_mode` and `session/set_model` on every prompt.**
+That's WebStorm's actual behaviour, not a bug — the proxy records exactly what's
+on the wire, so expect those two request/response pairs before every
+`session/prompt` in the timeline.
 
 **Multiple JetBrains IDEs at once.** Each chat session spawns its own proxy on
 an ephemeral port; they all appear in the session picker simultaneously,

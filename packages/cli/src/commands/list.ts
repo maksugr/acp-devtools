@@ -2,6 +2,7 @@ import type { Command } from 'commander';
 import {
     defaultCapturesDbPath,
     listSessionsSummary,
+    type SessionFilters,
     type SessionSummary,
 } from '@acp-devtools/core';
 import { colorEnabled, createStyler } from '../lib/style.js';
@@ -38,18 +39,18 @@ export function registerListCommand(program: Command): void {
                 process.stderr.write(`acp-devtools: invalid --limit "${opts.limit}"\n`);
                 process.exit(2);
             }
-            let rows = listSessionsSummary(opts.db, limit);
-            if (opts.imported) rows = rows.filter((r) => r.imported_at !== null);
-            if (opts.saved) rows = rows.filter((r) => r.imported_at === null);
-            if (opts.client) {
-                const needle = opts.client.toLowerCase();
-                rows = rows.filter((r) => {
-                    const fields = [r.client_name, r.client_version, r.client_platform].filter(
-                        (v): v is string => typeof v === 'string',
-                    );
-                    return fields.some((f) => f.toLowerCase().includes(needle));
-                });
+            if (opts.imported && opts.saved) {
+                process.stderr.write(
+                    'acp-devtools: --imported and --saved are mutually exclusive\n',
+                );
+                process.exit(2);
             }
+            // Filters run in SQL before LIMIT — `--limit n` caps matching rows.
+            const filters: SessionFilters = {};
+            if (opts.imported) filters.imported = true;
+            if (opts.saved) filters.imported = false;
+            if (opts.client) filters.client = opts.client;
+            const rows = listSessionsSummary(opts.db, limit, filters);
 
             if (opts.json) {
                 process.stdout.write(JSON.stringify(rows, null, 2) + '\n');
