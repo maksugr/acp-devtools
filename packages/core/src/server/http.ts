@@ -19,6 +19,44 @@ export interface ApiHandlerOptions {
      * `process.argv[1]` points at vite itself.
      */
     binaryPath?: string | null;
+    /**
+     * Extra `Host` header values to accept besides the loopback set
+     * (`127.0.0.1`, `localhost`, `[::1]`) — port is ignored when comparing.
+     * Pass the explicit bind address when it isn't loopback; a wildcard bind
+     * (`0.0.0.0` / `::`) disables the check entirely.
+     */
+    allowedHosts?: string[];
+}
+
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+const WILDCARD_BINDS = new Set(['0.0.0.0', '::', '*']);
+
+function stripPort(host: string): string {
+    if (host.startsWith('[')) {
+        const end = host.indexOf(']');
+        return end === -1 ? host : host.slice(1, end);
+    }
+    const colon = host.lastIndexOf(':');
+    // a second colon means bare IPv6 — no port to strip
+    if (colon !== -1 && host.indexOf(':') === colon) return host.slice(0, colon);
+    return host;
+}
+
+/**
+ * Guard against DNS rebinding: a hostile page resolves its own domain to
+ * 127.0.0.1 and reads API responses (or DELETEs sessions) from any open
+ * browser tab unless the server checks it is addressed by a name it expects.
+ * Loopback names always pass; anything else must be in `allowedHosts`.
+ */
+export function isAllowedHost(
+    hostHeader: string | string[] | undefined,
+    allowedHosts: readonly string[] = [],
+): boolean {
+    if (allowedHosts.some((h) => WILDCARD_BINDS.has(h))) return true;
+    if (typeof hostHeader !== 'string' || hostHeader.length === 0) return false;
+    const host = stripPort(hostHeader.trim()).toLowerCase();
+    if (LOOPBACK_HOSTS.has(host)) return true;
+    return allowedHosts.some((h) => stripPort(h).toLowerCase() === host);
 }
 
 /**
@@ -30,7 +68,13 @@ export interface ApiHandlerOptions {
 export function createApiHandler(options: ApiHandlerOptions) {
     return (req: IncomingMessage, res: ServerResponse): boolean => {
         const url = req.url ?? '';
-        const path = url.split('?')[0];
+        const path = url.split('?')[0] ?? '';
+        if (path.startsWith('/api/') && !isAllowedHost(req.headers.host, options.allowedHosts)) {
+            res.statusCode = 403;
+            res.setHeader('content-type', 'application/json');
+            res.end(JSON.stringify({ error: 'forbidden host' }));
+            return true;
+        }
         if (path === '/api/active') {
             handleActive(req, res);
             return true;
@@ -265,6 +309,8 @@ function readSourceFilename(req: IncomingMessage): string | null {
 
 export interface ReplayUpgradeOptions {
     capturesDbPath: string;
+    /** Same semantics as {@link ApiHandlerOptions.allowedHosts}. */
+    allowedHosts?: string[];
 }
 
 /**
@@ -279,6 +325,11 @@ export function attachReplayUpgrade(httpServer: HttpServer, options: ReplayUpgra
         const url = req.url ?? '';
         const match = url.match(/^\/replay\/(\d+)/);
         if (!match) return;
+        if (!isAllowedHost(req.headers.host, options.allowedHosts)) {
+            socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
+            socket.destroy();
+            return;
+        }
         const sessionId = Number(match[1]);
         wss.handleUpgrade(req, socket, head, (ws) => {
             streamReplay(ws, sessionId, options.capturesDbPath);

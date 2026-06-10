@@ -6,11 +6,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { exportSessionFromParts, serializeExport } from '../storage/export.js';
 import { openDatabase, type SqliteDatabase } from '../storage/sqlite.js';
 import { Session } from '../storage/session.js';
-import { createApiHandler } from './http.js';
+import { attachReplayUpgrade, createApiHandler, isAllowedHost } from './http.js';
 
 interface MockReq {
     url: string;
     method: string;
+    headers: Record<string, string>;
 }
 
 interface MockRes {
@@ -22,8 +23,8 @@ interface MockRes {
     end(body?: string): void;
 }
 
-function makeReq(url: string, method = 'GET'): MockReq {
-    return { url, method };
+function makeReq(url: string, method = 'GET', host = '127.0.0.1:3737'): MockReq {
+    return { url, method, headers: { host } };
 }
 
 /**
@@ -44,7 +45,7 @@ function makeStreamReq(
     };
     stream.url = url;
     stream.method = method;
-    stream.headers = headers;
+    stream.headers = { host: '127.0.0.1:3737', ...headers };
     return stream as Readable & { url: string; method: string; headers: Record<string, string> };
 }
 
@@ -352,5 +353,114 @@ describe('DELETE /api/sessions/:id', () => {
         handler(req as never, res as never);
         expect(res.statusCode).toBe(405);
         expect(res.headers['allow']).toBe('DELETE');
+    });
+});
+
+describe('Host validation (DNS-rebinding guard)', () => {
+    it.each(['127.0.0.1:3737', 'localhost:5173', '[::1]:3737', 'LOCALHOST'])(
+        'serves api requests addressed to loopback host %s',
+        (host) => {
+            const handler = createApiHandler({ capturesDbPath: dbPath });
+            const req = makeReq('/api/active', 'GET', host);
+            const res = makeRes();
+            expect(handler(req as never, res as never)).toBe(true);
+            expect(res.statusCode).toBe(200);
+        },
+    );
+
+    it('rejects a rebound external host with 403', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/api/sessions', 'GET', 'evil.example:3737');
+        const res = makeRes();
+        expect(handler(req as never, res as never)).toBe(true);
+        expect(res.statusCode).toBe(403);
+        expect(JSON.parse(res.body)).toEqual({ error: 'forbidden host' });
+    });
+
+    it('rejects a request with no Host header', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = { url: '/api/active', method: 'GET', headers: {} };
+        const res = makeRes();
+        expect(handler(req as never, res as never)).toBe(true);
+        expect(res.statusCode).toBe(403);
+    });
+
+    it('guards DELETE the same way', () => {
+        const s = Session.start(db, { agentCommand: 'kept' });
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq(`/api/sessions/${s.info.id}`, 'DELETE', 'evil.example');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(403);
+        const rows = db.prepare(`SELECT id FROM sessions`).all();
+        expect(rows).toHaveLength(1); // not deleted
+    });
+
+    it('accepts an explicitly allowed non-loopback host, ignoring the port', () => {
+        const handler = createApiHandler({
+            capturesDbPath: dbPath,
+            allowedHosts: ['192.168.1.10'],
+        });
+        const req = makeReq('/api/active', 'GET', '192.168.1.10:3737');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(200);
+    });
+
+    it('disables the check for a wildcard bind', () => {
+        const handler = createApiHandler({
+            capturesDbPath: dbPath,
+            allowedHosts: ['0.0.0.0'],
+        });
+        const req = makeReq('/api/active', 'GET', 'anything.example');
+        const res = makeRes();
+        handler(req as never, res as never);
+        expect(res.statusCode).toBe(200);
+    });
+
+    it('still returns false for non-api paths regardless of host', () => {
+        const handler = createApiHandler({ capturesDbPath: dbPath });
+        const req = makeReq('/index.html', 'GET', 'evil.example');
+        const res = makeRes();
+        expect(handler(req as never, res as never)).toBe(false);
+        expect(res.ended).toBe(false);
+    });
+
+    it('isAllowedHost strips ports and brackets correctly', () => {
+        expect(isAllowedHost('127.0.0.1')).toBe(true);
+        expect(isAllowedHost('[::1]:8080')).toBe(true);
+        expect(isAllowedHost('localhost:5173')).toBe(true);
+        expect(isAllowedHost('evil.example')).toBe(false);
+        expect(isAllowedHost(undefined)).toBe(false);
+        expect(isAllowedHost('lan-box:3737', ['lan-box'])).toBe(true);
+        expect(isAllowedHost('other:3737', ['lan-box'])).toBe(false);
+        expect(isAllowedHost('anything', ['::'])).toBe(true);
+    });
+
+    it('rejects a hostile WS replay upgrade before the handshake', () => {
+        const handlers: Record<string, (req: unknown, socket: unknown, head: Buffer) => void> = {};
+        const fakeServer = {
+            on(event: string, cb: (req: unknown, socket: unknown, head: Buffer) => void) {
+                handlers[event] = cb;
+            },
+        };
+        attachReplayUpgrade(fakeServer as never, { capturesDbPath: dbPath });
+        let written = '';
+        let destroyed = false;
+        const socket = {
+            write(s: string) {
+                written += s;
+            },
+            destroy() {
+                destroyed = true;
+            },
+        };
+        handlers['upgrade']!(
+            { url: '/replay/1', headers: { host: 'evil.example' } },
+            socket,
+            Buffer.alloc(0),
+        );
+        expect(written).toContain('403 Forbidden');
+        expect(destroyed).toBe(true);
     });
 });

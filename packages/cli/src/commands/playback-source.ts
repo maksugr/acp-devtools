@@ -23,6 +23,18 @@ export interface LoadedPlaybackScript {
 }
 
 /**
+ * Bad-flags error (mutually exclusive options, malformed --session) as opposed
+ * to a not-found error (missing file, empty database). Callers map this to the
+ * invalid-usage exit code 2; every other throw stays exit 1.
+ */
+export class PlaybackUsageError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'PlaybackUsageError';
+    }
+}
+
+/**
  * Resolve a mock command's input — either a JSON file (a teammate's export)
  * or a session row out of captures.db (the default, since the user almost
  * always wants something they captured themselves). Throws with a
@@ -30,7 +42,7 @@ export interface LoadedPlaybackScript {
  */
 export function loadPlaybackScript(opts: PlaybackSourceOptions): LoadedPlaybackScript {
     if (opts.script && opts.session !== undefined) {
-        throw new Error('--script and --session are mutually exclusive');
+        throw new PlaybackUsageError('--script and --session are mutually exclusive');
     }
     if (opts.script) {
         let text: string;
@@ -50,7 +62,7 @@ export function loadPlaybackScript(opts: PlaybackSourceOptions): LoadedPlaybackS
         if (opts.session !== undefined) {
             const id = Number(opts.session);
             if (!Number.isInteger(id) || id <= 0) {
-                throw new Error(`invalid --session "${opts.session}"`);
+                throw new PlaybackUsageError(`invalid --session "${opts.session}"`);
             }
             session = Session.load(db, id);
         } else {

@@ -10,7 +10,7 @@ import {
     serializeExport,
     type SqliteDatabase,
 } from '@acp-devtools/core';
-import { loadPlaybackScript } from './playback-source.js';
+import { PlaybackUsageError, loadPlaybackScript } from './playback-source.js';
 
 const mk = (seq: number, overrides: Partial<CapturedMessage> = {}): CapturedMessage => ({
     seq,
@@ -93,17 +93,27 @@ describe('loadPlaybackScript', () => {
         expect(loaded.source).toBe('foo.json');
     });
 
-    it('rejects --script + --session together', () => {
+    it('rejects --script + --session together as a usage error (exit-2 class)', () => {
+        expect(() => loadPlaybackScript({ db: dbPath, script: 'x.json', session: '1' })).toThrow(
+            PlaybackUsageError,
+        );
         expect(() => loadPlaybackScript({ db: dbPath, script: 'x.json', session: '1' })).toThrow(
             /mutually exclusive/,
         );
     });
 
-    it('rejects an invalid --session value', () => {
-        expect(() => loadPlaybackScript({ db: dbPath, session: 'abc' })).toThrow(
-            /invalid --session/,
-        );
+    it('rejects an invalid --session value as a usage error (exit-2 class)', () => {
+        expect(() => loadPlaybackScript({ db: dbPath, session: 'abc' })).toThrow(PlaybackUsageError);
         expect(() => loadPlaybackScript({ db: dbPath, session: '0' })).toThrow(/invalid --session/);
+    });
+
+    it('a missing session is a not-found error, NOT a usage error (exit-1 class)', () => {
+        // 999 doesn't exist; this must stay exit 1, so it must not be a
+        // PlaybackUsageError (which the mocks map to exit 2).
+        expect(() => loadPlaybackScript({ db: dbPath, session: '999' })).toThrow();
+        expect(() => loadPlaybackScript({ db: dbPath, session: '999' })).not.toThrow(
+            PlaybackUsageError,
+        );
     });
 
     it('errors with a helpful message when the db is empty and no --script given', () => {

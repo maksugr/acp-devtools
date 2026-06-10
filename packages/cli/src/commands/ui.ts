@@ -130,9 +130,13 @@ export function registerUiCommand(program: Command): void {
                 process.exit(1);
             }
             const capturesDbPath = opts.capturesDb ?? defaultCapturesDbPath();
+            // Loopback hosts always pass the Host check; this adds an explicit
+            // non-loopback bind (a wildcard bind disables the check).
+            const allowedHosts = [opts.host];
             const apiHandler = createApiHandler({
                 capturesDbPath,
                 binaryPath: process.argv[1] ?? null,
+                allowedHosts,
             });
 
             const server = createServer((req, res) => {
@@ -140,7 +144,7 @@ export function registerUiCommand(program: Command): void {
                 serveStatic(req, res, rootDir);
             });
 
-            attachReplayUpgrade(server, { capturesDbPath });
+            attachReplayUpgrade(server, { capturesDbPath, allowedHosts });
 
             await new Promise<void>((resolveListen, rejectListen) => {
                 server.once('error', rejectListen);

@@ -95,7 +95,7 @@ export function registerProxyCommand(program: Command): void {
             } else {
                 process.stderr.write(
                     `acp-devtools: no agent specified.\n` +
-                        `  Pass an agent command (\`acp-devtools proxy npx -y @zed-industries/claude-code-acp\`)\n` +
+                        `  Pass an agent command (\`acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp\`)\n` +
                         `  or use --agent <name> with one of: ${knownAgentList}.\n`,
                 );
                 process.exit(2);

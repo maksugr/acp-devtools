@@ -2,7 +2,7 @@ import type { CapturedMessage, SessionRecord } from '@acp-devtools/core';
 import { exportSessionFromParts, serializeExport } from '@acp-devtools/core/storage/export';
 import { redactSessionExport } from '@acp-devtools/core/storage/redact';
 
-const UI_TOOL = { name: 'acp-devtools-ui', version: '0.2.1' };
+const UI_TOOL = { name: 'acp-devtools-ui', version: '0.3.0' };
 
 /**
  * Build a filesystem-safe filename for an exported session.

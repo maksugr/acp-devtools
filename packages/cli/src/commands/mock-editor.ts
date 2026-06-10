@@ -11,7 +11,7 @@ import {
     type CapturedMessage,
     type SqliteDatabase,
 } from '@acp-devtools/core';
-import { loadPlaybackScript } from './playback-source.js';
+import { PlaybackUsageError, loadPlaybackScript } from './playback-source.js';
 
 interface MockEditorOptions {
     script?: string;
@@ -63,7 +63,7 @@ export function registerMockEditorCommand(program: Command): void {
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 process.stderr.write(`acp-devtools: ${msg}\n`);
-                process.exit(1);
+                process.exit(err instanceof PlaybackUsageError ? 2 : 1);
             }
             const engine = new PlaybackEngine(loaded.messages, 'editor');
             process.stderr.write(

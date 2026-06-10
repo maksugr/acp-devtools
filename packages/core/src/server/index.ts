@@ -4,6 +4,7 @@ export {
     insertImportedSession,
     deleteSession,
     findSessionsByClient,
+    type SessionFilters,
     type SessionSummary,
     type InsertImportResult,
 } from './queries.js';

@@ -10,7 +10,7 @@ import {
     type CapturedMessage,
     type SqliteDatabase,
 } from '@acp-devtools/core';
-import { loadPlaybackScript } from './playback-source.js';
+import { PlaybackUsageError, loadPlaybackScript } from './playback-source.js';
 
 interface MockAgentOptions {
     script?: string;
@@ -56,7 +56,7 @@ export function registerMockAgentCommand(program: Command): void {
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 process.stderr.write(`acp-devtools: ${msg}\n`);
-                process.exit(1);
+                process.exit(err instanceof PlaybackUsageError ? 2 : 1);
             }
             const engine = new PlaybackEngine(loaded.messages, 'agent');
             process.stderr.write(
@@ -121,11 +121,25 @@ export function registerMockAgentCommand(program: Command): void {
             // state via onIncoming, but emit is already scheduled and the
             // captured `step.line` is what gets written when the timer fires.
             let pendingTimer: ReturnType<typeof setTimeout> | null = null;
+            let stdinEnded = false;
 
             const emit = (line: string) => {
                 process.stdout.write(line + '\n');
                 log('←', line);
                 capture(line, 'agent-to-editor');
+            };
+
+            // The engine can make no further progress (script exhausted, or it
+            // needs editor input that will never arrive). Exit only once stdin
+            // has ended AND no --realtime emit is still scheduled — exiting
+            // while a timer is pending would drop the frames it was about to
+            // write (the bug: file-fed `--realtime` emitted nothing because
+            // stdin EOF fired process.exit before the delayed emits ran).
+            const finishIfDrained = () => {
+                if (stdinEnded && !pendingTimer) {
+                    closeSession();
+                    process.exit(0);
+                }
             };
 
             const drain = () => {
@@ -146,12 +160,10 @@ export function registerMockAgentCommand(program: Command): void {
                         emit(step.line);
                         continue;
                     }
-                    if (step.kind === 'done') {
-                        // Script exhausted — keep consuming any further editor
-                        // input silently so the IDE doesn't get a pipe error.
-                        return;
-                    }
-                    return; // wait
+                    // 'done' (script exhausted) or 'wait' (needs more editor
+                    // input) — no progress possible without another stdin line.
+                    finishIfDrained();
+                    return;
                 }
             };
 
@@ -171,9 +183,11 @@ export function registerMockAgentCommand(program: Command): void {
                 }
             });
             process.stdin.on('end', () => {
+                stdinEnded = true;
+                // If a realtime emit is mid-flight, its timer chain will call
+                // drain() → finishIfDrained() once it lands; otherwise this
+                // drain exits now.
                 drain();
-                closeSession();
-                process.exit(0);
             });
 
             // Some scripts have notifications at the very start (no waiting).

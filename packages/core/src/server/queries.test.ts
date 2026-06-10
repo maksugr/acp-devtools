@@ -155,6 +155,57 @@ describe('listSessionsSummary', () => {
         expect(out[0]?.imported_at).toEqual(expect.any(Number));
         expect(out[1]?.imported_at).toBeNull();
     });
+
+    it('applies filters in SQL before LIMIT — small limit still finds older matches', () => {
+        // 1 old Zed session buried under 3 newer client-less sessions.
+        const zed = Session.start(db, { agentCommand: 'mock', startedAt: 1000 });
+        zed.setClientName('Zed');
+        for (let i = 0; i < 3; i++) {
+            Session.start(db, { agentCommand: `noise${i}`, startedAt: 2000 + i });
+        }
+        const out = listSessionsSummary(dbPath, 2, { client: 'zed' });
+        expect(out.map((r) => r.id)).toEqual([zed.info.id]);
+    });
+
+    it('filters imported: true / false with limit on matching rows', () => {
+        Session.start(db, { agentCommand: 'live-a', startedAt: 1000 });
+        Session.start(db, { agentCommand: 'live-b', startedAt: 2000 });
+        const exp = exportSessionFromParts(
+            {
+                id: 9,
+                name: 'imp',
+                agentCommand: 'mock',
+                clientName: null,
+                startedAt: 500,
+                endedAt: 600,
+                importedAt: null,
+            },
+            [mockMessage(1)],
+            { tool: { name: 't', version: '1' } },
+        );
+        db.close();
+        insertImportedSession(dbPath, exp);
+        db = openDatabase(dbPath);
+
+        // imported_at (~now) sorts the import first — without WHERE, limit 1
+        // would return it and `imported: false` would then find nothing.
+        const saved = listSessionsSummary(dbPath, 1, { imported: false });
+        expect(saved).toHaveLength(1);
+        expect(saved[0]?.agent_command).toBe('live-b');
+        const imported = listSessionsSummary(dbPath, 5, { imported: true });
+        expect(imported.map((r) => r.name)).toEqual(['imp']);
+    });
+
+    it('client filter matches version and platform columns case-insensitively', () => {
+        const s = Session.start(db, { agentCommand: 'mock' });
+        s.setClientName('WebStorm');
+        db.prepare(
+            `UPDATE sessions SET client_version = '2026.1.2', client_platform = 'intellij' WHERE id = ?`,
+        ).run(s.info.id);
+        expect(listSessionsSummary(dbPath, 50, { client: 'INTELLIJ' })).toHaveLength(1);
+        expect(listSessionsSummary(dbPath, 50, { client: '2026.1' })).toHaveLength(1);
+        expect(listSessionsSummary(dbPath, 50, { client: 'zed' })).toHaveLength(0);
+    });
 });
 
 describe('insertImportedSession', () => {

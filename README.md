@@ -6,6 +6,8 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/acp-devtools"><img alt="npm version" src="https://img.shields.io/npm/v/acp-devtools"></a>
+  <a href="https://www.npmjs.com/package/acp-devtools"><img alt="npm downloads" src="https://img.shields.io/npm/dm/acp-devtools"></a>
   <a href="https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/maksugr/acp-devtools/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <a href="package.json"><img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A522-brightgreen"></a>
@@ -73,7 +75,7 @@ fields not declared in the spec.
 <summary><b>Stream clusters</b> — <code>agent_message_chunk</code> runs collapse to one <code>STR</code> row</summary>
 
 A shimmer bar marks the cluster while chunks are still arriving — tells
-«agent thinking» apart from «agent stuck». Click to expand the individual
+"agent thinking" apart from "agent stuck". Click to expand the individual
 chunks.
 </details>
 
@@ -178,7 +180,9 @@ npx acp-devtools ui                  # downloads on first run, slower start; cac
 ### Install via Homebrew
 
 ```bash
-brew install maksugr/tap/acp-devtools
+brew tap maksugr/tap
+brew trust maksugr/tap     # required once — Homebrew 5+ blocks third-party taps by default
+brew install acp-devtools
 ```
 
 ### Run the inspector
@@ -203,7 +207,21 @@ Connect any editor (Zed as an example) — open `~/.config/zed/settings.json` (`
 That's the whole config for the default Claude Code setup — `acp-devtools`
 detects it was spawned by an editor (stdin is a pipe) and runs
 `proxy --agent claude-code` internally. Send a prompt → the proxy spawns the
-agent, and the inspector picks up the live capture.
+agent, and within a second the inspector shows the handshake:
+
+```
+┌─ SESSION #1 · LIVE ────────────────────────────────────┐
+│ #1  18:34:06  → OUT  REQ  initialize             id:0  │
+│ #2  18:34:06  ← IN   RSP  —                    +402ms  │
+│ #3  18:34:06  → OUT  REQ  session/new            id:1  │
+│ #4  18:34:08  ← IN   RSP  —                    +1.84s  │
+│ #5  18:34:15  → OUT  REQ  session/prompt         id:2  │
+│ #6  18:34:16  ← IN   STR  agent_message_chunk     ×42  │
+└────────────────────────────────────────────────────────┘
+```
+
+If the timeline stays empty after a prompt, the editor most likely couldn't
+find the binary:
 
 > If editor reports "agent command not found", replace `"acp-devtools"` with the
 > absolute path from `which acp-devtools` — GUI apps inherit a minimal `PATH`
@@ -245,9 +263,9 @@ Full reference: **[docs/cli.md](docs/cli.md)**. Task-driven walkthroughs
 Desktop, …) as eleven read-only tools so you can ask it to investigate your own
 traces:
 
-> «find spec violations in the last 10 sessions» ·
-> «compare p99 of `session/prompt` between WebStorm and Zed» ·
-> «diff sessions 41 and 42 — what changed?»
+> "find spec violations in the last 10 sessions" ·
+> "compare p99 of `session/prompt` between WebStorm and Zed" ·
+> "diff sessions 41 and 42 — what changed?"
 
 Setup in one command (Claude Code as an example):
 
@@ -342,6 +360,14 @@ Redaction rewrites **both** `payload` (parsed) and `raw` (wire string), so
 the secret can't leak via either field. A summary lands on stderr:
 `redacted N field(s) across M message(s) — re-run with --raw to keep them`.
 
+The same default applies everywhere output is likely to leave your machine:
+`export`, the UI's download button, every MCP tool response, `diff`, and
+`session-info` (the last two take the same `--raw` opt-out). Two surfaces
+stay raw on purpose: `inspect` prints the actual wire bytes for local
+triage, and the local HTTP API the UI reads
+(`GET /api/sessions/:id/messages`) returns frames as captured — treat both
+like the database file itself, not like an export.
+
 ### What it does **not** redact (your call)
 
 File contents loaded via `fs/read_text_file` and the prompts / responses
@@ -350,7 +376,7 @@ that's a judgement call. Before sharing, audit with:
 
 ```bash
 acp-devtools inspect 21 --kind ntf  # all notifications (responses, streaming, tool calls)
-acp-devtools inspect 21 --grep proxy_key  # confirm tokens are masked
+acp-devtools inspect 21 --grep proxy_key  # see which frames carry tokens (inspect shows raw bytes)
 ```
 
 If something in those fields shouldn't ship, either drop the offending
@@ -394,10 +420,12 @@ playground just renders.
 
 ## Documentation
 
+- [Anatomy of an ACP session](docs/session-anatomy.md) — how to read a capture: handshake, prompt turn, what broken looks like
 - [CLI reference](docs/cli.md) — every command, flag, and sample output
 - [The inspector (UI)](docs/ui.md) — timeline, detail panel, perf, diff
 - [MCP server](docs/mcp.md) — tools and setup
 - [Recipes](docs/recipes.md) — headless debugging, diffing, mock-based testing
+- [Changelog](CHANGELOG.md) — what shipped in each release
 - [Contributing](CONTRIBUTING.md) — build from source, layout, conventions
 
 ---

@@ -22,13 +22,41 @@ export interface SessionSummary {
     current_model: string | null;
 }
 
+export interface SessionFilters {
+    /** Case-insensitive substring over client name / version / platform. */
+    client?: string;
+    /** true → only imported sessions; false → only live-captured; omit → both. */
+    imported?: boolean;
+}
+
 /**
- * Return all sessions in the given captures.db with their message counts,
- * newest first. Returns an empty list if the file does not exist — the UI
- * surfaces this as "no saved sessions yet" rather than an error.
+ * Return sessions in the given captures.db with their message counts, newest
+ * first. Filters are part of the SQL WHERE, so `limit` caps the *matching*
+ * rows — `{ imported: true }` with limit 5 returns the 5 newest imported
+ * sessions, not "imported among the 5 newest overall". Returns an empty list
+ * if the file does not exist — the UI surfaces this as "no saved sessions
+ * yet" rather than an error.
  */
-export function listSessionsSummary(dbPath: string, limit = 200): SessionSummary[] {
+export function listSessionsSummary(
+    dbPath: string,
+    limit = 200,
+    filters: SessionFilters = {},
+): SessionSummary[] {
     if (!existsSync(dbPath)) return [];
+    const where: string[] = [];
+    const params: unknown[] = [];
+    if (filters.imported === true) where.push('s.imported_at IS NOT NULL');
+    if (filters.imported === false) where.push('s.imported_at IS NULL');
+    if (filters.client) {
+        // instr() instead of LIKE — substring match without %/_ escaping.
+        where.push(
+            `(instr(lower(coalesce(s.client_name, '')), ?)
+              + instr(lower(coalesce(s.client_version, '')), ?)
+              + instr(lower(coalesce(s.client_platform, '')), ?)) > 0`,
+        );
+        const needle = filters.client.toLowerCase();
+        params.push(needle, needle, needle);
+    }
     const db = openDatabase(dbPath);
     try {
         return db
@@ -46,10 +74,11 @@ export function listSessionsSummary(dbPath: string, limit = 200): SessionSummary
                     s.current_mode, s.current_model,
                     (SELECT COUNT(*) FROM messages WHERE session_id = s.id) AS message_count
                  FROM sessions s
+                 ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
                  ORDER BY COALESCE(s.imported_at, s.started_at) DESC
                  LIMIT ?`,
             )
-            .all(limit) as SessionSummary[];
+            .all(...params, limit) as SessionSummary[];
     } finally {
         db.close();
     }
@@ -62,27 +91,16 @@ export function listSessionsSummary(dbPath: string, limit = 200): SessionSummary
  * columns being populated (by the proxy live, or by `backfill-metadata`
  * for older captures).
  *
- * `limit` is the cap on **results** returned, not the pre-filter pool.
- * A small limit (e.g. 3 from an MCP caller) used to bypass any WebStorm
- * session if the three newest happened to be Zed — fixed by fetching a
- * generous pool first, then trimming.
+ * `limit` caps the **matching** rows: the filter runs in SQL before LIMIT,
+ * so a small limit (e.g. 3 from an MCP caller) still finds WebStorm
+ * sessions even when the newest captures are all Zed.
  */
-const FIND_BY_CLIENT_POOL_SIZE = 500;
-
 export function findSessionsByClient(
     dbPath: string,
     needle: string,
     limit = 200,
 ): SessionSummary[] {
-    const pool = listSessionsSummary(dbPath, FIND_BY_CLIENT_POOL_SIZE);
-    const lower = needle.toLowerCase();
-    const matches = pool.filter((s) => {
-        const candidates = [s.client_name, s.client_version, s.client_platform].filter(
-            (v): v is string => typeof v === 'string',
-        );
-        return candidates.some((c) => c.toLowerCase().includes(lower));
-    });
-    return matches.slice(0, limit);
+    return listSessionsSummary(dbPath, limit, { client: needle });
 }
 
 export interface InsertImportResult {

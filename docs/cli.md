@@ -85,8 +85,8 @@ acp-devtools list --limit 5 --json         # machine-readable
 | Flag | Default | Meaning |
 |---|---|---|
 | `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--limit <n>` | `50` | maximum rows |
-| `--imported` | — | only imported sessions |
+| `--limit <n>` | `50` | maximum rows, counted AFTER filters — `--imported --limit 5` returns the 5 newest imported sessions |
+| `--imported` | — | only imported sessions (mutually exclusive with `--saved` — together they exit `2`) |
 | `--saved` | — | only non-imported (live-captured) sessions |
 | `--client <s>` | — | case-insensitive substring match on `client_name`/`client_version`/`client_platform` |
 | `--json` | — | emit JSON instead of an aligned table |
@@ -284,6 +284,14 @@ acp-devtools diff 23 41 --json | jq '.metadata, .perf, .summary'
 | `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
 | `--full` | — | print unchanged frames too (default collapses equal runs) |
 | `--json` | — | machine-readable JSON (`metadata` + `perf` + `summary` + `rows`) |
+| `--raw` | off (redacts) | keep auth headers and proxy tokens in printed values — use only when the output stays on YOUR machine |
+
+Auth headers and proxy tokens are redacted by default, before alignment —
+same rules as [`export`](#export-id). That kills two birds: nothing live
+lands in a copy-pasted diff, and two rotated tokens both become
+`<REDACTED>`, so per-run token churn no longer shows up as a `≠` frame.
+A summary goes to stderr: `redacted N field(s) across M message(s) —
+re-run with --raw to compare live values`.
 
 Sample output:
 
@@ -340,13 +348,14 @@ acp-devtools session-info 23 --json | jq '.metadata.clientCapabilities'
 |---|---|---|
 | `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
 | `--json` | — | machine-readable JSON instead of human-readable text |
+| `--raw` | off (redacts) | keep auth headers and proxy tokens (the JetBrains `proxyConfig` gateway token prints as `<REDACTED>` by default) |
 
 Sample output for a WebStorm capture:
 
 ```
 SESSION #23
 ────────────────────────────────────────────────
-  Client             WebStorm 2026.1.2 v2026.1.2 (intellij)
+  Client             WebStorm 2026.1.2 (intellij)
   Agent              @agentclientprotocol/claude-agent-acp v0.37.0
   Protocol           ACP v1
   Started            2026-05-27T12:09:29.336Z → 2026-05-27T14:15:28.551Z
@@ -557,7 +566,8 @@ Use cases (building your own agent, regression testing, CI, backward-compat,
 bug repro) are in [recipes → mock the editor](recipes.md#mock-the-editor).
 
 ```bash
-# Quick smoke — replay the latest captured session against a fixture agent
+# Quick smoke — replay the latest captured session against the stub agent
+# that ships in the repo (needs a checkout)
 acp-devtools mock-editor --log pretty node fixtures/mock-agent.js
 
 # Replay a specific session against your agent

@@ -61,7 +61,7 @@ export const SUMMARIES: Record<string, string> = {
 
 const ROOT_EXAMPLES: string[] = [
     '# Capture a Claude Code session (Zed adapter)',
-    'acp-devtools proxy npx -y @zed-industries/claude-code-acp',
+    'acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp',
     '',
     '# Browse captured sessions in the web inspector',
     'acp-devtools ui',
@@ -79,7 +79,7 @@ const ROOT_EXAMPLES: string[] = [
 const EXAMPLES: Record<string, string[]> = {
     proxy: [
         '# Wrap the Zed Claude Code adapter and capture every frame',
-        'acp-devtools proxy npx -y @zed-industries/claude-code-acp',
+        'acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp',
         '',
         '# Capture headless, into a specific database',
         'acp-devtools proxy --no-ws --save-to /tmp/run.db node ./my-agent.js',

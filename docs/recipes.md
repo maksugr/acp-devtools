@@ -148,7 +148,7 @@ fixture) agent — fast feedback with no GUI in the loop.
   editors.
 
 ```bash
-# Smoke against a fixture agent
+# Smoke against the stub agent that ships in the repo (needs a checkout)
 acp-devtools mock-editor --log pretty node fixtures/mock-agent.js
 
 # Regression: baseline vs new build

@@ -10,6 +10,7 @@ import {
     type MetadataDiff,
     type MethodStatsDelta,
     openExistingDatabase,
+    redactMessage,
     Session,
     type SessionDiff,
     type SessionRecord,
@@ -22,6 +23,7 @@ interface DiffCommandOptions {
     db: string;
     json?: boolean;
     full?: boolean;
+    raw: boolean;
 }
 
 export function registerDiffCommand(program: Command): void {
@@ -35,6 +37,11 @@ export function registerDiffCommand(program: Command): void {
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
         .option('--full', 'print unchanged frames too (default collapses equal runs)')
         .option('--json', 'machine-readable JSON instead of human-readable text')
+        .option(
+            '--raw',
+            'skip default redaction of auth headers / proxy tokens (use only when the output stays on YOUR machine)',
+            false,
+        )
         .action((rawA: string, rawB: string, opts: DiffCommandOptions) => {
             const idA = parseId(rawA);
             const idB = parseId(rawB);
@@ -67,6 +74,36 @@ export function registerDiffCommand(program: Command): void {
             }
             db.close();
 
+            // SECURITY: redact BEFORE alignment, like MCP diff_sessions — two
+            // different live tokens both become <REDACTED> and compare equal,
+            // so rotation noise disappears along with the leak.
+            let fieldsRedacted = 0;
+            let messagesAffected = 0;
+            if (!opts.raw) {
+                const redactAll = (msgs: CapturedMessage[]): CapturedMessage[] =>
+                    msgs.map((m) => {
+                        const r = redactMessage(m);
+                        if (r.count > 0) {
+                            messagesAffected += 1;
+                            fieldsRedacted += r.count;
+                        }
+                        return r.redacted;
+                    });
+                msgsA = redactAll(msgsA);
+                msgsB = redactAll(msgsB);
+            }
+            const writeRedactionNote = () => {
+                if (opts.raw) {
+                    process.stderr.write(
+                        'acp-devtools: --raw was set; output may contain auth headers / proxy tokens — do not share publicly\n',
+                    );
+                } else if (fieldsRedacted > 0) {
+                    process.stderr.write(
+                        `acp-devtools: redacted ${fieldsRedacted} field(s) across ${messagesAffected} message(s) — re-run with --raw to compare live values\n`,
+                    );
+                }
+            };
+
             const diff = buildSessionDiff(msgsA, msgsB);
             const meta = buildMetadataDiff(msgsA, msgsB);
             const perf = buildMethodStatsDiff(msgsA, msgsB);
@@ -86,6 +123,7 @@ export function registerDiffCommand(program: Command): void {
                         2,
                     ) + '\n',
                 );
+                writeRedactionNote();
                 return;
             }
 
@@ -93,6 +131,7 @@ export function registerDiffCommand(program: Command): void {
             process.stdout.write(
                 renderDiff(infoA, infoB, msgsA.length, msgsB.length, diff, meta, perf, Boolean(opts.full), st),
             );
+            writeRedactionNote();
         });
 }
 
