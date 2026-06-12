@@ -1,0 +1,1063 @@
+{
+    "version": 1,
+    "exportedAt": 1781283223211,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 67,
+        "name": null,
+        "agentCommand": "npx -y @agentclientprotocol/claude-agent-acp",
+        "clientName": "Zed",
+        "startedAt": 1781027007183,
+        "endedAt": null
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781027007188,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true},\"terminal\":true,\"auth\":{\"terminal\":true},\"_meta\":{\"terminal_output\":true,\"terminal-auth\":true}},\"clientInfo\":{\"name\":\"zed\",\"title\":\"Zed\",\"version\":\"1.5.4+stable.300.193b55aa3aa71accf0dcd78709ee164a8ca42d54\"}},\"id\":\"923b32c5-8128-4f02-8682-f46726460ef8\"}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        },
+                        "terminal": true,
+                        "auth": {
+                            "terminal": true
+                        },
+                        "_meta": {
+                            "terminal_output": true,
+                            "terminal-auth": true
+                        }
+                    },
+                    "clientInfo": {
+                        "name": "zed",
+                        "title": "Zed",
+                        "version": "1.5.4+stable.300.193b55aa3aa71accf0dcd78709ee164a8ca42d54"
+                    }
+                },
+                "id": "923b32c5-8128-4f02-8682-f46726460ef8"
+            },
+            "method": "initialize",
+            "rpcId": "923b32c5-8128-4f02-8682-f46726460ef8"
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781027008149,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":\"923b32c5-8128-4f02-8682-f46726460ef8\",\"result\":{\"protocolVersion\":1,\"agentCapabilities\":{\"_meta\":{\"claudeCode\":{\"promptQueueing\":true}},\"promptCapabilities\":{\"image\":true,\"embeddedContext\":true},\"mcpCapabilities\":{\"http\":true,\"sse\":true},\"loadSession\":true,\"sessionCapabilities\":{\"additionalDirectories\":{},\"close\":{},\"delete\":{},\"fork\":{},\"list\":{},\"resume\":{}}},\"agentInfo\":{\"name\":\"@agentclientprotocol/claude-agent-acp\",\"title\":\"Claude Agent\",\"version\":\"0.43.0\"},\"authMethods\":[{\"description\":\"Use Claude subscription \",\"name\":\"Claude Subscription\",\"id\":\"claude-ai-login\",\"type\":\"terminal\",\"args\":[\"--cli\",\"auth\",\"login\",\"--claudeai\"],\"_meta\":{\"terminal-auth\":{\"command\":\"/Users/dev/.nvm/versions/node/v24.16.0/bin/node\",\"args\":[\"/Users/dev/.npm/_npx/d820eb7d96bc2600/node_modules/.bin/claude-agent-acp\",\"--cli\",\"auth\",\"login\",\"--claudeai\"],\"label\":\"Claude Login\"}}},{\"description\":\"Use Anthropic Console (API usage billing)\",\"name\":\"Anthropic Console\",\"id\":\"console-login\",\"type\":\"terminal\",\"args\":[\"--cli\",\"auth\",\"login\",\"--console\"],\"_meta\":{\"terminal-auth\":{\"command\":\"/Users/dev/.nvm/versions/node/v24.16.0/bin/node\",\"args\":[\"/Users/dev/.npm/_npx/d820eb7d96bc2600/node_modules/.bin/claude-agent-acp\",\"--cli\",\"auth\",\"login\",\"--console\"],\"label\":\"Anthropic Console Login\"}}}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": "923b32c5-8128-4f02-8682-f46726460ef8",
+                "result": {
+                    "protocolVersion": 1,
+                    "agentCapabilities": {
+                        "_meta": {
+                            "claudeCode": {
+                                "promptQueueing": true
+                            }
+                        },
+                        "promptCapabilities": {
+                            "image": true,
+                            "embeddedContext": true
+                        },
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": true
+                        },
+                        "loadSession": true,
+                        "sessionCapabilities": {
+                            "additionalDirectories": {},
+                            "close": {},
+                            "delete": {},
+                            "fork": {},
+                            "list": {},
+                            "resume": {}
+                        }
+                    },
+                    "agentInfo": {
+                        "name": "@agentclientprotocol/claude-agent-acp",
+                        "title": "Claude Agent",
+                        "version": "0.43.0"
+                    },
+                    "authMethods": [
+                        {
+                            "description": "Use Claude subscription ",
+                            "name": "Claude Subscription",
+                            "id": "claude-ai-login",
+                            "type": "terminal",
+                            "args": ["--cli", "auth", "login", "--claudeai"],
+                            "_meta": {
+                                "terminal-auth": {
+                                    "command": "/Users/dev/.nvm/versions/node/v24.16.0/bin/node",
+                                    "args": [
+                                        "/Users/dev/.npm/_npx/d820eb7d96bc2600/node_modules/.bin/claude-agent-acp",
+                                        "--cli",
+                                        "auth",
+                                        "login",
+                                        "--claudeai"
+                                    ],
+                                    "label": "Claude Login"
+                                }
+                            }
+                        },
+                        {
+                            "description": "Use Anthropic Console (API usage billing)",
+                            "name": "Anthropic Console",
+                            "id": "console-login",
+                            "type": "terminal",
+                            "args": ["--cli", "auth", "login", "--console"],
+                            "_meta": {
+                                "terminal-auth": {
+                                    "command": "/Users/dev/.nvm/versions/node/v24.16.0/bin/node",
+                                    "args": [
+                                        "/Users/dev/.npm/_npx/d820eb7d96bc2600/node_modules/.bin/claude-agent-acp",
+                                        "--cli",
+                                        "auth",
+                                        "login",
+                                        "--console"
+                                    ],
+                                    "label": "Anthropic Console Login"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "rpcId": "923b32c5-8128-4f02-8682-f46726460ef8"
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781027008150,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/new\",\"params\":{\"cwd\":\"/Users/dev/jetbrains\",\"mcpServers\":[]},\"id\":\"0fa04b63-1e9e-4fe4-a67a-20c251e7cc53\"}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/new",
+                "params": {
+                    "cwd": "/Users/dev/jetbrains",
+                    "mcpServers": []
+                },
+                "id": "0fa04b63-1e9e-4fe4-a67a-20c251e7cc53"
+            },
+            "method": "session/new",
+            "rpcId": "0fa04b63-1e9e-4fe4-a67a-20c251e7cc53"
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781027008150,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/new\",\"params\":{\"cwd\":\"/Users/dev/jetbrains\",\"mcpServers\":[]},\"id\":\"41053103-a1e6-4d14-a87d-7f4527839a9d\"}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/new",
+                "params": {
+                    "cwd": "/Users/dev/jetbrains",
+                    "mcpServers": []
+                },
+                "id": "41053103-a1e6-4d14-a87d-7f4527839a9d"
+            },
+            "method": "session/new",
+            "rpcId": "41053103-a1e6-4d14-a87d-7f4527839a9d"
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781027008798,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":\"41053103-a1e6-4d14-a87d-7f4527839a9d\",\"result\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"modes\":{\"currentModeId\":\"default\",\"availableModes\":[{\"id\":\"auto\",\"name\":\"Auto\",\"description\":\"Use a model classifier to approve/deny permission prompts\"},{\"id\":\"default\",\"name\":\"Default\",\"description\":\"Standard behavior, prompts for dangerous operations\"},{\"id\":\"acceptEdits\",\"name\":\"Accept Edits\",\"description\":\"Auto-accept file edit operations\"},{\"id\":\"plan\",\"name\":\"Plan Mode\",\"description\":\"Planning mode, no actual tool execution\"},{\"id\":\"dontAsk\",\"name\":\"Don't Ask\",\"description\":\"Don't prompt for permissions, deny if not pre-approved\"},{\"id\":\"bypassPermissions\",\"name\":\"Bypass Permissions\",\"description\":\"Bypass all permission checks\"}]},\"configOptions\":[{\"id\":\"mode\",\"name\":\"Mode\",\"description\":\"Session permission mode\",\"category\":\"mode\",\"type\":\"select\",\"currentValue\":\"default\",\"options\":[{\"value\":\"auto\",\"name\":\"Auto\",\"description\":\"Use a model classifier to approve/deny permission prompts\"},{\"value\":\"default\",\"name\":\"Default\",\"description\":\"Standard behavior, prompts for dangerous operations\"},{\"value\":\"acceptEdits\",\"name\":\"Accept Edits\",\"description\":\"Auto-accept file edit operations\"},{\"value\":\"plan\",\"name\":\"Plan Mode\",\"description\":\"Planning mode, no actual tool execution\"},{\"value\":\"dontAsk\",\"name\":\"Don't Ask\",\"description\":\"Don't prompt for permissions, deny if not pre-approved\"},{\"value\":\"bypassPermissions\",\"name\":\"Bypass Permissions\",\"description\":\"Bypass all permission checks\"}]},{\"id\":\"model\",\"name\":\"Model\",\"description\":\"AI model to use\",\"category\":\"model\",\"type\":\"select\",\"currentValue\":\"default\",\"options\":[{\"value\":\"default\",\"name\":\"Default (recommended)\",\"description\":\"Opus 4.8 with 1M context · Most capable for complex work\"},{\"value\":\"sonnet\",\"name\":\"Sonnet\",\"description\":\"Sonnet 4.6 · Best for everyday tasks\"},{\"value\":\"haiku\",\"name\":\"Haiku\",\"description\":\"Haiku 4.5 · Fastest for quick answers\"}]},{\"id\":\"effort\",\"name\":\"Effort\",\"description\":\"Available effort levels for this model\",\"category\":\"thought_level\",\"type\":\"select\",\"currentValue\":\"default\",\"options\":[{\"value\":\"default\",\"name\":\"Default\"},{\"value\":\"low\",\"name\":\"Low\"},{\"value\":\"medium\",\"name\":\"Medium\"},{\"value\":\"high\",\"name\":\"High\"},{\"value\":\"xhigh\",\"name\":\"Xhigh\"},{\"value\":\"max\",\"name\":\"Max\"}]}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": "41053103-a1e6-4d14-a87d-7f4527839a9d",
+                "result": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "modes": {
+                        "currentModeId": "default",
+                        "availableModes": [
+                            {
+                                "id": "auto",
+                                "name": "Auto",
+                                "description": "Use a model classifier to approve/deny permission prompts"
+                            },
+                            {
+                                "id": "default",
+                                "name": "Default",
+                                "description": "Standard behavior, prompts for dangerous operations"
+                            },
+                            {
+                                "id": "acceptEdits",
+                                "name": "Accept Edits",
+                                "description": "Auto-accept file edit operations"
+                            },
+                            {
+                                "id": "plan",
+                                "name": "Plan Mode",
+                                "description": "Planning mode, no actual tool execution"
+                            },
+                            {
+                                "id": "dontAsk",
+                                "name": "Don't Ask",
+                                "description": "Don't prompt for permissions, deny if not pre-approved"
+                            },
+                            {
+                                "id": "bypassPermissions",
+                                "name": "Bypass Permissions",
+                                "description": "Bypass all permission checks"
+                            }
+                        ]
+                    },
+                    "configOptions": [
+                        {
+                            "id": "mode",
+                            "name": "Mode",
+                            "description": "Session permission mode",
+                            "category": "mode",
+                            "type": "select",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "auto",
+                                    "name": "Auto",
+                                    "description": "Use a model classifier to approve/deny permission prompts"
+                                },
+                                {
+                                    "value": "default",
+                                    "name": "Default",
+                                    "description": "Standard behavior, prompts for dangerous operations"
+                                },
+                                {
+                                    "value": "acceptEdits",
+                                    "name": "Accept Edits",
+                                    "description": "Auto-accept file edit operations"
+                                },
+                                {
+                                    "value": "plan",
+                                    "name": "Plan Mode",
+                                    "description": "Planning mode, no actual tool execution"
+                                },
+                                {
+                                    "value": "dontAsk",
+                                    "name": "Don't Ask",
+                                    "description": "Don't prompt for permissions, deny if not pre-approved"
+                                },
+                                {
+                                    "value": "bypassPermissions",
+                                    "name": "Bypass Permissions",
+                                    "description": "Bypass all permission checks"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "model",
+                            "name": "Model",
+                            "description": "AI model to use",
+                            "category": "model",
+                            "type": "select",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "default",
+                                    "name": "Default (recommended)",
+                                    "description": "Opus 4.8 with 1M context · Most capable for complex work"
+                                },
+                                {
+                                    "value": "sonnet",
+                                    "name": "Sonnet",
+                                    "description": "Sonnet 4.6 · Best for everyday tasks"
+                                },
+                                {
+                                    "value": "haiku",
+                                    "name": "Haiku",
+                                    "description": "Haiku 4.5 · Fastest for quick answers"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "effort",
+                            "name": "Effort",
+                            "description": "Available effort levels for this model",
+                            "category": "thought_level",
+                            "type": "select",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "default",
+                                    "name": "Default"
+                                },
+                                {
+                                    "value": "low",
+                                    "name": "Low"
+                                },
+                                {
+                                    "value": "medium",
+                                    "name": "Medium"
+                                },
+                                {
+                                    "value": "high",
+                                    "name": "High"
+                                },
+                                {
+                                    "value": "xhigh",
+                                    "name": "Xhigh"
+                                },
+                                {
+                                    "value": "max",
+                                    "name": "Max"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "rpcId": "41053103-a1e6-4d14-a87d-7f4527839a9d"
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781027008801,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"available_commands_update\",\"availableCommands\":[{\"name\":\"deep-research\",\"description\":\"Deep research harness — fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report. (dynamic workflow)\",\"input\":null},{\"name\":\"frontend-design\",\"description\":\"(frontend-design) Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.\",\"input\":null},{\"name\":\"huggingface-papers\",\"description\":\"(huggingface-papers) Look up and read Hugging Face paper pages in markdown, and use the papers API for structured metadata such as authors, linked models/datasets/spaces, Github repo and project page. Use when the user shares a Hugging Face paper page URL, an arXiv URL or ID, or asks to summarize, explain, or analyze an AI research paper.\",\"input\":null},{\"name\":\"positioning\",\"description\":\"(positioning) Guide founders and teams through a structured positioning statement exercise. Combines competitive research, strategic questioning, and team alignment to produce a sharp, honest positioning statement. Use when a company needs to define who they are, what they offer, and why anyone should care.\",\"input\":null},{\"name\":\"update-config\",\"description\":\"Use this skill to configure the Claude Code harness via settings.json. Automated behaviors (\\\"from now on when X\\\", \\\"each time X\\\", \\\"whenever X\\\", \\\"before/after X\\\") require hooks configured in settings.json - the harness executes these, not Claude, so memory/preferences cannot fulfill them. Also use for: permissions (\\\"allow X\\\", \\\"add permission\\\", \\\"move permission to\\\"), env vars (\\\"set X=Y\\\"), hook troubleshooting, or any changes to settings.json/settings.local.json files. Examples: \\\"allow npm commands\\\", \\\"add bq permission to global settings\\\", \\\"move permission to user settings\\\", \\\"set DEBUG=true\\\", \\\"when claude stops show X\\\". For simple settings like theme/model, suggest the /config command.\",\"input\":null},{\"name\":\"verify\",\"description\":\"Verify that a code change actually does what it's supposed to by running the app and observing behavior. Use when asked to verify a PR, confirm a fix works, test a change manually, check that a feature works, or validate local changes before pushing.\",\"input\":null},{\"name\":\"debug\",\"description\":\"Enable debug logging for this session and help diagnose issues\",\"input\":{\"hint\":\"[issue description]\"}},{\"name\":\"code-review\",\"description\":\"Review the current diff for correctness bugs and reuse/simplification/efficiency cleanups at the given effort level (low/medium: fewer, high-confidence findings; high→max: broader coverage, may include uncertain findings; ultra: deep multi-agent review in the cloud). Pass --comment to post findings as inline PR comments, or --fix to apply the findings to the working tree after the review.\",\"input\":{\"hint\":\"[low|medium|high|xhigh|max|ultra] [--fix] [--comment] [<target>]\"}},{\"name\":\"simplify\",\"description\":\"Review the changed code for reuse, simplification, efficiency, and altitude cleanups, then apply the fixes. Quality only — it does not hunt for bugs; use /code-review for that.\",\"input\":{\"hint\":\"[<target>]\"}},{\"name\":\"batch\",\"description\":\"Research and plan a large-scale change, then execute it in parallel across 5–30 isolated worktree agents that each open a PR.\",\"input\":{\"hint\":\"<instruction>\"}},{\"name\":\"fewer-permission-prompts\",\"description\":\"Scan your transcripts for common read-only Bash and MCP tool calls, then add a prioritized allowlist to project .claude/settings.json to reduce permission prompts.\",\"input\":null},{\"name\":\"loop\",\"description\":\"Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo). Omit the interval to let the model self-pace.\",\"input\":{\"hint\":\"[interval] [prompt]\"}},{\"name\":\"schedule\",\"description\":\"Create, update, list, or run scheduled cloud agents (routines) that execute on a cron schedule.\",\"input\":null},{\"name\":\"claude-api\",\"description\":\"Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration.\\nTRIGGER — read BEFORE opening the target file; don't skip because it \\\"looks like a one-liner\\\" — whenever: the prompt names Claude/Anthropic in any form (Claude, Anthropic, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`, `us.anthropic.*`, `[1m]`); the user asks about an LLM (pricing/model choice/limits/caching) — never answer from memory; OR the task is LLM-shaped with provider unstated (agent/MCP/tool-definition/multi-agent/RAG/LLM-judge/computer-use; generate/summarize/extract/classify/rewrite/converse over NL; debugging refusals/cutoffs/streaming/tool-calls/tokens).\\nSKIP only when another provider is being worked on (overrides all triggers): OpenAI/GPT/Gemini/Llama/Mistral/Cohere/Ollama named in the query; OR `grep -rE 'openai|langchain_openai|google.generativeai|genai|mistralai|cohere|ollama'` over the project hits (run this grep FIRST if no provider named — don't Read the file).\",\"input\":null},{\"name\":\"run\",\"description\":\"Launch and drive this project's app to see a change working. Use when asked to run, start, or screenshot the app, or to confirm a change works in the real app (not just tests). First looks for a project skill that already covers launching the app; otherwise falls back to built-in patterns per project type (CLI, server, TUI, Electron, browser-driven, library).\",\"input\":null},{\"name\":\"run-skill-generator\",\"description\":\"Author or improve the run-<unit> skill — a per-project skill that tells agents how to build, launch, and drive this project's app. Use when the user asks to set up the project, get it running, write run instructions, or verify build/run steps work from a clean environment.\",\"input\":null},{\"name\":\"compact\",\"description\":\"Free up context by summarizing the conversation so far\",\"input\":{\"hint\":\"<optional custom summarization instructions>\"}},{\"name\":\"context\",\"description\":\"Show current context usage\",\"input\":null},{\"name\":\"heapdump\",\"description\":\"Dump the JS heap to ~/Desktop\",\"input\":null},{\"name\":\"init\",\"description\":\"Initialize a new CLAUDE.md file with codebase documentation\",\"input\":null},{\"name\":\"reload-skills\",\"description\":\"Pick up skills added or changed on disk during this session\",\"input\":null},{\"name\":\"review\",\"description\":\"Review a pull request\",\"input\":null},{\"name\":\"security-review\",\"description\":\"Complete a security review of the pending changes on the current branch\",\"input\":null},{\"name\":\"usage-credits\",\"description\":\"Configure usage credits to keep working when you hit a limit\",\"input\":null},{\"name\":\"extra-usage\",\"description\":\"Renamed to /usage-credits\",\"input\":null},{\"name\":\"usage\",\"description\":\"Show the total cost and duration of the current session\",\"input\":null},{\"name\":\"insights\",\"description\":\"Generate a report analyzing your Claude Code sessions\",\"input\":null},{\"name\":\"goal\",\"description\":\"Set a goal — keep working until the condition is met\",\"input\":null},{\"name\":\"team-onboarding\",\"description\":\"Help teammates ramp on Claude Code with a guide from your usage\",\"input\":null}]}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "available_commands_update",
+                        "availableCommands": [
+                            {
+                                "name": "deep-research",
+                                "description": "Deep research harness — fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report. (dynamic workflow)",
+                                "input": null
+                            },
+                            {
+                                "name": "frontend-design",
+                                "description": "(frontend-design) Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.",
+                                "input": null
+                            },
+                            {
+                                "name": "huggingface-papers",
+                                "description": "(huggingface-papers) Look up and read Hugging Face paper pages in markdown, and use the papers API for structured metadata such as authors, linked models/datasets/spaces, Github repo and project page. Use when the user shares a Hugging Face paper page URL, an arXiv URL or ID, or asks to summarize, explain, or analyze an AI research paper.",
+                                "input": null
+                            },
+                            {
+                                "name": "positioning",
+                                "description": "(positioning) Guide founders and teams through a structured positioning statement exercise. Combines competitive research, strategic questioning, and team alignment to produce a sharp, honest positioning statement. Use when a company needs to define who they are, what they offer, and why anyone should care.",
+                                "input": null
+                            },
+                            {
+                                "name": "update-config",
+                                "description": "Use this skill to configure the Claude Code harness via settings.json. Automated behaviors (\"from now on when X\", \"each time X\", \"whenever X\", \"before/after X\") require hooks configured in settings.json - the harness executes these, not Claude, so memory/preferences cannot fulfill them. Also use for: permissions (\"allow X\", \"add permission\", \"move permission to\"), env vars (\"set X=Y\"), hook troubleshooting, or any changes to settings.json/settings.local.json files. Examples: \"allow npm commands\", \"add bq permission to global settings\", \"move permission to user settings\", \"set DEBUG=true\", \"when claude stops show X\". For simple settings like theme/model, suggest the /config command.",
+                                "input": null
+                            },
+                            {
+                                "name": "verify",
+                                "description": "Verify that a code change actually does what it's supposed to by running the app and observing behavior. Use when asked to verify a PR, confirm a fix works, test a change manually, check that a feature works, or validate local changes before pushing.",
+                                "input": null
+                            },
+                            {
+                                "name": "debug",
+                                "description": "Enable debug logging for this session and help diagnose issues",
+                                "input": {
+                                    "hint": "[issue description]"
+                                }
+                            },
+                            {
+                                "name": "code-review",
+                                "description": "Review the current diff for correctness bugs and reuse/simplification/efficiency cleanups at the given effort level (low/medium: fewer, high-confidence findings; high→max: broader coverage, may include uncertain findings; ultra: deep multi-agent review in the cloud). Pass --comment to post findings as inline PR comments, or --fix to apply the findings to the working tree after the review.",
+                                "input": {
+                                    "hint": "[low|medium|high|xhigh|max|ultra] [--fix] [--comment] [<target>]"
+                                }
+                            },
+                            {
+                                "name": "simplify",
+                                "description": "Review the changed code for reuse, simplification, efficiency, and altitude cleanups, then apply the fixes. Quality only — it does not hunt for bugs; use /code-review for that.",
+                                "input": {
+                                    "hint": "[<target>]"
+                                }
+                            },
+                            {
+                                "name": "batch",
+                                "description": "Research and plan a large-scale change, then execute it in parallel across 5–30 isolated worktree agents that each open a PR.",
+                                "input": {
+                                    "hint": "<instruction>"
+                                }
+                            },
+                            {
+                                "name": "fewer-permission-prompts",
+                                "description": "Scan your transcripts for common read-only Bash and MCP tool calls, then add a prioritized allowlist to project .claude/settings.json to reduce permission prompts.",
+                                "input": null
+                            },
+                            {
+                                "name": "loop",
+                                "description": "Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo). Omit the interval to let the model self-pace.",
+                                "input": {
+                                    "hint": "[interval] [prompt]"
+                                }
+                            },
+                            {
+                                "name": "schedule",
+                                "description": "Create, update, list, or run scheduled cloud agents (routines) that execute on a cron schedule.",
+                                "input": null
+                            },
+                            {
+                                "name": "claude-api",
+                                "description": "Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration.\nTRIGGER — read BEFORE opening the target file; don't skip because it \"looks like a one-liner\" — whenever: the prompt names Claude/Anthropic in any form (Claude, Anthropic, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`, `us.anthropic.*`, `[1m]`); the user asks about an LLM (pricing/model choice/limits/caching) — never answer from memory; OR the task is LLM-shaped with provider unstated (agent/MCP/tool-definition/multi-agent/RAG/LLM-judge/computer-use; generate/summarize/extract/classify/rewrite/converse over NL; debugging refusals/cutoffs/streaming/tool-calls/tokens).\nSKIP only when another provider is being worked on (overrides all triggers): OpenAI/GPT/Gemini/Llama/Mistral/Cohere/Ollama named in the query; OR `grep -rE 'openai|langchain_openai|google.generativeai|genai|mistralai|cohere|ollama'` over the project hits (run this grep FIRST if no provider named — don't Read the file).",
+                                "input": null
+                            },
+                            {
+                                "name": "run",
+                                "description": "Launch and drive this project's app to see a change working. Use when asked to run, start, or screenshot the app, or to confirm a change works in the real app (not just tests). First looks for a project skill that already covers launching the app; otherwise falls back to built-in patterns per project type (CLI, server, TUI, Electron, browser-driven, library).",
+                                "input": null
+                            },
+                            {
+                                "name": "run-skill-generator",
+                                "description": "Author or improve the run-<unit> skill — a per-project skill that tells agents how to build, launch, and drive this project's app. Use when the user asks to set up the project, get it running, write run instructions, or verify build/run steps work from a clean environment.",
+                                "input": null
+                            },
+                            {
+                                "name": "compact",
+                                "description": "Free up context by summarizing the conversation so far",
+                                "input": {
+                                    "hint": "<optional custom summarization instructions>"
+                                }
+                            },
+                            {
+                                "name": "context",
+                                "description": "Show current context usage",
+                                "input": null
+                            },
+                            {
+                                "name": "heapdump",
+                                "description": "Dump the JS heap to ~/Desktop",
+                                "input": null
+                            },
+                            {
+                                "name": "init",
+                                "description": "Initialize a new CLAUDE.md file with codebase documentation",
+                                "input": null
+                            },
+                            {
+                                "name": "reload-skills",
+                                "description": "Pick up skills added or changed on disk during this session",
+                                "input": null
+                            },
+                            {
+                                "name": "review",
+                                "description": "Review a pull request",
+                                "input": null
+                            },
+                            {
+                                "name": "security-review",
+                                "description": "Complete a security review of the pending changes on the current branch",
+                                "input": null
+                            },
+                            {
+                                "name": "usage-credits",
+                                "description": "Configure usage credits to keep working when you hit a limit",
+                                "input": null
+                            },
+                            {
+                                "name": "extra-usage",
+                                "description": "Renamed to /usage-credits",
+                                "input": null
+                            },
+                            {
+                                "name": "usage",
+                                "description": "Show the total cost and duration of the current session",
+                                "input": null
+                            },
+                            {
+                                "name": "insights",
+                                "description": "Generate a report analyzing your Claude Code sessions",
+                                "input": null
+                            },
+                            {
+                                "name": "goal",
+                                "description": "Set a goal — keep working until the condition is met",
+                                "input": null
+                            },
+                            {
+                                "name": "team-onboarding",
+                                "description": "Help teammates ramp on Claude Code with a guide from your usage",
+                                "input": null
+                            }
+                        ]
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 7,
+            "timestamp": 1781027008859,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":\"0fa04b63-1e9e-4fe4-a67a-20c251e7cc53\",\"result\":{\"sessionId\":\"d0724d6d-1b44-4434-81b8-53b5b319ee4d\",\"modes\":{\"currentModeId\":\"default\",\"availableModes\":[{\"id\":\"auto\",\"name\":\"Auto\",\"description\":\"Use a model classifier to approve/deny permission prompts\"},{\"id\":\"default\",\"name\":\"Default\",\"description\":\"Standard behavior, prompts for dangerous operations\"},{\"id\":\"acceptEdits\",\"name\":\"Accept Edits\",\"description\":\"Auto-accept file edit operations\"},{\"id\":\"plan\",\"name\":\"Plan Mode\",\"description\":\"Planning mode, no actual tool execution\"},{\"id\":\"dontAsk\",\"name\":\"Don't Ask\",\"description\":\"Don't prompt for permissions, deny if not pre-approved\"},{\"id\":\"bypassPermissions\",\"name\":\"Bypass Permissions\",\"description\":\"Bypass all permission checks\"}]},\"configOptions\":[{\"id\":\"mode\",\"name\":\"Mode\",\"description\":\"Session permission mode\",\"category\":\"mode\",\"type\":\"select\",\"currentValue\":\"default\",\"options\":[{\"value\":\"auto\",\"name\":\"Auto\",\"description\":\"Use a model classifier to approve/deny permission prompts\"},{\"value\":\"default\",\"name\":\"Default\",\"description\":\"Standard behavior, prompts for dangerous operations\"},{\"value\":\"acceptEdits\",\"name\":\"Accept Edits\",\"description\":\"Auto-accept file edit operations\"},{\"value\":\"plan\",\"name\":\"Plan Mode\",\"description\":\"Planning mode, no actual tool execution\"},{\"value\":\"dontAsk\",\"name\":\"Don't Ask\",\"description\":\"Don't prompt for permissions, deny if not pre-approved\"},{\"value\":\"bypassPermissions\",\"name\":\"Bypass Permissions\",\"description\":\"Bypass all permission checks\"}]},{\"id\":\"model\",\"name\":\"Model\",\"description\":\"AI model to use\",\"category\":\"model\",\"type\":\"select\",\"currentValue\":\"default\",\"options\":[{\"value\":\"default\",\"name\":\"Default (recommended)\",\"description\":\"Opus 4.8 with 1M context · Most capable for complex work\"},{\"value\":\"sonnet\",\"name\":\"Sonnet\",\"description\":\"Sonnet 4.6 · Best for everyday tasks\"},{\"value\":\"haiku\",\"name\":\"Haiku\",\"description\":\"Haiku 4.5 · Fastest for quick answers\"}]},{\"id\":\"effort\",\"name\":\"Effort\",\"description\":\"Available effort levels for this model\",\"category\":\"thought_level\",\"type\":\"select\",\"currentValue\":\"default\",\"options\":[{\"value\":\"default\",\"name\":\"Default\"},{\"value\":\"low\",\"name\":\"Low\"},{\"value\":\"medium\",\"name\":\"Medium\"},{\"value\":\"high\",\"name\":\"High\"},{\"value\":\"xhigh\",\"name\":\"Xhigh\"},{\"value\":\"max\",\"name\":\"Max\"}]}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": "0fa04b63-1e9e-4fe4-a67a-20c251e7cc53",
+                "result": {
+                    "sessionId": "d0724d6d-1b44-4434-81b8-53b5b319ee4d",
+                    "modes": {
+                        "currentModeId": "default",
+                        "availableModes": [
+                            {
+                                "id": "auto",
+                                "name": "Auto",
+                                "description": "Use a model classifier to approve/deny permission prompts"
+                            },
+                            {
+                                "id": "default",
+                                "name": "Default",
+                                "description": "Standard behavior, prompts for dangerous operations"
+                            },
+                            {
+                                "id": "acceptEdits",
+                                "name": "Accept Edits",
+                                "description": "Auto-accept file edit operations"
+                            },
+                            {
+                                "id": "plan",
+                                "name": "Plan Mode",
+                                "description": "Planning mode, no actual tool execution"
+                            },
+                            {
+                                "id": "dontAsk",
+                                "name": "Don't Ask",
+                                "description": "Don't prompt for permissions, deny if not pre-approved"
+                            },
+                            {
+                                "id": "bypassPermissions",
+                                "name": "Bypass Permissions",
+                                "description": "Bypass all permission checks"
+                            }
+                        ]
+                    },
+                    "configOptions": [
+                        {
+                            "id": "mode",
+                            "name": "Mode",
+                            "description": "Session permission mode",
+                            "category": "mode",
+                            "type": "select",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "auto",
+                                    "name": "Auto",
+                                    "description": "Use a model classifier to approve/deny permission prompts"
+                                },
+                                {
+                                    "value": "default",
+                                    "name": "Default",
+                                    "description": "Standard behavior, prompts for dangerous operations"
+                                },
+                                {
+                                    "value": "acceptEdits",
+                                    "name": "Accept Edits",
+                                    "description": "Auto-accept file edit operations"
+                                },
+                                {
+                                    "value": "plan",
+                                    "name": "Plan Mode",
+                                    "description": "Planning mode, no actual tool execution"
+                                },
+                                {
+                                    "value": "dontAsk",
+                                    "name": "Don't Ask",
+                                    "description": "Don't prompt for permissions, deny if not pre-approved"
+                                },
+                                {
+                                    "value": "bypassPermissions",
+                                    "name": "Bypass Permissions",
+                                    "description": "Bypass all permission checks"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "model",
+                            "name": "Model",
+                            "description": "AI model to use",
+                            "category": "model",
+                            "type": "select",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "default",
+                                    "name": "Default (recommended)",
+                                    "description": "Opus 4.8 with 1M context · Most capable for complex work"
+                                },
+                                {
+                                    "value": "sonnet",
+                                    "name": "Sonnet",
+                                    "description": "Sonnet 4.6 · Best for everyday tasks"
+                                },
+                                {
+                                    "value": "haiku",
+                                    "name": "Haiku",
+                                    "description": "Haiku 4.5 · Fastest for quick answers"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "effort",
+                            "name": "Effort",
+                            "description": "Available effort levels for this model",
+                            "category": "thought_level",
+                            "type": "select",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "default",
+                                    "name": "Default"
+                                },
+                                {
+                                    "value": "low",
+                                    "name": "Low"
+                                },
+                                {
+                                    "value": "medium",
+                                    "name": "Medium"
+                                },
+                                {
+                                    "value": "high",
+                                    "name": "High"
+                                },
+                                {
+                                    "value": "xhigh",
+                                    "name": "Xhigh"
+                                },
+                                {
+                                    "value": "max",
+                                    "name": "Max"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "rpcId": "0fa04b63-1e9e-4fe4-a67a-20c251e7cc53"
+        },
+        {
+            "seq": 8,
+            "timestamp": 1781027008862,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"d0724d6d-1b44-4434-81b8-53b5b319ee4d\",\"update\":{\"sessionUpdate\":\"available_commands_update\",\"availableCommands\":[{\"name\":\"deep-research\",\"description\":\"Deep research harness — fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report. (dynamic workflow)\",\"input\":null},{\"name\":\"frontend-design\",\"description\":\"(frontend-design) Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.\",\"input\":null},{\"name\":\"huggingface-papers\",\"description\":\"(huggingface-papers) Look up and read Hugging Face paper pages in markdown, and use the papers API for structured metadata such as authors, linked models/datasets/spaces, Github repo and project page. Use when the user shares a Hugging Face paper page URL, an arXiv URL or ID, or asks to summarize, explain, or analyze an AI research paper.\",\"input\":null},{\"name\":\"positioning\",\"description\":\"(positioning) Guide founders and teams through a structured positioning statement exercise. Combines competitive research, strategic questioning, and team alignment to produce a sharp, honest positioning statement. Use when a company needs to define who they are, what they offer, and why anyone should care.\",\"input\":null},{\"name\":\"update-config\",\"description\":\"Use this skill to configure the Claude Code harness via settings.json. Automated behaviors (\\\"from now on when X\\\", \\\"each time X\\\", \\\"whenever X\\\", \\\"before/after X\\\") require hooks configured in settings.json - the harness executes these, not Claude, so memory/preferences cannot fulfill them. Also use for: permissions (\\\"allow X\\\", \\\"add permission\\\", \\\"move permission to\\\"), env vars (\\\"set X=Y\\\"), hook troubleshooting, or any changes to settings.json/settings.local.json files. Examples: \\\"allow npm commands\\\", \\\"add bq permission to global settings\\\", \\\"move permission to user settings\\\", \\\"set DEBUG=true\\\", \\\"when claude stops show X\\\". For simple settings like theme/model, suggest the /config command.\",\"input\":null},{\"name\":\"verify\",\"description\":\"Verify that a code change actually does what it's supposed to by running the app and observing behavior. Use when asked to verify a PR, confirm a fix works, test a change manually, check that a feature works, or validate local changes before pushing.\",\"input\":null},{\"name\":\"debug\",\"description\":\"Enable debug logging for this session and help diagnose issues\",\"input\":{\"hint\":\"[issue description]\"}},{\"name\":\"code-review\",\"description\":\"Review the current diff for correctness bugs and reuse/simplification/efficiency cleanups at the given effort level (low/medium: fewer, high-confidence findings; high→max: broader coverage, may include uncertain findings; ultra: deep multi-agent review in the cloud). Pass --comment to post findings as inline PR comments, or --fix to apply the findings to the working tree after the review.\",\"input\":{\"hint\":\"[low|medium|high|xhigh|max|ultra] [--fix] [--comment] [<target>]\"}},{\"name\":\"simplify\",\"description\":\"Review the changed code for reuse, simplification, efficiency, and altitude cleanups, then apply the fixes. Quality only — it does not hunt for bugs; use /code-review for that.\",\"input\":{\"hint\":\"[<target>]\"}},{\"name\":\"batch\",\"description\":\"Research and plan a large-scale change, then execute it in parallel across 5–30 isolated worktree agents that each open a PR.\",\"input\":{\"hint\":\"<instruction>\"}},{\"name\":\"fewer-permission-prompts\",\"description\":\"Scan your transcripts for common read-only Bash and MCP tool calls, then add a prioritized allowlist to project .claude/settings.json to reduce permission prompts.\",\"input\":null},{\"name\":\"loop\",\"description\":\"Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo). Omit the interval to let the model self-pace.\",\"input\":{\"hint\":\"[interval] [prompt]\"}},{\"name\":\"schedule\",\"description\":\"Create, update, list, or run scheduled cloud agents (routines) that execute on a cron schedule.\",\"input\":null},{\"name\":\"claude-api\",\"description\":\"Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration.\\nTRIGGER — read BEFORE opening the target file; don't skip because it \\\"looks like a one-liner\\\" — whenever: the prompt names Claude/Anthropic in any form (Claude, Anthropic, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`, `us.anthropic.*`, `[1m]`); the user asks about an LLM (pricing/model choice/limits/caching) — never answer from memory; OR the task is LLM-shaped with provider unstated (agent/MCP/tool-definition/multi-agent/RAG/LLM-judge/computer-use; generate/summarize/extract/classify/rewrite/converse over NL; debugging refusals/cutoffs/streaming/tool-calls/tokens).\\nSKIP only when another provider is being worked on (overrides all triggers): OpenAI/GPT/Gemini/Llama/Mistral/Cohere/Ollama named in the query; OR `grep -rE 'openai|langchain_openai|google.generativeai|genai|mistralai|cohere|ollama'` over the project hits (run this grep FIRST if no provider named — don't Read the file).\",\"input\":null},{\"name\":\"run\",\"description\":\"Launch and drive this project's app to see a change working. Use when asked to run, start, or screenshot the app, or to confirm a change works in the real app (not just tests). First looks for a project skill that already covers launching the app; otherwise falls back to built-in patterns per project type (CLI, server, TUI, Electron, browser-driven, library).\",\"input\":null},{\"name\":\"run-skill-generator\",\"description\":\"Author or improve the run-<unit> skill — a per-project skill that tells agents how to build, launch, and drive this project's app. Use when the user asks to set up the project, get it running, write run instructions, or verify build/run steps work from a clean environment.\",\"input\":null},{\"name\":\"compact\",\"description\":\"Free up context by summarizing the conversation so far\",\"input\":{\"hint\":\"<optional custom summarization instructions>\"}},{\"name\":\"context\",\"description\":\"Show current context usage\",\"input\":null},{\"name\":\"heapdump\",\"description\":\"Dump the JS heap to ~/Desktop\",\"input\":null},{\"name\":\"init\",\"description\":\"Initialize a new CLAUDE.md file with codebase documentation\",\"input\":null},{\"name\":\"reload-skills\",\"description\":\"Pick up skills added or changed on disk during this session\",\"input\":null},{\"name\":\"review\",\"description\":\"Review a pull request\",\"input\":null},{\"name\":\"security-review\",\"description\":\"Complete a security review of the pending changes on the current branch\",\"input\":null},{\"name\":\"usage-credits\",\"description\":\"Configure usage credits to keep working when you hit a limit\",\"input\":null},{\"name\":\"extra-usage\",\"description\":\"Renamed to /usage-credits\",\"input\":null},{\"name\":\"usage\",\"description\":\"Show the total cost and duration of the current session\",\"input\":null},{\"name\":\"insights\",\"description\":\"Generate a report analyzing your Claude Code sessions\",\"input\":null},{\"name\":\"goal\",\"description\":\"Set a goal — keep working until the condition is met\",\"input\":null},{\"name\":\"team-onboarding\",\"description\":\"Help teammates ramp on Claude Code with a guide from your usage\",\"input\":null}]}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "d0724d6d-1b44-4434-81b8-53b5b319ee4d",
+                    "update": {
+                        "sessionUpdate": "available_commands_update",
+                        "availableCommands": [
+                            {
+                                "name": "deep-research",
+                                "description": "Deep research harness — fan-out web searches, fetch sources, adversarially verify claims, synthesize a cited report. (dynamic workflow)",
+                                "input": null
+                            },
+                            {
+                                "name": "frontend-design",
+                                "description": "(frontend-design) Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.",
+                                "input": null
+                            },
+                            {
+                                "name": "huggingface-papers",
+                                "description": "(huggingface-papers) Look up and read Hugging Face paper pages in markdown, and use the papers API for structured metadata such as authors, linked models/datasets/spaces, Github repo and project page. Use when the user shares a Hugging Face paper page URL, an arXiv URL or ID, or asks to summarize, explain, or analyze an AI research paper.",
+                                "input": null
+                            },
+                            {
+                                "name": "positioning",
+                                "description": "(positioning) Guide founders and teams through a structured positioning statement exercise. Combines competitive research, strategic questioning, and team alignment to produce a sharp, honest positioning statement. Use when a company needs to define who they are, what they offer, and why anyone should care.",
+                                "input": null
+                            },
+                            {
+                                "name": "update-config",
+                                "description": "Use this skill to configure the Claude Code harness via settings.json. Automated behaviors (\"from now on when X\", \"each time X\", \"whenever X\", \"before/after X\") require hooks configured in settings.json - the harness executes these, not Claude, so memory/preferences cannot fulfill them. Also use for: permissions (\"allow X\", \"add permission\", \"move permission to\"), env vars (\"set X=Y\"), hook troubleshooting, or any changes to settings.json/settings.local.json files. Examples: \"allow npm commands\", \"add bq permission to global settings\", \"move permission to user settings\", \"set DEBUG=true\", \"when claude stops show X\". For simple settings like theme/model, suggest the /config command.",
+                                "input": null
+                            },
+                            {
+                                "name": "verify",
+                                "description": "Verify that a code change actually does what it's supposed to by running the app and observing behavior. Use when asked to verify a PR, confirm a fix works, test a change manually, check that a feature works, or validate local changes before pushing.",
+                                "input": null
+                            },
+                            {
+                                "name": "debug",
+                                "description": "Enable debug logging for this session and help diagnose issues",
+                                "input": {
+                                    "hint": "[issue description]"
+                                }
+                            },
+                            {
+                                "name": "code-review",
+                                "description": "Review the current diff for correctness bugs and reuse/simplification/efficiency cleanups at the given effort level (low/medium: fewer, high-confidence findings; high→max: broader coverage, may include uncertain findings; ultra: deep multi-agent review in the cloud). Pass --comment to post findings as inline PR comments, or --fix to apply the findings to the working tree after the review.",
+                                "input": {
+                                    "hint": "[low|medium|high|xhigh|max|ultra] [--fix] [--comment] [<target>]"
+                                }
+                            },
+                            {
+                                "name": "simplify",
+                                "description": "Review the changed code for reuse, simplification, efficiency, and altitude cleanups, then apply the fixes. Quality only — it does not hunt for bugs; use /code-review for that.",
+                                "input": {
+                                    "hint": "[<target>]"
+                                }
+                            },
+                            {
+                                "name": "batch",
+                                "description": "Research and plan a large-scale change, then execute it in parallel across 5–30 isolated worktree agents that each open a PR.",
+                                "input": {
+                                    "hint": "<instruction>"
+                                }
+                            },
+                            {
+                                "name": "fewer-permission-prompts",
+                                "description": "Scan your transcripts for common read-only Bash and MCP tool calls, then add a prioritized allowlist to project .claude/settings.json to reduce permission prompts.",
+                                "input": null
+                            },
+                            {
+                                "name": "loop",
+                                "description": "Run a prompt or slash command on a recurring interval (e.g. /loop 5m /foo). Omit the interval to let the model self-pace.",
+                                "input": {
+                                    "hint": "[interval] [prompt]"
+                                }
+                            },
+                            {
+                                "name": "schedule",
+                                "description": "Create, update, list, or run scheduled cloud agents (routines) that execute on a cron schedule.",
+                                "input": null
+                            },
+                            {
+                                "name": "claude-api",
+                                "description": "Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration.\nTRIGGER — read BEFORE opening the target file; don't skip because it \"looks like a one-liner\" — whenever: the prompt names Claude/Anthropic in any form (Claude, Anthropic, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`, `us.anthropic.*`, `[1m]`); the user asks about an LLM (pricing/model choice/limits/caching) — never answer from memory; OR the task is LLM-shaped with provider unstated (agent/MCP/tool-definition/multi-agent/RAG/LLM-judge/computer-use; generate/summarize/extract/classify/rewrite/converse over NL; debugging refusals/cutoffs/streaming/tool-calls/tokens).\nSKIP only when another provider is being worked on (overrides all triggers): OpenAI/GPT/Gemini/Llama/Mistral/Cohere/Ollama named in the query; OR `grep -rE 'openai|langchain_openai|google.generativeai|genai|mistralai|cohere|ollama'` over the project hits (run this grep FIRST if no provider named — don't Read the file).",
+                                "input": null
+                            },
+                            {
+                                "name": "run",
+                                "description": "Launch and drive this project's app to see a change working. Use when asked to run, start, or screenshot the app, or to confirm a change works in the real app (not just tests). First looks for a project skill that already covers launching the app; otherwise falls back to built-in patterns per project type (CLI, server, TUI, Electron, browser-driven, library).",
+                                "input": null
+                            },
+                            {
+                                "name": "run-skill-generator",
+                                "description": "Author or improve the run-<unit> skill — a per-project skill that tells agents how to build, launch, and drive this project's app. Use when the user asks to set up the project, get it running, write run instructions, or verify build/run steps work from a clean environment.",
+                                "input": null
+                            },
+                            {
+                                "name": "compact",
+                                "description": "Free up context by summarizing the conversation so far",
+                                "input": {
+                                    "hint": "<optional custom summarization instructions>"
+                                }
+                            },
+                            {
+                                "name": "context",
+                                "description": "Show current context usage",
+                                "input": null
+                            },
+                            {
+                                "name": "heapdump",
+                                "description": "Dump the JS heap to ~/Desktop",
+                                "input": null
+                            },
+                            {
+                                "name": "init",
+                                "description": "Initialize a new CLAUDE.md file with codebase documentation",
+                                "input": null
+                            },
+                            {
+                                "name": "reload-skills",
+                                "description": "Pick up skills added or changed on disk during this session",
+                                "input": null
+                            },
+                            {
+                                "name": "review",
+                                "description": "Review a pull request",
+                                "input": null
+                            },
+                            {
+                                "name": "security-review",
+                                "description": "Complete a security review of the pending changes on the current branch",
+                                "input": null
+                            },
+                            {
+                                "name": "usage-credits",
+                                "description": "Configure usage credits to keep working when you hit a limit",
+                                "input": null
+                            },
+                            {
+                                "name": "extra-usage",
+                                "description": "Renamed to /usage-credits",
+                                "input": null
+                            },
+                            {
+                                "name": "usage",
+                                "description": "Show the total cost and duration of the current session",
+                                "input": null
+                            },
+                            {
+                                "name": "insights",
+                                "description": "Generate a report analyzing your Claude Code sessions",
+                                "input": null
+                            },
+                            {
+                                "name": "goal",
+                                "description": "Set a goal — keep working until the condition is met",
+                                "input": null
+                            },
+                            {
+                                "name": "team-onboarding",
+                                "description": "Help teammates ramp on Claude Code with a guide from your usage",
+                                "input": null
+                            }
+                        ]
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 9,
+            "timestamp": 1781027048969,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"prompt\":[{\"type\":\"text\",\"text\":\"hi\"}]},\"id\":\"66d317d2-d8f8-4097-b15c-38bc91451c2b\"}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "hi"
+                        }
+                    ]
+                },
+                "id": "66d317d2-d8f8-4097-b15c-38bc91451c2b"
+            },
+            "method": "session/prompt",
+            "rpcId": "66d317d2-d8f8-4097-b15c-38bc91451c2b"
+        },
+        {
+            "seq": 10,
+            "timestamp": 1781027051505,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":18905,\"size\":200000}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "usage_update",
+                        "used": 18905,
+                        "size": 200000
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 11,
+            "timestamp": 1781027051506,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\"\"},\"messageId\":\"msg_011UYQpfHgG6yiuyHyyrCopW\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": ""
+                        },
+                        "messageId": "msg_011UYQpfHgG6yiuyHyyrCopW"
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 12,
+            "timestamp": 1781027051506,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\"Hi! How can I help you\"},\"messageId\":\"msg_011UYQpfHgG6yiuyHyyrCopW\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": "Hi! How can I help you"
+                        },
+                        "messageId": "msg_011UYQpfHgG6yiuyHyyrCopW"
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 13,
+            "timestamp": 1781027051506,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\" today?\\n\\nWhat are you working on in `/Users/dev/jetbrains`? Happy\"},\"messageId\":\"msg_011UYQpfHgG6yiuyHyyrCopW\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": " today?\n\nWhat are you working on in `/Users/dev/jetbrains`? Happy"
+                        },
+                        "messageId": "msg_011UYQpfHgG6yiuyHyyrCopW"
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 14,
+            "timestamp": 1781027051958,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\" to dig into code, run something, research a question, or whatever you need.\"},\"messageId\":\"msg_011UYQpfHgG6yiuyHyyrCopW\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": " to dig into code, run something, research a question, or whatever you need."
+                        },
+                        "messageId": "msg_011UYQpfHgG6yiuyHyyrCopW"
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 15,
+            "timestamp": 1781027052026,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":18962,\"size\":200000}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "usage_update",
+                        "used": 18962,
+                        "size": 200000
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 16,
+            "timestamp": 1781027052027,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":18962,\"size\":200000,\"_meta\":{\"_claude/rateLimit\":{\"status\":\"allowed\",\"resetsAt\":1781032800,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"org_level_disabled\",\"isUsingOverage\":false}}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "usage_update",
+                        "used": 18962,
+                        "size": 200000,
+                        "_meta": {
+                            "_claude/rateLimit": {
+                                "status": "allowed",
+                                "resetsAt": 1781032800,
+                                "rateLimitType": "five_hour",
+                                "overageStatus": "rejected",
+                                "overageDisabledReason": "org_level_disabled",
+                                "isUsingOverage": false
+                            }
+                        }
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 17,
+            "timestamp": 1781027052029,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"b9e3a9aa-81ac-44d4-962b-bcceae6fea73\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":18962,\"size\":1000000,\"cost\":{\"amount\":0.03392975,\"currency\":\"USD\"}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "b9e3a9aa-81ac-44d4-962b-bcceae6fea73",
+                    "update": {
+                        "sessionUpdate": "usage_update",
+                        "used": 18962,
+                        "size": 1000000,
+                        "cost": {
+                            "amount": 0.03392975,
+                            "currency": "USD"
+                        }
+                    }
+                }
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 18,
+            "timestamp": 1781027052029,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":\"66d317d2-d8f8-4097-b15c-38bc91451c2b\",\"result\":{\"stopReason\":\"end_turn\",\"usage\":{\"inputTokens\":2614,\"outputTokens\":66,\"cachedReadTokens\":14357,\"cachedWriteTokens\":1925,\"totalTokens\":18962}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": "66d317d2-d8f8-4097-b15c-38bc91451c2b",
+                "result": {
+                    "stopReason": "end_turn",
+                    "usage": {
+                        "inputTokens": 2614,
+                        "outputTokens": 66,
+                        "cachedReadTokens": 14357,
+                        "cachedWriteTokens": 1925,
+                        "totalTokens": 18962
+                    }
+                }
+            },
+            "rpcId": "66d317d2-d8f8-4097-b15c-38bc91451c2b"
+        }
+    ]
+}
