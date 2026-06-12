@@ -41,6 +41,11 @@ WebStorm, IntelliJ, Neovim, Visual Studio via ReSharper) drive a coding agent
 [30+ others](https://agentclientprotocol.com/get-started/agents)) over stdio,
 without either side knowing the other's implementation. **ACP Devtools sits in the middle of that stdio pipe — neither side knows it's there.**
 
+Never seen the wire before? [Anatomy of an ACP session](docs/session-anatomy.md)
+walks one real capture frame by frame — handshake, prompt turn, a tool call
+behind a permission dialog, a cancelled turn — and it's the same session the
+[playground](#playground) loads, so you can click along.
+
 ## Who it's for
 
 - **Agent authors** — see exactly what an editor sends, and validate your wire
