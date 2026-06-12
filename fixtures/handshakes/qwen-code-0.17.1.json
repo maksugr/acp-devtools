@@ -1,0 +1,148 @@
+{
+    "version": 1,
+    "exportedAt": 1781269701682,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 3,
+        "name": null,
+        "agentCommand": "npx -y @qwen-code/qwen-code --experimental-acp",
+        "clientName": null,
+        "startedAt": 1781267483452,
+        "endedAt": 1781267486822
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781267483455,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781267483455,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781267483455,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781267486784,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":1,\"agentInfo\":{\"name\":\"qwen-code\",\"title\":\"Qwen Code\",\"version\":\"0.17.1\"},\"authMethods\":[{\"id\":\"openai\",\"name\":\"Use OpenAI API key\",\"description\":\"Requires setting the `OPENAI_API_KEY` environment variable\",\"_meta\":{\"type\":\"terminal\",\"args\":[\"--auth-type=openai\"]}}],\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"audio\":true,\"embeddedContext\":true},\"sessionCapabilities\":{\"list\":{},\"resume\":{}},\"mcpCapabilities\":{\"sse\":true,\"http\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "agentInfo": {
+                        "name": "qwen-code",
+                        "title": "Qwen Code",
+                        "version": "0.17.1"
+                    },
+                    "authMethods": [
+                        {
+                            "id": "openai",
+                            "name": "Use OpenAI API key",
+                            "description": "Requires setting the `OPENAI_API_KEY` environment variable",
+                            "_meta": {
+                                "type": "terminal",
+                                "args": ["--auth-type=openai"]
+                            }
+                        }
+                    ],
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "promptCapabilities": {
+                            "image": true,
+                            "audio": true,
+                            "embeddedContext": true
+                        },
+                        "sessionCapabilities": {
+                            "list": {},
+                            "resume": {}
+                        },
+                        "mcpCapabilities": {
+                            "sse": true,
+                            "http": true
+                        }
+                    }
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781267486786,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32603,\"message\":\"Internal error\",\"data\":{\"details\":\"Session not found: s1\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32603,
+                    "message": "Internal error",
+                    "data": {
+                        "details": "Session not found: s1"
+                    }
+                }
+            },
+            "rpcId": 3
+        }
+    ]
+}

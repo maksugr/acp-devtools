@@ -1,0 +1,144 @@
+{
+    "version": 1,
+    "exportedAt": 1781269702010,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 5,
+        "name": null,
+        "agentCommand": "npx -y opencode-ai acp",
+        "clientName": null,
+        "startedAt": 1781267999299,
+        "endedAt": 1781268004581
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781267999302,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781267999303,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781267999303,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781268004555,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":1,\"agentCapabilities\":{\"loadSession\":true,\"mcpCapabilities\":{\"http\":true,\"sse\":true},\"promptCapabilities\":{\"embeddedContext\":true,\"image\":true},\"sessionCapabilities\":{\"close\":{},\"fork\":{},\"list\":{},\"resume\":{}}},\"authMethods\":[{\"description\":\"Run `opencode auth login` in the terminal\",\"name\":\"Login with opencode\",\"id\":\"opencode-login\"}],\"agentInfo\":{\"name\":\"OpenCode\",\"version\":\"1.17.4\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": true
+                        },
+                        "promptCapabilities": {
+                            "embeddedContext": true,
+                            "image": true
+                        },
+                        "sessionCapabilities": {
+                            "close": {},
+                            "fork": {},
+                            "list": {},
+                            "resume": {}
+                        }
+                    },
+                    "authMethods": [
+                        {
+                            "description": "Run `opencode auth login` in the terminal",
+                            "name": "Login with opencode",
+                            "id": "opencode-login"
+                        }
+                    ],
+                    "agentInfo": {
+                        "name": "OpenCode",
+                        "version": "1.17.4"
+                    }
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781268004555,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32602,\"message\":\"Invalid params: session not found: s1\",\"data\":{\"sessionId\":\"s1\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32602,
+                    "message": "Invalid params: session not found: s1",
+                    "data": {
+                        "sessionId": "s1"
+                    }
+                }
+            },
+            "rpcId": 3
+        }
+    ]
+}

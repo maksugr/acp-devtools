@@ -1,0 +1,158 @@
+{
+    "version": 1,
+    "exportedAt": 1781269702878,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 13,
+        "name": null,
+        "agentCommand": "uvx --from mistral-vibe vibe-acp",
+        "clientName": null,
+        "startedAt": 1781269412691,
+        "endedAt": 1781269427657
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781269412693,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781269412693,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781269412693,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781269413635,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"audio\":false,\"embeddedContext\":true,\"image\":false},\"sessionCapabilities\":{\"close\":{},\"fork\":{},\"list\":{}}},\"agentInfo\":{\"name\":\"@mistralai/mistral-vibe\",\"title\":\"Mistral Vibe\",\"version\":\"2.15.0\"},\"authMethods\":[{\"description\":\"Sign into Mistral Vibe through your Mistral AI Studio account.\",\"id\":\"browser-auth\",\"name\":\"Sign in through Mistral AI Studio\"}],\"protocolVersion\":1}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "promptCapabilities": {
+                            "audio": false,
+                            "embeddedContext": true,
+                            "image": false
+                        },
+                        "sessionCapabilities": {
+                            "close": {},
+                            "fork": {},
+                            "list": {}
+                        }
+                    },
+                    "agentInfo": {
+                        "name": "@mistralai/mistral-vibe",
+                        "title": "Mistral Vibe",
+                        "version": "2.15.0"
+                    },
+                    "authMethods": [
+                        {
+                            "description": "Sign into Mistral Vibe through your Mistral AI Studio account.",
+                            "id": "browser-auth",
+                            "name": "Sign in through Mistral AI Studio"
+                        }
+                    ],
+                    "protocolVersion": 1
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781269413635,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"error\":{\"code\":-32000,\"message\":\"Missing API key for mistral provider.\",\"data\":null}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "error": {
+                    "code": -32000,
+                    "message": "Missing API key for mistral provider.",
+                    "data": null
+                }
+            },
+            "rpcId": 2
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781269413635,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32602,\"message\":\"Session not found: s1\",\"data\":{\"session_id\":\"s1\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32602,
+                    "message": "Session not found: s1",
+                    "data": {
+                        "session_id": "s1"
+                    }
+                }
+            },
+            "rpcId": 3
+        }
+    ]
+}

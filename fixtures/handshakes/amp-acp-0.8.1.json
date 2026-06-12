@@ -1,0 +1,253 @@
+{
+    "version": 1,
+    "exportedAt": 1781269701842,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 4,
+        "name": null,
+        "agentCommand": "npx -y amp-acp",
+        "clientName": null,
+        "startedAt": 1781267484411,
+        "endedAt": 1781267487933
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781267484414,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781267484415,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781267484415,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781267487920,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":1,\"agentInfo\":{\"name\":\"amp-acp\",\"title\":\"Amp ACP Agent\",\"version\":\"0.8.1\"},\"agentCapabilities\":{\"promptCapabilities\":{\"image\":true,\"embeddedContext\":true},\"mcpCapabilities\":{\"http\":true,\"sse\":true}},\"authMethods\":[{\"id\":\"setup\",\"name\":\"Amp API Key Setup\",\"description\":\"Run interactive setup to configure your Amp API key\",\"_meta\":{\"terminal-auth\":{\"command\":\"/Users/dev/.npm/_npx/8708cb523b2038f2/node_modules/.bin/amp-acp\",\"args\":[\"--setup\"],\"label\":\"Amp API Key Setup\"}}}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "agentInfo": {
+                        "name": "amp-acp",
+                        "title": "Amp ACP Agent",
+                        "version": "0.8.1"
+                    },
+                    "agentCapabilities": {
+                        "promptCapabilities": {
+                            "image": true,
+                            "embeddedContext": true
+                        },
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": true
+                        }
+                    },
+                    "authMethods": [
+                        {
+                            "id": "setup",
+                            "name": "Amp API Key Setup",
+                            "description": "Run interactive setup to configure your Amp API key",
+                            "_meta": {
+                                "terminal-auth": {
+                                    "command": "/Users/dev/.npm/_npx/8708cb523b2038f2/node_modules/.bin/amp-acp",
+                                    "args": ["--setup"],
+                                    "label": "Amp API Key Setup"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781267487922,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"sessionId\":\"S-mqawo627-j60dpw\",\"configOptions\":[{\"type\":\"select\",\"id\":\"permission\",\"name\":\"Permissions\",\"description\":\"Controls whether Amp uses configured permissions or force-allows tool calls.\",\"category\":\"mode\",\"currentValue\":\"default\",\"options\":[{\"value\":\"default\",\"name\":\"Default\",\"description\":\"Use Amp's configured behavior. As of Amp Neo, tools run without prompts unless you've opted into permissions.\"},{\"value\":\"bypass\",\"name\":\"Bypass\",\"description\":\"Force-allow every tool call, overriding any configured permissions plugin.\"}]},{\"type\":\"select\",\"id\":\"amp-mode\",\"name\":\"Amp Mode\",\"description\":\"Select the Amp SDK execution mode.\",\"category\":\"model\",\"currentValue\":\"smart\",\"options\":[{\"value\":\"smart\",\"name\":\"Smart\",\"description\":\"Amp smart mode: maximum capability and autonomy for general coding tasks.\"},{\"value\":\"deep\",\"name\":\"Deep\",\"description\":\"Amp deep mode: extended reasoning for complex tasks.\"},{\"value\":\"rush\",\"name\":\"Rush\",\"description\":\"Amp rush mode: fast responses for small, well-defined tasks.\"}]},{\"type\":\"select\",\"id\":\"effort\",\"name\":\"Effort\",\"description\":\"Set model reasoning effort for Amp smart mode.\",\"category\":\"thought_level\",\"currentValue\":\"high\",\"options\":[{\"value\":\"high\",\"name\":\"high\"},{\"value\":\"xhigh\",\"name\":\"xhigh\"},{\"value\":\"max\",\"name\":\"max\"}]}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "result": {
+                    "sessionId": "S-mqawo627-j60dpw",
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "permission",
+                            "name": "Permissions",
+                            "description": "Controls whether Amp uses configured permissions or force-allows tool calls.",
+                            "category": "mode",
+                            "currentValue": "default",
+                            "options": [
+                                {
+                                    "value": "default",
+                                    "name": "Default",
+                                    "description": "Use Amp's configured behavior. As of Amp Neo, tools run without prompts unless you've opted into permissions."
+                                },
+                                {
+                                    "value": "bypass",
+                                    "name": "Bypass",
+                                    "description": "Force-allow every tool call, overriding any configured permissions plugin."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "select",
+                            "id": "amp-mode",
+                            "name": "Amp Mode",
+                            "description": "Select the Amp SDK execution mode.",
+                            "category": "model",
+                            "currentValue": "smart",
+                            "options": [
+                                {
+                                    "value": "smart",
+                                    "name": "Smart",
+                                    "description": "Amp smart mode: maximum capability and autonomy for general coding tasks."
+                                },
+                                {
+                                    "value": "deep",
+                                    "name": "Deep",
+                                    "description": "Amp deep mode: extended reasoning for complex tasks."
+                                },
+                                {
+                                    "value": "rush",
+                                    "name": "Rush",
+                                    "description": "Amp rush mode: fast responses for small, well-defined tasks."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "select",
+                            "id": "effort",
+                            "name": "Effort",
+                            "description": "Set model reasoning effort for Amp smart mode.",
+                            "category": "thought_level",
+                            "currentValue": "high",
+                            "options": [
+                                {
+                                    "value": "high",
+                                    "name": "high"
+                                },
+                                {
+                                    "value": "xhigh",
+                                    "name": "xhigh"
+                                },
+                                {
+                                    "value": "max",
+                                    "name": "max"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "rpcId": 2
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781267487922,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32603,\"message\":\"Internal error\",\"data\":{\"details\":\"Session not found\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32603,
+                    "message": "Internal error",
+                    "data": {
+                        "details": "Session not found"
+                    }
+                }
+            },
+            "rpcId": 3
+        },
+        {
+            "seq": 7,
+            "timestamp": 1781267487922,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"S-mqawo627-j60dpw\",\"update\":{\"sessionUpdate\":\"available_commands_update\",\"availableCommands\":[{\"name\":\"init\",\"description\":\"Generate an AGENTS.md file for the project\"}]}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "S-mqawo627-j60dpw",
+                    "update": {
+                        "sessionUpdate": "available_commands_update",
+                        "availableCommands": [
+                            {
+                                "name": "init",
+                                "description": "Generate an AGENTS.md file for the project"
+                            }
+                        ]
+                    }
+                }
+            },
+            "method": "session/update"
+        }
+    ]
+}

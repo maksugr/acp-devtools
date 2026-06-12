@@ -804,3 +804,40 @@ describe('CLI integration — mock commands', () => {
         expect(r.err).toMatch(/mutually exclusive/);
     }, TIMEOUT);
 });
+
+describe('CLI integration — drive-full-turn fixture', () => {
+    it('completes a full prompt turn against the mock agent (exit 0, capture saved)', async () => {
+        const saveTo = join(home, 'drive-full-turn.db');
+        const r = await new Promise<Run>((resolve, reject) => {
+            const child = spawn(
+                process.execPath,
+                [
+                    join(repoRoot, 'fixtures/drive-full-turn.mjs'),
+                    process.execPath,
+                    join(repoRoot, 'fixtures/mock-agent.js'),
+                ],
+                {
+                    cwd: repoRoot,
+                    env: { ...process.env, ACP_DEVTOOLS_HOME: home, DRIVE_SAVE_TO: saveTo },
+                    stdio: ['ignore', 'pipe', 'pipe'],
+                },
+            );
+            let out = '';
+            let err = '';
+            child.stdout.on('data', (d: Buffer) => (out += d.toString()));
+            child.stderr.on('data', (d: Buffer) => (err += d.toString()));
+            const killer = setTimeout(() => {
+                child.kill('SIGKILL');
+                reject(new Error(`drive-full-turn timed out\n${err}`));
+            }, TIMEOUT - 2000);
+            child.on('error', reject);
+            child.on('close', (code) => {
+                clearTimeout(killer);
+                resolve({ code, out, err });
+            });
+        });
+        expect(r.code).toBe(0);
+        expect(r.err).toContain('full turn completed — stopReason: end_turn');
+        expect(existsSync(saveTo)).toBe(true);
+    }, TIMEOUT);
+});

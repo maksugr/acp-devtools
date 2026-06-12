@@ -1,0 +1,180 @@
+{
+    "version": 1,
+    "exportedAt": 1781269702696,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 12,
+        "name": null,
+        "agentCommand": "uvx kimi-cli acp",
+        "clientName": null,
+        "startedAt": 1781269411683,
+        "endedAt": 1781269426653
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781269411686,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781269411686,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781269411686,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781269412561,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"agentCapabilities\":{\"loadSession\":true,\"mcpCapabilities\":{\"http\":true,\"sse\":false},\"promptCapabilities\":{\"audio\":false,\"embeddedContext\":true,\"image\":true},\"sessionCapabilities\":{\"list\":{},\"resume\":{}}},\"agentInfo\":{\"name\":\"Kimi Code CLI\",\"version\":\"1.47.0\"},\"authMethods\":[{\"_meta\":{\"terminal-auth\":{\"command\":\"/Users/dev/.cache/uv/archive-v0/hmjBO_Mg9BYA_6cXSH10I/bin/kimi-cli\",\"args\":[\"login\"],\"label\":\"Kimi Code Login\",\"env\":{},\"type\":\"terminal\"}},\"description\":\"Run `kimi login` command in the terminal, then follow the instructions to finish login.\",\"id\":\"login\",\"name\":\"Login with Kimi account\"}],\"protocolVersion\":1}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": false
+                        },
+                        "promptCapabilities": {
+                            "audio": false,
+                            "embeddedContext": true,
+                            "image": true
+                        },
+                        "sessionCapabilities": {
+                            "list": {},
+                            "resume": {}
+                        }
+                    },
+                    "agentInfo": {
+                        "name": "Kimi Code CLI",
+                        "version": "1.47.0"
+                    },
+                    "authMethods": [
+                        {
+                            "_meta": {
+                                "terminal-auth": {
+                                    "command": "/Users/dev/.cache/uv/archive-v0/hmjBO_Mg9BYA_6cXSH10I/bin/kimi-cli",
+                                    "args": ["login"],
+                                    "label": "Kimi Code Login",
+                                    "env": {},
+                                    "type": "terminal"
+                                }
+                            },
+                            "description": "Run `kimi login` command in the terminal, then follow the instructions to finish login.",
+                            "id": "login",
+                            "name": "Login with Kimi account"
+                        }
+                    ],
+                    "protocolVersion": 1
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781269412561,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"error\":{\"code\":-32000,\"message\":\"Authentication required\",\"data\":{\"authMethods\":[{\"id\":\"login\",\"name\":\"Login with Kimi account\",\"description\":\"Run `kimi login` command in the terminal, then follow the instructions to finish login.\",\"type\":\"terminal\",\"args\":[\"login\"],\"env\":{}}]}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "error": {
+                    "code": -32000,
+                    "message": "Authentication required",
+                    "data": {
+                        "authMethods": [
+                            {
+                                "id": "login",
+                                "name": "Login with Kimi account",
+                                "description": "Run `kimi login` command in the terminal, then follow the instructions to finish login.",
+                                "type": "terminal",
+                                "args": ["login"],
+                                "env": {}
+                            }
+                        ]
+                    }
+                }
+            },
+            "rpcId": 2
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781269412561,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32602,\"message\":\"Invalid params\",\"data\":{\"session_id\":\"Session not found\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32602,
+                    "message": "Invalid params",
+                    "data": {
+                        "session_id": "Session not found"
+                    }
+                }
+            },
+            "rpcId": 3
+        }
+    ]
+}

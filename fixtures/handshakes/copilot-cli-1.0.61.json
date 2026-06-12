@@ -1,0 +1,147 @@
+{
+    "version": 1,
+    "exportedAt": 1781269702349,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 10,
+        "name": null,
+        "agentCommand": "npx -y @github/copilot --acp",
+        "clientName": null,
+        "startedAt": 1781268682867,
+        "endedAt": 1781268685334
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781268682872,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781268682872,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781268682872,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781268684253,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":1,\"agentCapabilities\":{\"loadSession\":true,\"mcpCapabilities\":{\"http\":true,\"sse\":true},\"promptCapabilities\":{\"image\":true,\"audio\":false,\"embeddedContext\":true},\"sessionCapabilities\":{\"list\":{}}},\"agentInfo\":{\"name\":\"Copilot\",\"title\":\"Copilot\",\"version\":\"1.0.61\"},\"authMethods\":[{\"id\":\"copilot-login\",\"name\":\"Log in with Copilot CLI\",\"description\":\"Run `copilot login` in the terminal\",\"_meta\":{\"terminal-auth\":{\"command\":\"/Users/dev/.npm/_npx/965e8981e34edf7c/node_modules/@github/copilot-darwin-arm64/copilot\",\"args\":[\"login\"],\"label\":\"Copilot Login\"}}}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": true
+                        },
+                        "promptCapabilities": {
+                            "image": true,
+                            "audio": false,
+                            "embeddedContext": true
+                        },
+                        "sessionCapabilities": {
+                            "list": {}
+                        }
+                    },
+                    "agentInfo": {
+                        "name": "Copilot",
+                        "title": "Copilot",
+                        "version": "1.0.61"
+                    },
+                    "authMethods": [
+                        {
+                            "id": "copilot-login",
+                            "name": "Log in with Copilot CLI",
+                            "description": "Run `copilot login` in the terminal",
+                            "_meta": {
+                                "terminal-auth": {
+                                    "command": "/Users/dev/.npm/_npx/965e8981e34edf7c/node_modules/@github/copilot-darwin-arm64/copilot",
+                                    "args": ["login"],
+                                    "label": "Copilot Login"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781268684266,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32602,\"message\":\"Session s1 not found\"}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32602,
+                    "message": "Session s1 not found"
+                }
+            },
+            "rpcId": 3
+        }
+    ]
+}

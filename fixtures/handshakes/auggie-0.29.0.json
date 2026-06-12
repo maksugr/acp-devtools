@@ -1,0 +1,147 @@
+{
+    "version": 1,
+    "exportedAt": 1781269702177,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 7,
+        "name": null,
+        "agentCommand": "npx -y @augmentcode/auggie --acp",
+        "clientName": null,
+        "startedAt": 1781268000790,
+        "endedAt": 1781268004578
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781268000792,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781268000793,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781268000793,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781268004355,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":1,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true},\"sessionCapabilities\":{\"list\":{}}},\"agentInfo\":{\"name\":\"auggie\",\"title\":\"Auggie Agent\",\"version\":\"0.29.0 (commit e43866bb)\"},\"authMethods\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "promptCapabilities": {
+                            "image": true
+                        },
+                        "sessionCapabilities": {
+                            "list": {}
+                        }
+                    },
+                    "agentInfo": {
+                        "name": "auggie",
+                        "title": "Auggie Agent",
+                        "version": "0.29.0 (commit e43866bb)"
+                    },
+                    "authMethods": []
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781268004356,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"error\":{\"code\":-32000,\"message\":\"Authentication required: Auggie does not currently support authenticating over ACP. Please run `auggie login` from your terminal then try again.\"}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "error": {
+                    "code": -32000,
+                    "message": "Authentication required: Auggie does not currently support authenticating over ACP. Please run `auggie login` from your terminal then try again."
+                }
+            },
+            "rpcId": 2
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781268004356,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32603,\"message\":\"Internal error\",\"data\":{\"details\":\"Session not found: s1\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32603,
+                    "message": "Internal error",
+                    "data": {
+                        "details": "Session not found: s1"
+                    }
+                }
+            },
+            "rpcId": 3
+        }
+    ]
+}

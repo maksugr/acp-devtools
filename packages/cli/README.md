@@ -33,7 +33,7 @@ The `acp-devtools` binary is one CLI with subcommands plus a bundled UI:
 
 Works with Zed, WebStorm, IntelliJ, PyCharm, Neovim, and Visual Studio via
 ReSharper — any editor that supports custom ACP servers — and with Claude
-Code, Codex, Goose, OpenCode, and 30+ other agents.
+Code, Codex, Goose, OpenCode, and 40+ other agents.
 
 ## Install
 

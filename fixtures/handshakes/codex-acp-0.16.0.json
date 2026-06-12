@@ -1,0 +1,322 @@
+{
+    "version": 1,
+    "exportedAt": 1781269701362,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 1,
+        "name": null,
+        "agentCommand": "npx -y @zed-industries/codex-acp",
+        "clientName": null,
+        "startedAt": 1781267160130,
+        "endedAt": null
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781267160132,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781267160133,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781267160133,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781267165277,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"result\":{\"protocolVersion\":1,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"audio\":false,\"embeddedContext\":true},\"mcpCapabilities\":{\"http\":true,\"sse\":false,\"acp\":false},\"sessionCapabilities\":{\"list\":{},\"resume\":{},\"close\":{}},\"auth\":{\"logout\":{}}},\"authMethods\":[{\"id\":\"chatgpt\",\"name\":\"Login with ChatGPT\",\"description\":\"Use your ChatGPT login with Codex CLI (requires a paid ChatGPT subscription)\"},{\"type\":\"env_var\",\"id\":\"codex-api-key\",\"name\":\"Use CODEX_API_KEY\",\"description\":\"Requires setting the `CODEX_API_KEY` environment variable.\",\"vars\":[{\"name\":\"CODEX_API_KEY\"}]},{\"type\":\"env_var\",\"id\":\"openai-api-key\",\"name\":\"Use OPENAI_API_KEY\",\"description\":\"Requires setting the `OPENAI_API_KEY` environment variable.\",\"vars\":[{\"name\":\"OPENAI_API_KEY\"}]}],\"agentInfo\":{\"name\":\"codex-acp\",\"title\":\"Codex\",\"version\":\"0.16.0\"}},\"id\":1}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "result": {
+                    "protocolVersion": 1,
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "promptCapabilities": {
+                            "image": true,
+                            "audio": false,
+                            "embeddedContext": true
+                        },
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": false,
+                            "acp": false
+                        },
+                        "sessionCapabilities": {
+                            "list": {},
+                            "resume": {},
+                            "close": {}
+                        },
+                        "auth": {
+                            "logout": {}
+                        }
+                    },
+                    "authMethods": [
+                        {
+                            "id": "chatgpt",
+                            "name": "Login with ChatGPT",
+                            "description": "Use your ChatGPT login with Codex CLI (requires a paid ChatGPT subscription)"
+                        },
+                        {
+                            "type": "env_var",
+                            "id": "codex-api-key",
+                            "name": "Use CODEX_API_KEY",
+                            "description": "Requires setting the `CODEX_API_KEY` environment variable.",
+                            "vars": [
+                                {
+                                    "name": "CODEX_API_KEY"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "env_var",
+                            "id": "openai-api-key",
+                            "name": "Use OPENAI_API_KEY",
+                            "description": "Requires setting the `OPENAI_API_KEY` environment variable.",
+                            "vars": [
+                                {
+                                    "name": "OPENAI_API_KEY"
+                                }
+                            ]
+                        }
+                    ],
+                    "agentInfo": {
+                        "name": "codex-acp",
+                        "title": "Codex",
+                        "version": "0.16.0"
+                    }
+                },
+                "id": 1
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781267165497,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32002,\"message\":\"Resource not found\"},\"id\":3}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "error": {
+                    "code": -32002,
+                    "message": "Resource not found"
+                },
+                "id": 3
+            },
+            "rpcId": 3
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781267165782,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"result\":{\"sessionId\":\"019ebbcb-f1cc-73f3-a537-bba96047589a\",\"modes\":{\"currentModeId\":\"read-only\",\"availableModes\":[{\"id\":\"read-only\",\"name\":\"Read Only\",\"description\":\"Codex can read files in the current workspace. Approval is required to edit files or access the internet.\"},{\"id\":\"auto\",\"name\":\"Default\",\"description\":\"Codex can read and edit files in the current workspace, and run commands. Approval is required to access the internet or edit other files. (Identical to Agent mode)\"},{\"id\":\"full-access\",\"name\":\"Full Access\",\"description\":\"Codex can edit files outside this workspace and access the internet without asking for approval. Exercise caution when using.\"}]},\"configOptions\":[{\"id\":\"mode\",\"name\":\"Approval Preset\",\"description\":\"Choose an approval and sandboxing preset for your session\",\"category\":\"mode\",\"type\":\"select\",\"currentValue\":\"read-only\",\"options\":[{\"value\":\"read-only\",\"name\":\"Read Only\",\"description\":\"Codex can read files in the current workspace. Approval is required to edit files or access the internet.\"},{\"value\":\"auto\",\"name\":\"Default\",\"description\":\"Codex can read and edit files in the current workspace, and run commands. Approval is required to access the internet or edit other files. (Identical to Agent mode)\"},{\"value\":\"full-access\",\"name\":\"Full Access\",\"description\":\"Codex can edit files outside this workspace and access the internet without asking for approval. Exercise caution when using.\"}]},{\"id\":\"model\",\"name\":\"Model\",\"description\":\"Choose which model Codex should use\",\"category\":\"model\",\"type\":\"select\",\"currentValue\":\"gpt-5.2-codex\",\"options\":[{\"value\":\"gpt-5.2-codex\",\"name\":\"gpt-5.2-codex\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"Frontier model for complex coding, research, and real-world work.\"},{\"value\":\"gpt-5.4\",\"name\":\"gpt-5.4\",\"description\":\"Strong model for everyday coding.\"},{\"value\":\"gpt-5.4-mini\",\"name\":\"GPT-5.4-Mini\",\"description\":\"Small, fast, and cost-efficient model for simpler coding tasks.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"gpt-5.3-codex\",\"description\":\"Coding-optimized model.\"},{\"value\":\"gpt-5.2\",\"name\":\"gpt-5.2\",\"description\":\"Optimized for professional work and long-running agents.\"}]}]},\"id\":2}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "result": {
+                    "sessionId": "019ebbcb-f1cc-73f3-a537-bba96047589a",
+                    "modes": {
+                        "currentModeId": "read-only",
+                        "availableModes": [
+                            {
+                                "id": "read-only",
+                                "name": "Read Only",
+                                "description": "Codex can read files in the current workspace. Approval is required to edit files or access the internet."
+                            },
+                            {
+                                "id": "auto",
+                                "name": "Default",
+                                "description": "Codex can read and edit files in the current workspace, and run commands. Approval is required to access the internet or edit other files. (Identical to Agent mode)"
+                            },
+                            {
+                                "id": "full-access",
+                                "name": "Full Access",
+                                "description": "Codex can edit files outside this workspace and access the internet without asking for approval. Exercise caution when using."
+                            }
+                        ]
+                    },
+                    "configOptions": [
+                        {
+                            "id": "mode",
+                            "name": "Approval Preset",
+                            "description": "Choose an approval and sandboxing preset for your session",
+                            "category": "mode",
+                            "type": "select",
+                            "currentValue": "read-only",
+                            "options": [
+                                {
+                                    "value": "read-only",
+                                    "name": "Read Only",
+                                    "description": "Codex can read files in the current workspace. Approval is required to edit files or access the internet."
+                                },
+                                {
+                                    "value": "auto",
+                                    "name": "Default",
+                                    "description": "Codex can read and edit files in the current workspace, and run commands. Approval is required to access the internet or edit other files. (Identical to Agent mode)"
+                                },
+                                {
+                                    "value": "full-access",
+                                    "name": "Full Access",
+                                    "description": "Codex can edit files outside this workspace and access the internet without asking for approval. Exercise caution when using."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Choose which model Codex should use",
+                            "category": "model",
+                            "type": "select",
+                            "currentValue": "gpt-5.2-codex",
+                            "options": [
+                                {
+                                    "value": "gpt-5.2-codex",
+                                    "name": "gpt-5.2-codex"
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "Frontier model for complex coding, research, and real-world work."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "gpt-5.4",
+                                    "description": "Strong model for everyday coding."
+                                },
+                                {
+                                    "value": "gpt-5.4-mini",
+                                    "name": "GPT-5.4-Mini",
+                                    "description": "Small, fast, and cost-efficient model for simpler coding tasks."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "gpt-5.3-codex",
+                                    "description": "Coding-optimized model."
+                                },
+                                {
+                                    "value": "gpt-5.2",
+                                    "name": "gpt-5.2",
+                                    "description": "Optimized for professional work and long-running agents."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "id": 2
+            },
+            "rpcId": 2
+        },
+        {
+            "seq": 7,
+            "timestamp": 1781267165985,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"019ebbcb-f1cc-73f3-a537-bba96047589a\",\"update\":{\"sessionUpdate\":\"available_commands_update\",\"availableCommands\":[{\"name\":\"review\",\"description\":\"Review my current changes and find issues\",\"input\":{\"hint\":\"optional custom review instructions\"}},{\"name\":\"review-branch\",\"description\":\"Review the code changes against a specific branch\",\"input\":{\"hint\":\"branch name\"}},{\"name\":\"review-commit\",\"description\":\"Review the code changes introduced by a commit\",\"input\":{\"hint\":\"commit sha\"}},{\"name\":\"init\",\"description\":\"create an AGENTS.md file with instructions for Codex\"},{\"name\":\"compact\",\"description\":\"summarize conversation to prevent hitting the context limit\"},{\"name\":\"logout\",\"description\":\"logout of Codex\"}]}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "019ebbcb-f1cc-73f3-a537-bba96047589a",
+                    "update": {
+                        "sessionUpdate": "available_commands_update",
+                        "availableCommands": [
+                            {
+                                "name": "review",
+                                "description": "Review my current changes and find issues",
+                                "input": {
+                                    "hint": "optional custom review instructions"
+                                }
+                            },
+                            {
+                                "name": "review-branch",
+                                "description": "Review the code changes against a specific branch",
+                                "input": {
+                                    "hint": "branch name"
+                                }
+                            },
+                            {
+                                "name": "review-commit",
+                                "description": "Review the code changes introduced by a commit",
+                                "input": {
+                                    "hint": "commit sha"
+                                }
+                            },
+                            {
+                                "name": "init",
+                                "description": "create an AGENTS.md file with instructions for Codex"
+                            },
+                            {
+                                "name": "compact",
+                                "description": "summarize conversation to prevent hitting the context limit"
+                            },
+                            {
+                                "name": "logout",
+                                "description": "logout of Codex"
+                            }
+                        ]
+                    }
+                }
+            },
+            "method": "session/update"
+        }
+    ]
+}

@@ -1,0 +1,179 @@
+{
+    "version": 1,
+    "exportedAt": 1781269701523,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.3.0"
+    },
+    "session": {
+        "id": 2,
+        "name": null,
+        "agentCommand": "npx -y @google/gemini-cli --experimental-acp",
+        "clientName": null,
+        "startedAt": 1781267481029,
+        "endedAt": 1781267484573
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781267481031,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        }
+                    }
+                }
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781267481032,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/tmp\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/tmp",
+                    "mcpServers": []
+                }
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781267481032,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"s1\",\"prompt\":[{\"type\":\"text\",\"text\":\"ping\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "s1",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "ping"
+                        }
+                    ]
+                }
+            },
+            "method": "session/prompt",
+            "rpcId": 3
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781267484259,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":3,\"error\":{\"code\":-32602,\"message\":\"Session not found: s1\"}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 3,
+                "error": {
+                    "code": -32602,
+                    "message": "Session not found: s1"
+                }
+            },
+            "rpcId": 3
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781267484453,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":1,\"authMethods\":[{\"id\":\"oauth-personal\",\"name\":\"Log in with Google\",\"description\":\"Log in with your Google account\"},{\"id\":\"gemini-api-key\",\"name\":\"Gemini API key\",\"description\":\"Use an API key with Gemini Developer API\",\"_meta\":{\"api-key\":{\"provider\":\"google\"}}},{\"id\":\"vertex-ai\",\"name\":\"Vertex AI\",\"description\":\"Use an API key with Vertex AI GenAI API\"},{\"id\":\"gateway\",\"name\":\"AI API Gateway\",\"description\":\"Use a custom AI API Gateway\",\"_meta\":{\"gateway\":{\"protocol\":\"google\",\"restartRequired\":\"false\"}}}],\"agentInfo\":{\"name\":\"gemini-cli\",\"title\":\"Gemini CLI\",\"version\":\"0.46.0\"},\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"image\":true,\"audio\":true,\"embeddedContext\":true},\"mcpCapabilities\":{\"http\":true,\"sse\":true}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "authMethods": [
+                        {
+                            "id": "oauth-personal",
+                            "name": "Log in with Google",
+                            "description": "Log in with your Google account"
+                        },
+                        {
+                            "id": "gemini-api-key",
+                            "name": "Gemini API key",
+                            "description": "Use an API key with Gemini Developer API",
+                            "_meta": {
+                                "api-key": {
+                                    "provider": "google"
+                                }
+                            }
+                        },
+                        {
+                            "id": "vertex-ai",
+                            "name": "Vertex AI",
+                            "description": "Use an API key with Vertex AI GenAI API"
+                        },
+                        {
+                            "id": "gateway",
+                            "name": "AI API Gateway",
+                            "description": "Use a custom AI API Gateway",
+                            "_meta": {
+                                "gateway": {
+                                    "protocol": "google",
+                                    "restartRequired": "false"
+                                }
+                            }
+                        }
+                    ],
+                    "agentInfo": {
+                        "name": "gemini-cli",
+                        "title": "Gemini CLI",
+                        "version": "0.46.0"
+                    },
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "promptCapabilities": {
+                            "image": true,
+                            "audio": true,
+                            "embeddedContext": true
+                        },
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": true
+                        }
+                    }
+                }
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781267484531,
+            "direction": "agent-to-editor",
+            "kind": "error",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"error\":{\"code\":-32000,\"message\":\"Gemini API key is missing or not configured.\"}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "error": {
+                    "code": -32000,
+                    "message": "Gemini API key is missing or not configured."
+                }
+            },
+            "rpcId": 2
+        }
+    ]
+}
