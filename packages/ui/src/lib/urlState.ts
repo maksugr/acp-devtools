@@ -32,7 +32,7 @@ export interface UrlState {
     filters: Partial<Filters>;
     selectedSeq: number | null;
     detailTab: DetailTab | null;
-    playbackCap: number | null;
+    playhead: number | null;
     captureUrl: string | null;
 }
 
@@ -72,19 +72,19 @@ export function parseUrlState(search: string): UrlState {
             : null;
 
     const playRaw = p.get('play');
-    const playbackCap =
+    const playhead =
         playRaw !== null && /^\d+$/.test(playRaw) ? Number(playRaw) : null;
 
     const captureUrl = p.get('ws');
 
-    return { filters, selectedSeq, detailTab, playbackCap, captureUrl };
+    return { filters, selectedSeq, detailTab, playhead, captureUrl };
 }
 
 export interface WriteState {
     filters: Filters;
     selectedSeq: number | null;
     detailTab: DetailTab;
-    playbackCap: number | null;
+    playhead: number | null;
     captureUrl: string | null;
 }
 
@@ -126,7 +126,7 @@ export function writeUrlState(state: WriteState): void {
     if (state.filters.search) p.set('q', state.filters.search);
     if (state.selectedSeq !== null) p.set('seq', String(state.selectedSeq));
     if (state.detailTab !== 'tree') p.set('tab', state.detailTab);
-    if (state.playbackCap !== null) p.set('play', String(state.playbackCap));
+    if (state.playhead !== null) p.set('play', String(state.playhead));
 
     const query = p.toString();
     const next = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`;

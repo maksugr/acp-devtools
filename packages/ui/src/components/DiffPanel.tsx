@@ -16,7 +16,7 @@ import { useMessagesStore } from '../store/messagesStore';
 import { fetchSessionMessages, type SavedSession } from '../api/sessions';
 import { useDiscoveryStore } from '../store/discoveryStore';
 import { useDrawerAnimation } from '../lib/useDrawerAnimation';
-import { sessionHeader, shortAgentName } from '../lib/captureLabel';
+import { shortAgentName } from '../lib/captureLabel';
 import { formatAge, formatLatency } from '../lib/format';
 import { cn } from '../lib/cn';
 

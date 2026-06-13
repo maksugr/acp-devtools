@@ -127,8 +127,10 @@ with grep-style exit codes (1 if no match).
 <details>
 <summary><b>Replay</b> — play/pause/speed/seek through a saved session</summary>
 
-UI scrubber with 1× / 2× / 4× speeds. CLI: `replay <id>` rebroadcasts over
-WebSocket on a fixed port for repeatable demos.
+Every frame is on screen from the start; a left-rail playhead marks the
+current position and the timeline follows it as it runs (0.5×–8× speed via
+the scrubber). CLI: `replay <id>` rebroadcasts over WebSocket on a fixed
+port for repeatable demos.
 </details>
 
 <details>

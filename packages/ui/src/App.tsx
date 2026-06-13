@@ -12,6 +12,7 @@ import { useDiscoveryStore } from './store/discoveryStore';
 import { captureLabel, sessionHeader } from './lib/captureLabel';
 import { isPlaygroundMode } from './lib/playgroundMode';
 import { parseUrlState, writeUrlState } from './lib/urlState';
+import { isReplayUrl } from './api/sessions';
 import { CommandPalette } from './components/CommandPalette';
 import { ConnectingState } from './components/ConnectingState';
 import { DetailPanel } from './components/DetailPanel';
@@ -40,8 +41,7 @@ export function App() {
     const sessionImportedAt = useMessagesStore((s) => s.session?.importedAt ?? null);
 
     const wsUrl = selectedUrl;
-    const isReplaySelected =
-        selectedUrl !== null && /\/replay\/\d+$/.test(selectedUrl);
+    const isReplaySelected = isReplayUrl(selectedUrl);
     const isImported = sessionImportedAt !== null;
 
     useEffect(() => {
@@ -56,7 +56,7 @@ export function App() {
     const [toast, setToast] = useState<{ message: string; tone: 'info' | 'success' | 'warn' } | null>(null);
     const prevUrls = useRef<Set<string>>(new Set());
 
-    // Hydrate everything (filters, selected seq, detail tab, playback cap,
+    // Hydrate everything (filters, selected seq, detail tab, playhead,
     // capture URL) from the query string on first render. URL wins over
     // localStorage so a shared link reproduces the exact state.
     useEffect(() => {
@@ -68,8 +68,8 @@ export function App() {
         }
         if (parsed.selectedSeq !== null) patch.selectedSeq = parsed.selectedSeq;
         if (parsed.detailTab !== null) patch.detailTab = parsed.detailTab;
-        if (parsed.playbackCap !== null) {
-            patch.playback = { ...state.playback, cap: parsed.playbackCap };
+        if (parsed.playhead !== null) {
+            patch.playback = { ...state.playback, playhead: parsed.playhead };
         }
         if (Object.keys(patch).length > 0) useMessagesStore.setState(patch);
         if (parsed.captureUrl) {
@@ -96,7 +96,7 @@ export function App() {
                 filters: m.filters,
                 selectedSeq: m.selectedSeq,
                 detailTab: m.detailTab,
-                playbackCap: m.playback.cap,
+                playhead: m.playback.playhead,
                 captureUrl: d.selectedUrl,
             });
         };
@@ -170,7 +170,7 @@ export function App() {
             }
             patch.selectedSeq = parsed.selectedSeq;
             patch.detailTab = parsed.detailTab ?? 'tree';
-            patch.playback = { ...ms.playback, cap: parsed.playbackCap };
+            patch.playback = { ...ms.playback, playhead: parsed.playhead };
             useMessagesStore.setState(patch);
             if (parsed.captureUrl !== ds.selectedUrl && parsed.captureUrl) {
                 ds.setSelected(parsed.captureUrl);

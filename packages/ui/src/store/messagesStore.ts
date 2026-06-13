@@ -14,8 +14,12 @@ export interface Filters {
 }
 
 export interface Playback {
-    /** When non-null, messages with seq > value are hidden from view. */
-    cap: number | null;
+    /**
+     * Seq of the message the playhead has reached. Every frame stays visible;
+     * the playhead only marks the current position. `null` = parked at the
+     * start (nothing reached yet).
+     */
+    playhead: number | null;
     /** Auto-advance is running. */
     playing: boolean;
     /** Playback speed multiplier (1 = real-time by timestamp). */
@@ -61,7 +65,7 @@ interface MessagesState {
     toggleDirection: (dir: CapturedMessage['direction']) => void;
     toggleKind: (kind: CapturedMessage['kind']) => void;
     toggleStreams: () => void;
-    setPlaybackCap: (cap: number | null) => void;
+    setPlayhead: (playhead: number | null) => void;
     setPlaying: (playing: boolean) => void;
     setPlaybackSpeed: (speed: number) => void;
     setDetailTab: (tab: DetailTab) => void;
@@ -107,7 +111,7 @@ export const useMessagesStore = create<MessagesState>()(
     selectedSeq: null,
     replayDone: false,
     filters: initialFilters,
-    playback: { cap: null, playing: false, speed: 1 },
+    playback: { playhead: null, playing: false, speed: 1 },
     detailTab: 'tree',
     clearedUpToSeq: null,
 
@@ -131,7 +135,7 @@ export const useMessagesStore = create<MessagesState>()(
                         clearedUpToSeq: keepUserState ? state.clearedUpToSeq : null,
                         playback: keepUserState
                             ? state.playback
-                            : { ...state.playback, cap: null, playing: false },
+                            : { ...state.playback, playhead: null, playing: false },
                     };
                 });
                 return;
@@ -174,8 +178,8 @@ export const useMessagesStore = create<MessagesState>()(
         }),
     toggleStreams: () =>
         set((s) => ({ filters: { ...s.filters, showStreams: !s.filters.showStreams } })),
-    setPlaybackCap: (cap) =>
-        set((s) => ({ playback: { ...s.playback, cap } })),
+    setPlayhead: (playhead) =>
+        set((s) => ({ playback: { ...s.playback, playhead } })),
     setPlaying: (playing) =>
         set((s) => ({ playback: { ...s.playback, playing } })),
     setPlaybackSpeed: (speed) =>
@@ -193,31 +197,40 @@ export const useMessagesStore = create<MessagesState>()(
         });
     },
     loadFromExport: (exp) => {
-        set({
-            session: {
-                id: exp.session.id,
-                name: exp.session.name,
-                agentCommand: exp.session.agentCommand,
-                startedAt: exp.session.startedAt,
-                endedAt: exp.session.endedAt,
-                clientName: exp.session.clientName,
-                importedAt: exp.exportedAt,
-                clientVersion: null,
-                clientPlatform: null,
-                agentName: null,
-                agentVersion: null,
-                protocolVersion: null,
-                currentMode: null,
-                currentModel: null,
-                agentCapabilitiesJson: null,
-            },
-            messages: exp.messages,
-            selectedSeq: null,
-            replayDone: true,
-            clearedUpToSeq: null,
-            playback: { cap: null, playing: false, speed: 1 },
-            connection: 'idle',
-            lastError: null,
+        set((state) => {
+            // First load (nothing open yet) keeps URL-hydrated selection /
+            // playhead so a deep link — `?url=…&seq=…&play=…`, the playground's
+            // share format — restores scroll position. Dropping a new export
+            // over an already-open session is a deliberate switch, so reset.
+            const isInitial = state.session === null;
+            return {
+                session: {
+                    id: exp.session.id,
+                    name: exp.session.name,
+                    agentCommand: exp.session.agentCommand,
+                    startedAt: exp.session.startedAt,
+                    endedAt: exp.session.endedAt,
+                    clientName: exp.session.clientName,
+                    importedAt: exp.exportedAt,
+                    clientVersion: null,
+                    clientPlatform: null,
+                    agentName: null,
+                    agentVersion: null,
+                    protocolVersion: null,
+                    currentMode: null,
+                    currentModel: null,
+                    agentCapabilitiesJson: null,
+                },
+                messages: exp.messages,
+                selectedSeq: isInitial ? state.selectedSeq : null,
+                replayDone: true,
+                clearedUpToSeq: isInitial ? state.clearedUpToSeq : null,
+                playback: isInitial
+                    ? { ...state.playback, playing: false }
+                    : { playhead: null, playing: false, speed: 1 },
+                connection: 'idle',
+                lastError: null,
+            };
         });
     },
     clear: () =>
@@ -262,11 +275,9 @@ export const useMessagesStore = create<MessagesState>()(
 export function applyFilters(
     messages: CapturedMessage[],
     filters: Filters,
-    playbackCap: number | null = null,
 ): CapturedMessage[] {
     const q = filters.search.trim().toLowerCase();
     return messages.filter((m) => {
-        if (playbackCap !== null && m.seq > playbackCap) return false;
         if (!filters.directions.has(m.direction)) return false;
 
         // STREAM chip is an independent gate for `agent_message_chunk` runs

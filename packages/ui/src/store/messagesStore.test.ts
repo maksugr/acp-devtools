@@ -80,7 +80,7 @@ function resetStore(): void {
         selectedSeq: null,
         replayDone: false,
         filters: initialFilters(),
-        playback: { cap: null, playing: false, speed: 1 },
+        playback: { playhead: null, playing: false, speed: 1 },
         detailTab: 'tree',
         clearedUpToSeq: null,
     });
@@ -105,13 +105,13 @@ describe('handleEvent · session.start', () => {
         useMessagesStore.setState({
             selectedSeq: 42,
             clearedUpToSeq: 7,
-            playback: { cap: 100, playing: false, speed: 2 },
+            playback: { playhead: 100, playing: false, speed: 2 },
         });
         send({ type: 'session.start', session: sessionFixture({ id: 5 }) });
         const s = useMessagesStore.getState();
         expect(s.selectedSeq).toBe(42);
         expect(s.clearedUpToSeq).toBe(7);
-        expect(s.playback).toEqual({ cap: 100, playing: false, speed: 2 });
+        expect(s.playback).toEqual({ playhead: 100, playing: false, speed: 2 });
     });
 
     it('preserves user state on reconnect to the SAME session id', () => {
@@ -119,14 +119,14 @@ describe('handleEvent · session.start', () => {
         useMessagesStore.setState({
             selectedSeq: 9,
             clearedUpToSeq: 4,
-            playback: { cap: 20, playing: false, speed: 1 },
+            playback: { playhead: 20, playing: false, speed: 1 },
         });
         // Reconnect — same session.id.
         send({ type: 'session.start', session: sessionFixture({ id: 5, startedAt: 999 }) });
         const s = useMessagesStore.getState();
         expect(s.selectedSeq).toBe(9);
         expect(s.clearedUpToSeq).toBe(4);
-        expect(s.playback.cap).toBe(20);
+        expect(s.playback.playhead).toBe(20);
     });
 
     it('RESETS selectedSeq / clearedUpToSeq / playback when switching to a DIFFERENT session', () => {
@@ -134,13 +134,13 @@ describe('handleEvent · session.start', () => {
         useMessagesStore.setState({
             selectedSeq: 9,
             clearedUpToSeq: 4,
-            playback: { cap: 20, playing: true, speed: 4 },
+            playback: { playhead: 20, playing: true, speed: 4 },
         });
         send({ type: 'session.start', session: sessionFixture({ id: 6 }) });
         const s = useMessagesStore.getState();
         expect(s.selectedSeq).toBeNull();
         expect(s.clearedUpToSeq).toBeNull();
-        expect(s.playback.cap).toBeNull();
+        expect(s.playback.playhead).toBeNull();
         expect(s.playback.playing).toBe(false);
         // Speed is a user preference, kept across sessions.
         expect(s.playback.speed).toBe(4);
@@ -334,11 +334,6 @@ describe('applyFilters', () => {
         expect(out.every((m) => m.raw.toLowerCase().includes('initialize'))).toBe(true);
     });
 
-    it('playbackCap hides messages with seq above the cap (today\'s bug)', () => {
-        const out = applyFilters(build(), initialFilters(), 3);
-        expect(out.map((m) => m.seq)).toEqual([1, 2, 3]);
-    });
-
     it('direction filter narrows by side', () => {
         const filters = initialFilters();
         filters.directions = new Set(['editor-to-agent']);
@@ -389,12 +384,13 @@ describe('loadFromExport — static load from SessionExport', () => {
         const m2 = mkMessage({ direction: 'agent-to-editor', kind: 'response', method: undefined });
         const m3 = mkMessage({ kind: 'notification', method: 'session/update', rpcId: undefined });
 
-        // Pre-existing state from a prior session shouldn't bleed through.
+        // Dropping an export over an ALREADY-open session is a deliberate
+        // switch — pre-existing state must not bleed through.
         send({ type: 'session.start', session: sessionFixture({ id: 99 }) });
         useMessagesStore.setState({
             selectedSeq: 17,
             clearedUpToSeq: 9,
-            playback: { cap: 4, playing: true, speed: 4 },
+            playback: { playhead: 4, playing: true, speed: 4 },
             replayDone: false,
             connection: 'open',
             lastError: 'old error',
@@ -424,8 +420,45 @@ describe('loadFromExport — static load from SessionExport', () => {
         expect(s.selectedSeq).toBeNull();
         expect(s.clearedUpToSeq).toBeNull();
         expect(s.replayDone).toBe(true);
-        expect(s.playback).toEqual({ cap: null, playing: false, speed: 1 });
+        expect(s.playback).toEqual({ playhead: null, playing: false, speed: 1 });
         expect(s.connection).toBe('idle');
         expect(s.lastError).toBeNull();
+    });
+
+    it('keeps URL-hydrated selection / playhead on the first load (deep link)', () => {
+        seqCounter = 0;
+        const m1 = mkMessage();
+        const m2 = mkMessage({ direction: 'agent-to-editor', kind: 'response', method: undefined });
+        const m3 = mkMessage({ kind: 'notification', method: 'session/update', rpcId: undefined });
+
+        // No session open yet — these came from `?seq=&play=` hydration before
+        // the export arrived (the playground deep-link path).
+        useMessagesStore.setState({
+            selectedSeq: 2,
+            playback: { playhead: 2, playing: false, speed: 2 },
+        });
+
+        useMessagesStore.getState().loadFromExport({
+            version: 1,
+            exportedAt: 1_700_000_005_000,
+            tool: { name: 'acp-devtools', version: '0.1.0' },
+            session: {
+                id: 7,
+                name: 'imported-from-file',
+                agentCommand: 'mock',
+                clientName: 'Zed',
+                startedAt: 1_700_000_000_000,
+                endedAt: 1_700_000_002_000,
+            },
+            messages: [m1, m2, m3],
+        });
+
+        const s = useMessagesStore.getState();
+        expect(s.selectedSeq).toBe(2);
+        expect(s.playback.playhead).toBe(2);
+        // never auto-plays on load, but the user's speed preference is kept
+        expect(s.playback.playing).toBe(false);
+        expect(s.playback.speed).toBe(2);
+        expect(s.replayDone).toBe(true);
     });
 });

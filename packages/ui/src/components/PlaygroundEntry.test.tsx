@@ -26,7 +26,7 @@ function resetStore(): void {
         lastError: null,
         selectedSeq: null,
         replayDone: false,
-        playback: { cap: null, playing: false, speed: 1 },
+        playback: { playhead: null, playing: false, speed: 1 },
         clearedUpToSeq: null,
     });
 }

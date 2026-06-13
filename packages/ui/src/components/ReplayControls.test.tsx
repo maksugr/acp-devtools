@@ -20,14 +20,14 @@ function msg(seq: number, timestamp = 1_700_000_000_000 + seq * 100): CapturedMe
 function seed(seqs: number[]) {
     useMessagesStore.setState({
         messages: seqs.map((s) => msg(s, 1_700_000_000_000 + s * 200)),
-        playback: { cap: null, playing: false, speed: 1 },
+        playback: { playhead: null, playing: false, speed: 1 },
     });
 }
 
 beforeEach(() => {
     useMessagesStore.setState({
         messages: [],
-        playback: { cap: null, playing: false, speed: 1 },
+        playback: { playhead: null, playing: false, speed: 1 },
     });
 });
 
@@ -41,10 +41,10 @@ describe('ReplayControls — rendering', () => {
         expect(container.firstChild).toBeNull();
     });
 
-    it('renders the seq counter "current / max"', () => {
+    it('renders the seq counter parked at the start "000 / max"', () => {
         seed([1, 2, 3]);
         render(<ReplayControls />);
-        expect(screen.getByText('003 / 003')).toBeInTheDocument();
+        expect(screen.getByText('000 / 003')).toBeInTheDocument();
     });
 
     it('renders all speed buttons', () => {
@@ -57,27 +57,25 @@ describe('ReplayControls — rendering', () => {
 });
 
 describe('ReplayControls — play / pause', () => {
-    it('the play button toggles playback state', () => {
+    it('shows Play and toggles playback when parked at the start', () => {
         seed([1, 2, 3]);
-        // Cap at first seq so we're not at the end (otherwise togglePlay restarts)
-        act(() => useMessagesStore.setState({ playback: { cap: 1, playing: false, speed: 1 } }));
+        // playhead = null (default) → parked at start → Play, not restart.
         render(<ReplayControls />);
-        // Initially paused
         expect(useMessagesStore.getState().playback.playing).toBe(false);
-        // Find the play/pause button by its accessible title
         const playBtn = screen.getByTitle(/^play$/);
         fireEvent.click(playBtn);
         expect(useMessagesStore.getState().playback.playing).toBe(true);
     });
 
-    it('clicking play at end-of-stream restarts from the first seq', () => {
+    it('clicking restart at end-of-stream rewinds the playhead to the start', () => {
         seed([1, 2, 3]);
-        // playback.cap = null means "show all" → atEnd = true
+        // playhead at the last seq → atEnd → Replay button.
+        act(() => useMessagesStore.setState({ playback: { playhead: 3, playing: false, speed: 1 } }));
         render(<ReplayControls />);
         const restartBtn = screen.getByTitle(/^restart playback$/);
         fireEvent.click(restartBtn);
         const state = useMessagesStore.getState();
-        expect(state.playback.cap).toBe(1);
+        expect(state.playback.playhead).toBeNull();
         expect(state.playback.playing).toBe(true);
     });
 });
@@ -92,65 +90,53 @@ describe('ReplayControls — speed selection', () => {
 });
 
 describe('ReplayControls — manual scrub', () => {
-    it('changing the slider sets cap and pauses playback', () => {
+    it('changing the slider moves the playhead and pauses playback', () => {
         seed([1, 2, 3, 4, 5]);
         // Start playing first
-        act(() => useMessagesStore.setState({ playback: { cap: 1, playing: true, speed: 1 } }));
+        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }));
         render(<ReplayControls />);
         const slider = screen.getByRole('slider');
         fireEvent.change(slider, { target: { value: '3' } });
         const state = useMessagesStore.getState();
-        expect(state.playback.cap).toBe(3);
+        expect(state.playback.playhead).toBe(3);
         expect(state.playback.playing).toBe(false);
     });
 
-    it('scrubbing to the max value clears the cap (null = show all)', () => {
+    it('scrubbing to the max value parks the playhead at the end', () => {
         seed([1, 2, 3]);
-        act(() => useMessagesStore.setState({ playback: { cap: 1, playing: false, speed: 1 } }));
+        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: false, speed: 1 } }));
         render(<ReplayControls />);
         const slider = screen.getByRole('slider');
         fireEvent.change(slider, { target: { value: '3' } }); // 3 = maxSeq
-        expect(useMessagesStore.getState().playback.cap).toBeNull();
-    });
-});
-
-describe('ReplayControls — "show all" button', () => {
-    it('clears cap and stops playback', () => {
-        seed([1, 2, 3]);
-        act(() =>
-            useMessagesStore.setState({ playback: { cap: 2, playing: true, speed: 1 } }),
-        );
-        render(<ReplayControls />);
-        fireEvent.click(screen.getByRole('button', { name: /show all/i }));
-        const state = useMessagesStore.getState();
-        expect(state.playback.cap).toBeNull();
-        expect(state.playback.playing).toBe(false);
+        expect(useMessagesStore.getState().playback.playhead).toBe(3);
+        // At the end → the button offers a restart.
+        expect(screen.getByTitle(/^restart playback$/)).toBeInTheDocument();
     });
 });
 
 describe('ReplayControls — auto-advance ticker', () => {
-    it('advances cap to the next seq when playing', async () => {
+    it('advances the playhead to the next seq when playing', async () => {
         vi.useFakeTimers();
         seed([1, 2, 3]);
-        act(() => useMessagesStore.setState({ playback: { cap: 1, playing: true, speed: 1 } }));
+        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }));
         render(<ReplayControls />);
         // Per the ticker formula: delta = ts(seq2)-ts(seq1) = 200ms / speed=1 → 200ms
         await act(async () => {
             await vi.advanceTimersByTimeAsync(250);
         });
-        expect(useMessagesStore.getState().playback.cap).toBe(2);
+        expect(useMessagesStore.getState().playback.playhead).toBe(2);
     });
 
     it('stops auto-playing when the end is reached', async () => {
         vi.useFakeTimers();
         seed([1, 2]);
-        act(() => useMessagesStore.setState({ playback: { cap: 1, playing: true, speed: 1 } }));
+        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }));
         render(<ReplayControls />);
         await act(async () => {
             await vi.advanceTimersByTimeAsync(500);
         });
         // cap moved to 2 (last)
-        expect(useMessagesStore.getState().playback.cap).toBe(2);
+        expect(useMessagesStore.getState().playback.playhead).toBe(2);
         // After advancing, the effect re-runs and detects atEnd → stops playing
         await act(async () => {
             await vi.advanceTimersByTimeAsync(500);

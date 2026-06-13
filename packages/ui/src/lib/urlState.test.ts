@@ -16,7 +16,7 @@ describe('parseUrlState', () => {
         expect(s.filters).toEqual({});
         expect(s.selectedSeq).toBeNull();
         expect(s.detailTab).toBeNull();
-        expect(s.playbackCap).toBeNull();
+        expect(s.playhead).toBeNull();
         expect(s.captureUrl).toBeNull();
     });
 
@@ -51,8 +51,8 @@ describe('parseUrlState', () => {
     });
 
     it('reads playback cap only when numeric', () => {
-        expect(parseUrlState('?play=15').playbackCap).toBe(15);
-        expect(parseUrlState('?play=oops').playbackCap).toBeNull();
+        expect(parseUrlState('?play=15').playhead).toBe(15);
+        expect(parseUrlState('?play=oops').playhead).toBeNull();
     });
 
     it('reads capture URL verbatim', () => {
@@ -81,7 +81,7 @@ describe('writeUrlState', () => {
             filters: defaultFilters(),
             selectedSeq: null,
             detailTab: 'tree',
-            playbackCap: null,
+            playhead: null,
             captureUrl: null,
         });
         expect(window.location.search).toBe('');
@@ -97,14 +97,14 @@ describe('writeUrlState', () => {
             },
             selectedSeq: 42,
             detailTab: 'meta',
-            playbackCap: 7,
+            playhead: 7,
             captureUrl: 'ws://127.0.0.1:53000',
         });
         const parsed = parseUrlState(window.location.search);
         expect(parsed.captureUrl).toBe('ws://127.0.0.1:53000');
         expect(parsed.selectedSeq).toBe(42);
         expect(parsed.detailTab).toBe('meta');
-        expect(parsed.playbackCap).toBe(7);
+        expect(parsed.playhead).toBe(7);
         expect(parsed.filters.directions).toEqual(new Set(['editor-to-agent']));
         expect(parsed.filters.kinds).toEqual(new Set(['request', 'response']));
         expect(parsed.filters.search).toBe('foo bar');
@@ -117,7 +117,7 @@ describe('writeUrlState', () => {
             filters: defaultFilters(),
             selectedSeq: null,
             detailTab: 'tree',
-            playbackCap: null,
+            playhead: null,
             captureUrl: null,
         });
         const params = new URLSearchParams(window.location.search);
@@ -131,7 +131,7 @@ describe('writeUrlState', () => {
             filters: defaultFilters(),
             selectedSeq: 1,
             detailTab: 'tree',
-            playbackCap: null,
+            playhead: null,
             captureUrl: null,
         });
         expect(window.history.length).toBe(beforeLen);

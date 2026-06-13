@@ -7,35 +7,40 @@ const SPEEDS = [0.5, 1, 2, 4, 8];
 export function ReplayControls() {
     const messages = useMessagesStore((s) => s.messages);
     const playback = useMessagesStore((s) => s.playback);
-    const setCap = useMessagesStore((s) => s.setPlaybackCap);
+    const setPlayhead = useMessagesStore((s) => s.setPlayhead);
     const setPlaying = useMessagesStore((s) => s.setPlaying);
     const setSpeed = useMessagesStore((s) => s.setPlaybackSpeed);
 
     const minSeq = messages.length > 0 ? messages[0]!.seq : 0;
     const maxSeq = messages.length > 0 ? messages[messages.length - 1]!.seq : 0;
-    const cap = playback.cap ?? maxSeq;
-    const atEnd = cap >= maxSeq;
+    const playhead = playback.playhead;
+    // null = parked at the start; the scrubber sits at the far left and the
+    // counter reads 0. Everything is already on screen — the playhead only
+    // tracks position, it never hides frames.
+    const sliderValue = playhead ?? minSeq;
+    const atEnd = playhead !== null && playhead >= maxSeq;
 
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
-        // Stop the loop when we run out of messages.
         if (!playback.playing) return;
         if (atEnd) {
             setPlaying(false);
             return;
         }
-        const currentIdx = messages.findIndex((m) => m.seq === cap);
+        // From the start (null) the first tick reaches the first frame.
+        const currentIdx =
+            playhead === null ? -1 : messages.findIndex((m) => m.seq === playhead);
         const nextMsg = messages[currentIdx + 1];
         if (!nextMsg) {
             setPlaying(false);
             return;
         }
-        const currentMsg = messages[currentIdx];
+        const currentMsg = currentIdx >= 0 ? messages[currentIdx] : undefined;
         const delta = currentMsg ? nextMsg.timestamp - currentMsg.timestamp : 0;
         const delay = Math.max(15, Math.min(1500, delta / playback.speed));
         timerRef.current = setTimeout(() => {
-            setCap(nextMsg.seq);
+            setPlayhead(nextMsg.seq);
         }, delay);
         return () => {
             if (timerRef.current) {
@@ -43,23 +48,20 @@ export function ReplayControls() {
                 timerRef.current = null;
             }
         };
-    }, [playback.playing, playback.speed, cap, messages, atEnd, setCap, setPlaying]);
+    }, [playback.playing, playback.speed, playhead, messages, atEnd, setPlayhead, setPlaying]);
 
     if (messages.length === 0) return null;
 
     const handleSlider = (value: number) => {
-        if (value >= maxSeq) {
-            setCap(null);
-        } else {
-            setCap(value);
-        }
+        setPlayhead(value);
         // Pause when user scrubs manually.
         if (playback.playing) setPlaying(false);
     };
 
     const togglePlay = () => {
         if (atEnd) {
-            setCap(minSeq);
+            // Restart from the top; the loop's first tick lands on frame one.
+            setPlayhead(null);
             setPlaying(true);
         } else {
             setPlaying(!playback.playing);
@@ -82,13 +84,13 @@ export function ReplayControls() {
                 {playback.playing ? '❚❚' : atEnd ? '↺' : '▶'}
             </button>
             <span className="w-20 shrink-0 text-right text-ink-secondary">
-                {String(cap).padStart(3, '0')} / {String(maxSeq).padStart(3, '0')}
+                {String(playhead ?? 0).padStart(3, '0')} / {String(maxSeq).padStart(3, '0')}
             </span>
             <input
                 type="range"
                 min={minSeq}
                 max={maxSeq}
-                value={cap}
+                value={sliderValue}
                 onChange={(e) => handleSlider(Number(e.target.value))}
                 className="h-1 flex-1 cursor-pointer accent-accent-out"
             />
@@ -110,17 +112,6 @@ export function ReplayControls() {
                     </button>
                 ))}
             </div>
-            <button
-                type="button"
-                onClick={() => {
-                    setCap(null);
-                    setPlaying(false);
-                }}
-                className="rounded-sm border border-line px-2 py-0.5 text-[10px] uppercase tracking-widest text-ink-muted transition-colors hover:border-line-strong hover:text-ink-secondary"
-                title="show all messages, exit playback"
-            >
-                show all
-            </button>
         </div>
     );
 }

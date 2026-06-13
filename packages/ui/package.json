@@ -1,6 +1,6 @@
 {
     "name": "@acp-devtools/ui",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "private": true,
     "description": "Web UI for acp-devtools — live ACP message inspector",
     "type": "module",
@@ -19,7 +19,7 @@
         "clean": "rimraf dist .vite"
     },
     "dependencies": {
-        "@acp-devtools/core": "0.3.0",
+        "@acp-devtools/core": "0.4.0",
         "clsx": "^2.1.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
