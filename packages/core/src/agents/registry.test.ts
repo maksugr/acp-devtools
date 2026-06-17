@@ -95,6 +95,13 @@ describe('detectAgentShortcut', () => {
         expect(detectAgentShortcut('opencode acp')?.shortName).toBe('opencode');
         expect(detectAgentShortcut('opencode acp --port 8080')?.shortName).toBe('opencode');
     });
+    it('matches an absolute-path launch by basename (JetBrains uses full paths)', () => {
+        expect(detectAgentShortcut('/opt/homebrew/bin/goose acp')?.shortName).toBe('goose');
+        expect(detectAgentShortcut('/usr/local/bin/opencode acp --port 8080')?.shortName).toBe(
+            'opencode',
+        );
+        expect(detectAgentShortcut('C:\\Tools\\goose acp')?.displayName).toBe('Goose');
+    });
     it('matches codex', () => {
         expect(detectAgentShortcut('npx -y @zed-industries/codex-acp')?.shortName).toBe('codex');
     });

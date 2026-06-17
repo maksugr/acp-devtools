@@ -99,10 +99,16 @@ export function listAgents(): AgentDefinition[] {
  * Returns the matching definition when the command + args prefix matches a
  * known shortcut, so the UI can replace the verbose form with a friendly
  * label. Returns `null` for custom agents.
+ *
+ * The first token is compared both verbatim and by basename, so an
+ * absolute-path launch — which JetBrains always uses (`/opt/homebrew/bin/goose
+ * acp`) — still resolves to its shortcut instead of falling back to the raw
+ * path.
  */
 export function detectAgentShortcut(agentCommand: string): AgentDefinition | null {
     const trimmed = agentCommand.trim();
     if (trimmed.length === 0) return null;
+    const candidates = [trimmed, basenameFirstToken(trimmed)];
     for (const def of Object.values(AGENT_REGISTRY)) {
         const variants: ReadonlyArray<readonly string[]> = [
             [def.command, ...def.args],
@@ -110,9 +116,20 @@ export function detectAgentShortcut(agentCommand: string): AgentDefinition | nul
         ];
         for (const variant of variants) {
             const exact = variant.join(' ');
-            if (trimmed === exact) return def;
-            if (trimmed.startsWith(exact + ' ')) return def;
+            for (const candidate of candidates) {
+                if (candidate === exact) return def;
+                if (candidate.startsWith(exact + ' ')) return def;
+            }
         }
     }
     return null;
+}
+
+/** Replace the command's first token with its path basename (handles `/` and `\`). */
+function basenameFirstToken(command: string): string {
+    const spaceAt = command.indexOf(' ');
+    const head = spaceAt === -1 ? command : command.slice(0, spaceAt);
+    const rest = spaceAt === -1 ? '' : command.slice(spaceAt);
+    const base = head.split(/[/\\]/).pop() ?? head;
+    return base + rest;
 }

@@ -105,6 +105,7 @@ let id1: number; // clean Zed session
 let id2: number; // clean WebStorm session (differs from id1 in clientInfo)
 let id3: number; // broken: invalid initialize (schema violation)
 let id4: number; // WebStorm with _meta.proxyConfig (for export redaction tests)
+let id5: number; // valid but missing agentInfo/clientInfo (soon-required advisory)
 const SECRET_TOKEN = 'super-secret-jetbrains-proxy-key-12345';
 
 beforeAll(() => {
@@ -168,6 +169,17 @@ beforeAll(() => {
     s4.record(resp(1, validInitResult));
     s4.close();
     id4 = s4.info.id;
+
+    // Valid under today's schema but omits agentInfo / clientInfo — the
+    // soon-required advisory case (goose 1.37.0 behaves like this).
+    seq = 0;
+    const s5 = Session.start(db, { name: 'no-agent-info', agentCommand: 'mock' });
+    s5.record(req('initialize', { protocolVersion: 1, clientCapabilities: {} }));
+    s5.record(
+        resp(1, { protocolVersion: 1, agentCapabilities: { promptCapabilities: {} }, authMethods: [] }),
+    );
+    s5.close();
+    id5 = s5.info.id;
 
     db.close();
 });
@@ -243,7 +255,7 @@ describe('CLI integration — per-command behavior', () => {
             const r = await run(['export', '--db', dbPath]);
             expect(r.code).toBe(0);
             const j = JSON.parse(r.out) as { session: { id: number } };
-            expect(j.session.id).toBe(id4); // newest
+            expect(j.session.id).toBe(id5); // newest
         }, TIMEOUT);
 
         it('redacts auth tokens by default and reports the count on stderr', async () => {
@@ -495,6 +507,23 @@ describe('CLI integration — per-command behavior', () => {
             const r = await run(['validate', String(id3), '--db', dbPath]);
             expect(r.code).toBe(1);
             expect(r.out + r.err).toMatch(/violation|must have required/i);
+        }, TIMEOUT);
+
+        it('reports a soon-required advisory without failing exit code', async () => {
+            const r = await run(['validate', String(id5), '--db', dbPath]);
+            expect(r.code).toBe(0);
+            expect(r.out + r.err).toMatch(/advisor/i);
+            expect(r.out).toMatch(/agentInfo/);
+        }, TIMEOUT);
+
+        it('--json includes an advisories array', async () => {
+            const r = await run(['validate', String(id5), '--db', dbPath, '--json']);
+            expect(r.code).toBe(0);
+            const j = JSON.parse(r.out) as {
+                advisories: Array<{ path: string; method: string | null }>;
+            };
+            expect(j.advisories.some((a) => a.path === 'agentInfo')).toBe(true);
+            expect(j.advisories.some((a) => a.path === 'clientInfo')).toBe(true);
         }, TIMEOUT);
     });
 

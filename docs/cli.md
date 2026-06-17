@@ -417,6 +417,10 @@ but not flagged) when the message failed to parse, the method isn't in the spec
 (extension methods, future additions), or the spec has no schema for the kind
 (JSON-RPC error envelopes are framing, not ACP-specific).
 
+A session can be clean and still earn **advisories** — fields the spec marks
+optional today but slated to become mandatory. These print in a separate amber
+block and never affect the exit code.
+
 The same check runs as part of `inspect --spec` (per-row `✓` / `⚠N`) and
 `stats` (summary line). In the inspector the same data shows up as timeline
 badges, a detail-panel **Spec** tab, and a footer chip — see the

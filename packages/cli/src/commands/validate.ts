@@ -27,6 +27,14 @@ interface Violation {
     keyword?: string;
 }
 
+interface Advisory {
+    seq: number;
+    method: string | null;
+    schemaName: string;
+    path: string;
+    message: string;
+}
+
 export function registerValidateCommand(program: Command): void {
     program
         .command('validate')
@@ -77,6 +85,7 @@ export function registerValidateCommand(program: Command): void {
 
             const methodNeedle = opts.method ? opts.method.toLowerCase() : null;
             const violations: Violation[] = [];
+            const advisories: Advisory[] = [];
             let checked = 0;
             let skipped = 0;
             for (const m of messages) {
@@ -90,11 +99,21 @@ export function registerValidateCommand(program: Command): void {
                     continue;
                 }
                 checked += 1;
-                if (result.valid) continue;
                 const method = m.method ?? pairedMethod ?? null;
-                if (methodNeedle && (!method || !method.toLowerCase().includes(methodNeedle))) {
-                    continue;
+                const methodMatch =
+                    !methodNeedle || (!!method && method.toLowerCase().includes(methodNeedle));
+                if (methodMatch && result.advisories) {
+                    for (const a of result.advisories) {
+                        advisories.push({
+                            seq: m.seq,
+                            method,
+                            schemaName: result.schemaName ?? '?',
+                            path: a.path,
+                            message: a.message,
+                        });
+                    }
                 }
+                if (result.valid || !methodMatch) continue;
                 for (const e of result.errors) {
                     if (violations.length >= limit) break;
                     const v: Violation = {
@@ -114,7 +133,7 @@ export function registerValidateCommand(program: Command): void {
             if (opts.json) {
                 process.stdout.write(
                     JSON.stringify(
-                        { sessionId: id, checked, skipped, violations },
+                        { sessionId: id, checked, skipped, violations, advisories },
                         null,
                         2,
                     ) + '\n',
@@ -129,17 +148,28 @@ export function registerValidateCommand(program: Command): void {
                 violations.length === 0
                     ? errStyler.green('0 violations')
                     : errStyler.red(`${violations.length} violations`);
+            const aCount =
+                advisories.length === 0
+                    ? ''
+                    : ` · ${errStyler.yellow(`${advisories.length} advisor${advisories.length === 1 ? 'y' : 'ies'}`)}`;
             process.stderr.write(
-                `${errStyler.bold(errStyler.cyan(`session #${id}`))} · ${checked} checked · ${skipped} skipped (no schema) · ${vCount} in ${affected.size} method${affected.size === 1 ? '' : 's'}\n\n`,
+                `${errStyler.bold(errStyler.cyan(`session #${id}`))} · ${checked} checked · ${skipped} skipped (no schema) · ${vCount} in ${affected.size} method${affected.size === 1 ? '' : 's'}${aCount}\n\n`,
             );
-            if (violations.length === 0) {
+            const s = createStyler(colorEnabled(process.stdout));
+            if (violations.length > 0) {
+                process.stdout.write(renderViolations(s, violations));
+            }
+            if (advisories.length > 0) {
+                if (violations.length > 0) process.stdout.write('\n');
+                process.stdout.write(renderAdvisories(s, advisories));
+            }
+            if (violations.length === 0 && advisories.length === 0) {
                 process.stdout.write(errStyler.green('no violations') + '\n');
                 return;
             }
-            const s = createStyler(colorEnabled(process.stdout));
-            process.stdout.write(renderViolations(s, violations));
-            // Non-zero exit so CI scripts can fail on first violation.
-            process.exit(1);
+            // Non-zero exit so CI scripts can fail on first violation. Advisories
+            // are informational — a frame that is valid today does not fail.
+            if (violations.length > 0) process.exit(1);
         });
 }
 
@@ -164,6 +194,29 @@ function renderViolations(s: Styler, violations: Violation[]): string {
         s.red(v.message),
     ]);
     return renderTable(s, COLUMNS, body);
+}
+
+const ADVISORY_COLUMNS: Column[] = [
+    { title: 'SEQ', align: 'right' },
+    { title: 'METHOD', align: 'left' },
+    { title: 'SCHEMA', align: 'left' },
+    { title: 'FIELD', align: 'left' },
+    { title: 'ADVISORY', align: 'left' },
+];
+
+function renderAdvisories(s: Styler, advisories: Advisory[]): string {
+    const heading =
+        s.yellow(`${advisories.length} advisor${advisories.length === 1 ? 'y' : 'ies'}`) +
+        s.dim(' — valid today, but a future ACP version will require these fields') +
+        '\n';
+    const body = advisories.map((a) => [
+        s.dim(`#${a.seq}`),
+        truncate(a.method ?? '—', METHOD_MAX),
+        s.dim(truncate(a.schemaName, SCHEMA_MAX)),
+        s.yellow(truncate(a.path, PATH_MAX)),
+        s.yellow(a.message),
+    ]);
+    return heading + renderTable(s, ADVISORY_COLUMNS, body);
 }
 
 function truncate(s: string, max: number): string {

@@ -609,7 +609,7 @@ export function buildMcpServer(opts: McpOptions): McpServer {
         'find_spec_violations',
         {
             description:
-                'Validate every captured frame in a session against the ACP JSON schema (Draft 2020-12, ajv-compiled). Returns every offender with its seq, method, and per-error path + keyword + message. Schema-skipped frames (unknown methods, parse errors, generic envelopes) are not counted. Use the returned seq with get_message to inspect the offending raw payload. Start here when an agent is misbehaving but you don\'t yet know how.',
+                'Validate every captured frame in a session against the ACP JSON schema (Draft 2020-12, ajv-compiled). Returns every offender with its seq, method, and per-error path + keyword + message. Schema-skipped frames (unknown methods, parse errors, generic envelopes) are not counted. Also returns `advisories`: frames valid under today\'s schema that omit a field the spec says will become mandatory (e.g. `agentInfo` on an initialize response, `clientInfo` on the request) — these never count as violations. Use the returned seq with get_message to inspect the offending raw payload. Start here when an agent is misbehaving but you don\'t yet know how.',
             inputSchema: {
                 session_id: z
                     .number()
@@ -638,6 +638,14 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                         })
                         .loose(),
                 ),
+                advisories: z.array(
+                    z.object({
+                        seq: z.number(),
+                        method: z.string().nullable(),
+                        path: z.string(),
+                        message: z.string(),
+                    }),
+                ),
             },
             annotations: annotations({ title: 'Validate session against ACP schema' }),
         },
@@ -651,6 +659,12 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                 method: string | null;
                 errors: ReturnType<typeof validateAcpMessage>['errors'];
             }> = [];
+            const advisories: Array<{
+                seq: number;
+                method: string | null;
+                path: string;
+                message: string;
+            }> = [];
             let checked = 0;
             for (const m of messages) {
                 const pair = pairs.get(m.seq);
@@ -660,15 +674,15 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                 const result = validateAcpMessage(m, validationOpts);
                 if (result.skipped) continue;
                 checked += 1;
+                const method = m.method ?? pairedMethod ?? null;
                 if (!result.valid) {
-                    violations.push({
-                        seq: m.seq,
-                        method: m.method ?? pairedMethod ?? null,
-                        errors: result.errors,
-                    });
+                    violations.push({ seq: m.seq, method, errors: result.errors });
+                }
+                for (const a of result.advisories ?? []) {
+                    advisories.push({ seq: m.seq, method, path: a.path, message: a.message });
                 }
             }
-            return structuredResult({ session_id, checked, violations });
+            return structuredResult({ session_id, checked, violations, advisories });
         },
     );
 

@@ -131,6 +131,79 @@ describe('validateAcpMessage', () => {
     });
 });
 
+describe('soon-required advisories', () => {
+    const initResult = (result: Record<string, unknown>) =>
+        validateAcpMessage(
+            mk({
+                direction: 'agent-to-editor',
+                kind: 'response',
+                method: undefined,
+                rpcId: 1,
+                payload: { jsonrpc: '2.0', id: 1, result },
+            }),
+            { pairedMethod: 'initialize' },
+        );
+
+    it('flags a valid initialize response missing agentInfo', () => {
+        const r = initResult({
+            protocolVersion: 1,
+            agentCapabilities: { promptCapabilities: {} },
+            authMethods: [],
+        });
+        expect(r.valid).toBe(true);
+        expect(r.advisories).toEqual([
+            {
+                path: 'agentInfo',
+                kind: 'soon-required',
+                message: 'missing agentInfo — will be required in a future ACP version',
+            },
+        ]);
+    });
+
+    it('treats an explicit null agentInfo as missing', () => {
+        const r = initResult({
+            protocolVersion: 1,
+            agentCapabilities: { promptCapabilities: {} },
+            authMethods: [],
+            agentInfo: null,
+        });
+        expect(r.advisories?.[0]?.path).toBe('agentInfo');
+    });
+
+    it('emits no advisory once agentInfo is present', () => {
+        const r = initResult({
+            protocolVersion: 1,
+            agentCapabilities: { promptCapabilities: {} },
+            authMethods: [],
+            agentInfo: { name: 'goose', version: '1.37.0' },
+        });
+        expect(r.valid).toBe(true);
+        expect(r.advisories).toBeUndefined();
+    });
+
+    it('flags an initialize request missing clientInfo (editor side)', () => {
+        const r = validateAcpMessage(
+            mk({
+                payload: {
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'initialize',
+                    params: { protocolVersion: 1, clientCapabilities: {} },
+                },
+            }),
+        );
+        expect(r.valid).toBe(true);
+        expect(r.advisories?.[0]?.path).toBe('clientInfo');
+    });
+
+    it('carries advisories alongside hard violations', () => {
+        const r = initResult({});
+        expect(r.valid).toBe(false);
+        expect(r.errors.length).toBeGreaterThan(0);
+        expect(r.advisories?.some((a) => a.path === 'agentInfo')).toBe(true);
+    });
+});
+
 describe('knownAcpMethods', () => {
     it('lists at least the core handshake + session lifecycle methods', () => {
         const names = new Set(knownAcpMethods());

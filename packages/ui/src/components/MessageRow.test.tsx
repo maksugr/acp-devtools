@@ -117,4 +117,28 @@ describe('MessageRow', () => {
         const btn = container.querySelector('button');
         expect(btn?.className).toMatch(/ring-accent-out/);
     });
+
+    it('shows an amber ADV badge when the frame carries advisories', () => {
+        render(
+            <MessageRow
+                message={msg()}
+                selected={false}
+                onSelect={() => {}}
+                validation={{
+                    valid: true,
+                    errors: [],
+                    advisories: [
+                        {
+                            path: 'agentInfo',
+                            kind: 'soon-required',
+                            message: 'missing agentInfo — will be required in a future ACP version',
+                        },
+                    ],
+                }}
+            />,
+        );
+        const badge = screen.getByText(/ADV 1/);
+        expect(badge).toBeInTheDocument();
+        expect(badge.className).toMatch(/accent-warn/);
+    });
 });

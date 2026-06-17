@@ -119,3 +119,32 @@ describe('DetailPanel — tree view parse errors', () => {
         expect(screen.getByText(/<<<garbage>>>/)).toBeInTheDocument();
     });
 });
+
+describe('DetailPanel — spec advisories', () => {
+    const validWithAdvisory = {
+        valid: true,
+        errors: [],
+        schemaName: 'InitializeResponse',
+        advisories: [
+            {
+                path: 'agentInfo',
+                kind: 'soon-required' as const,
+                message: 'missing agentInfo — will be required in a future ACP version',
+            },
+        ],
+    };
+
+    it('renders the amber advisory block on the Spec tab for a valid frame', () => {
+        useMessagesStore.setState({ detailTab: 'spec' });
+        render(<DetailPanel message={msg()} validation={validWithAdvisory} />);
+        expect(screen.getByText(/conforms/i)).toBeInTheDocument();
+        expect(screen.getByText(/1 advisory/i)).toBeInTheDocument();
+        expect(screen.getByText(/missing agentInfo/i)).toBeInTheDocument();
+    });
+
+    it('puts an advisory count badge on the Spec tab button', () => {
+        render(<DetailPanel message={msg()} validation={validWithAdvisory} />);
+        const specTab = screen.getByRole('button', { name: /^Spec/ });
+        expect(specTab.textContent).toMatch(/1/);
+    });
+});

@@ -45,7 +45,7 @@ database schemas match.
 | `get_message` | single message by `(session_id, seq)` |
 | `get_paired` | request↔response pair partner + latency |
 | `search_messages` | substring search across raw frames |
-| `find_spec_violations` | every frame that fails the ACP schema |
+| `find_spec_violations` | every frame that fails the ACP schema, plus `advisories` for valid frames missing a soon-required field |
 | `diff_sessions` | align two sessions; added / removed frames + field-level payload changes |
 
 Start with `get_session_summary` when you don't yet know what's wrong — it

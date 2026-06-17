@@ -9,7 +9,8 @@ import type { ActiveCapture, SessionRecord } from '@acp-devtools/core';
  *      `@zed-industries/claude-code-acp` package detail from end users.
  *   2. If the command is `npx [-y…] <package>`, return the package name.
  *   3. If it's `node /some/path.js`, return the file basename.
- *   4. Otherwise return the first token of the command.
+ *   4. Otherwise return the first token's basename (so an absolute-path launch
+ *      of a custom agent shows `my-agent`, not `/opt/tools/my-agent`).
  */
 export function shortAgentName(agentCommand: string): string {
     const known = detectAgentShortcut(agentCommand);
@@ -27,7 +28,7 @@ export function shortAgentName(agentCommand: string): string {
         const file = parts[1].split('/').pop();
         return file ?? parts[1];
     }
-    return parts[0]!;
+    return parts[0]!.split(/[/\\]/).pop() || parts[0]!;
 }
 
 export function captureLabel(c: ActiveCapture): string {

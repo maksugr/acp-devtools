@@ -72,6 +72,8 @@ function MessageRowImpl({
     const preview = extractTextPreview(message);
     const isPrompt = isUserPrompt(message);
     const specBadge = validation && !validation.skipped && !validation.valid;
+    const advisories = validation?.advisories;
+    const advisoryBadge = advisories && advisories.length > 0;
 
     return (
         <button
@@ -142,6 +144,19 @@ function MessageRowImpl({
                             .join(' · ')}`}
                     >
                         ⚠ SPEC {validation.errors.length}
+                    </span>
+                )}
+                {advisoryBadge && advisories && (
+                    <span
+                        className={cn(
+                            'inline-flex shrink-0 items-center gap-0.5 rounded-sm border border-accent-warn/40',
+                            'bg-accent-warn/10 px-1 text-[9px] font-semibold uppercase tracking-widest text-accent-warn',
+                        )}
+                        title={`soon-required by the ACP spec: ${advisories
+                            .map((a) => a.message)
+                            .join(' · ')}`}
+                    >
+                        ⚠ ADV {advisories.length}
                     </span>
                 )}
                 {preview && (
