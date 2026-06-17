@@ -46,12 +46,18 @@ export interface ValidationSummary {
     totalErrors: number;
     /** Unique methods that produced at least one violation. */
     affectedMethods: string[];
+    /** Number of frames carrying at least one soon-required advisory. */
+    advisoryFrames: number;
+    /** Sum of advisories across all frames. */
+    totalAdvisories: number;
 }
 
 export function summarizeValidation(map: Map<number, ValidationResult>): ValidationSummary {
     let checked = 0;
     let invalidFrames = 0;
     let totalErrors = 0;
+    let advisoryFrames = 0;
+    let totalAdvisories = 0;
     const affected = new Set<string>();
     for (const [, r] of map) {
         if (r.skipped) continue;
@@ -66,11 +72,17 @@ export function summarizeValidation(map: Map<number, ValidationResult>): Validat
                 affected.add(m);
             }
         }
+        if (r.advisories && r.advisories.length > 0) {
+            advisoryFrames += 1;
+            totalAdvisories += r.advisories.length;
+        }
     }
     return {
         checked,
         invalidFrames,
         totalErrors,
         affectedMethods: [...affected].sort(),
+        advisoryFrames,
+        totalAdvisories,
     };
 }

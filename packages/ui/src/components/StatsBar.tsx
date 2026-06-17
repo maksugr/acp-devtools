@@ -84,6 +84,8 @@ export function StatsBar() {
                         invalidFrames={stats.spec.invalidFrames}
                         totalErrors={stats.spec.totalErrors}
                         affectedMethods={stats.spec.affectedMethods}
+                        advisoryFrames={stats.spec.advisoryFrames}
+                        totalAdvisories={stats.spec.totalAdvisories}
                     />
                 )}
                 <StarPrompt />
@@ -112,48 +114,74 @@ function SpecStat({
     invalidFrames,
     totalErrors,
     affectedMethods,
+    advisoryFrames,
+    totalAdvisories,
 }: {
     invalidFrames: number;
     totalErrors: number;
     affectedMethods: string[];
+    advisoryFrames: number;
+    totalAdvisories: number;
 }) {
-    if (invalidFrames === 0) {
-        return (
+    const advisoryMarker =
+        advisoryFrames > 0 ? (
             <SpecHint
+                tone="warn"
                 label={
                     <span className="font-sans">
-                        every frame validates against the ACP schema
+                        {totalAdvisories} field{totalAdvisories === 1 ? '' : 's'} a future ACP
+                        version will require {totalAdvisories === 1 ? 'is' : 'are'} missing — valid
+                        today
                     </span>
                 }
-                tone="info"
             >
-                <span className="inline-flex items-baseline gap-1">
-                    <span>spec</span>
-                    <span className="text-accent-ok">✓</span>
-                </span>
+                <span className="text-accent-warn">⚠ {advisoryFrames}</span>
             </SpecHint>
+        ) : null;
+
+    if (invalidFrames === 0) {
+        return (
+            <span className="inline-flex items-baseline gap-1.5">
+                <SpecHint
+                    label={
+                        <span className="font-sans">
+                            every frame validates against the ACP schema
+                        </span>
+                    }
+                    tone="info"
+                >
+                    <span className="inline-flex items-baseline gap-1">
+                        <span>spec</span>
+                        <span className="text-accent-ok">✓</span>
+                    </span>
+                </SpecHint>
+                {advisoryMarker}
+            </span>
         );
     }
     const summary = `${totalErrors} schema error${totalErrors === 1 ? '' : 's'} in ${invalidFrames} frame${invalidFrames === 1 ? '' : 's'}`;
     return (
-        <SpecHint
-            tone="warn"
-            label={
-                <div className="space-y-1.5 font-sans">
-                    <div>{summary}</div>
-                    {affectedMethods.length > 0 && (
-                        <div className="font-mono text-[10px] text-ink-muted">
-                            methods: {affectedMethods.join(', ')}
-                        </div>
-                    )}
-                </div>
-            }
-        >
-            <span className="inline-flex items-baseline gap-1">
-                <span>spec</span>
-                <span className="text-accent-error">⚠ {invalidFrames}</span>
-            </span>
-        </SpecHint>
+        <span className="inline-flex items-baseline gap-1.5">
+            <SpecHint
+                tone="warn"
+                label={
+                    <div className="space-y-1.5 font-sans">
+                        <div>{summary}</div>
+                        {affectedMethods.length > 0 && (
+                            <div className="font-mono text-[10px] text-ink-muted">
+                                methods: {affectedMethods.join(', ')}
+                            </div>
+                        )}
+                    </div>
+                }
+            >
+                <span className="inline-flex items-baseline gap-1">
+                    <span>spec</span>
+                    <span className="text-accent-error">⚠ {invalidFrames}</span>
+                </span>
+            </SpecHint>
+            {advisoryMarker}
+        </span>
     );
 }
 

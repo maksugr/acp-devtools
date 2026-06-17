@@ -28,6 +28,20 @@ export interface ValidationError {
     keyword?: string;
 }
 
+/**
+ * A non-fatal note about a frame that is valid under the *current* schema but
+ * omits a field the spec says will become mandatory. The signal is the
+ * schema's own property description (`"…this will be required."`) — see
+ * {@link createAcpValidator}. Kept separate from {@link ValidationError} so a
+ * frame can be `valid: true` and still carry advisories.
+ */
+export interface ValidationAdvisory {
+    /** The omitted field, relative to the method payload (e.g. `agentInfo`). */
+    path: string;
+    message: string;
+    kind: 'soon-required';
+}
+
 export type ValidationSkipReason =
     | 'parse-error'
     | 'no-method'
@@ -38,6 +52,11 @@ export type ValidationSkipReason =
 export interface ValidationResult {
     valid: boolean;
     errors: ValidationError[];
+    /**
+     * Soon-required fields the frame omits. Empty/absent for conforming
+     * frames. Present even when `valid` is `true` — these never affect `valid`.
+     */
+    advisories?: ValidationAdvisory[];
     skipped?: ValidationSkipReason;
     schemaName?: string;
 }
@@ -57,8 +76,13 @@ interface MethodSlots {
     notificationDef?: string;
 }
 
+interface SchemaProperty {
+    description?: string;
+}
+
 interface SchemaDef {
     'x-method'?: unknown;
+    properties?: Record<string, SchemaProperty>;
 }
 
 interface SchemaShape {
@@ -66,6 +90,12 @@ interface SchemaShape {
 }
 
 const SCHEMA_ID = 'acp';
+
+// The spec marks a field that is optional today but slated to become
+// mandatory with this exact phrasing in its description (e.g. `agentInfo`,
+// `clientInfo`). Matching the description rather than a hardcoded field list
+// means new such fields are picked up automatically when the SDK schema bumps.
+const SOON_REQUIRED_RE = /will be required/i;
 
 function toError(e: ErrorObject): ValidationError {
     const v: ValidationError = {
@@ -90,8 +120,15 @@ export function createAcpValidator(schema: SchemaShape): AcpValidator {
     ajv.addSchema(schema as object, SCHEMA_ID);
 
     const methodIndex = new Map<string, MethodSlots>();
+    // defName → list of fields whose description marks them soon-required.
+    const softRequired = new Map<string, string[]>();
     const defs = schema.$defs ?? {};
     for (const [name, def] of Object.entries(defs)) {
+        const soon = Object.entries(def.properties ?? {})
+            .filter(([, prop]) => SOON_REQUIRED_RE.test(prop.description ?? ''))
+            .map(([field]) => field);
+        if (soon.length > 0) softRequired.set(name, soon);
+
         const method = def['x-method'];
         if (typeof method !== 'string') continue;
         let slots = methodIndex.get(method);
@@ -144,14 +181,38 @@ export function createAcpValidator(schema: SchemaShape): AcpValidator {
         }
         if (!defName) return { valid: true, errors: [], skipped: 'no-schema-for-kind' };
 
+        const advisories = collectAdvisories(defName, target);
         const validator = getValidator(defName);
         const ok = validator(target);
-        if (ok) return { valid: true, errors: [], schemaName: defName };
-        return {
-            valid: false,
-            errors: (validator.errors ?? []).map(toError),
-            schemaName: defName,
-        };
+        const base: ValidationResult = ok
+            ? { valid: true, errors: [], schemaName: defName }
+            : {
+                  valid: false,
+                  errors: (validator.errors ?? []).map(toError),
+                  schemaName: defName,
+              };
+        if (advisories.length > 0) base.advisories = advisories;
+        return base;
+    }
+
+    function collectAdvisories(defName: string, target: unknown): ValidationAdvisory[] {
+        const fields = softRequired.get(defName);
+        if (!fields || typeof target !== 'object' || target === null) return [];
+        const obj = target as Record<string, unknown>;
+        const out: ValidationAdvisory[] = [];
+        for (const field of fields) {
+            // Absent key or explicit null both mean "no value provided" — for
+            // `agentInfo`/`clientInfo` the schema permits null today, but it
+            // carries no name/version, which is the whole point of the field.
+            if (obj[field] === undefined || obj[field] === null) {
+                out.push({
+                    path: field,
+                    message: `missing ${field} — will be required in a future ACP version`,
+                    kind: 'soon-required',
+                });
+            }
+        }
+        return out;
     }
 
     function knownAcpMethods(): string[] {

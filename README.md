@@ -89,7 +89,7 @@ chunks.
 
 Invalid frames get a red `⚠ SPEC N` badge in the timeline, per-error ajv
 details in the detail panel, and a footer aggregate across the session. CLI:
-`acp-devtools validate <id>` exits 1 on violations — wire into CI.
+`acp-devtools validate <id>` exits 1 on violations — wire into CI. Frames that are valid today but omit a field the spec says will become mandatory get a softer amber `⚠ ADV N` advisory instead.
 </details>
 
 <details>

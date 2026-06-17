@@ -590,9 +590,54 @@ describe('MCP server — tools/call', () => {
             });
             const body = parseJsonContent(
                 (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { checked: number; violations: Array<unknown> };
+            ) as { checked: number; violations: Array<unknown>; advisories: Array<unknown> };
             expect(body.checked).toBeGreaterThan(0);
             expect(Array.isArray(body.violations)).toBe(true);
+            // Default seed carries clientInfo + agentInfo → no advisories.
+            expect(body.advisories).toEqual([]);
+        } finally {
+            await close();
+        }
+    });
+
+    it('find_spec_violations reports soon-required advisories for missing agentInfo', async () => {
+        const db = openDatabase(dbPath);
+        const session = Session.start(db, { name: 'no-agent-info', agentCommand: 'mock' });
+        session.record(mk(1, {
+            payload: {
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'initialize',
+                params: { protocolVersion: 1 },
+            } as unknown as CapturedMessage['payload'],
+        }));
+        session.record(mk(2, {
+            direction: 'agent-to-editor',
+            kind: 'response',
+            method: undefined,
+            rpcId: '1',
+            payload: {
+                jsonrpc: '2.0',
+                id: 1,
+                result: { protocolVersion: 1, agentCapabilities: {} },
+            } as unknown as CapturedMessage['payload'],
+        }));
+        session.close();
+        const noInfoId = session.info.id;
+        db.close();
+
+        const { client, close } = await withClient();
+        try {
+            const res = await client.callTool({
+                name: 'find_spec_violations',
+                arguments: { session_id: noInfoId },
+            });
+            const body = parseJsonContent(
+                (res.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as { advisories: Array<{ path: string }> };
+            const paths = body.advisories.map((a) => a.path);
+            expect(paths).toContain('agentInfo');
+            expect(paths).toContain('clientInfo');
         } finally {
             await close();
         }

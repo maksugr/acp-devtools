@@ -41,6 +41,7 @@ delivered. Every label has a tooltip on hover.
 | `UNK` | the frame did not parse as JSON-RPC; raw bytes are still preserved |
 | `STR` | collapsed run of consecutive `agent_message_chunk` notifications |
 | `⚠ SPEC N` | the frame fails the official ACP schema with `N` ajv errors (see [Spec validation](#spec-validation)) |
+| `⚠ ADV N` | the frame is valid but omits `N` soon-required fields (amber, see [Spec validation](#spec-validation)) |
 
 ## Timeline
 
@@ -86,6 +87,13 @@ The same check behind `acp-devtools validate` surfaces in three places:
 - **Footer chip** — `spec ⚠ N` next to `p50`/`p99` aggregates non-conforming
   frames across the visible session (or `spec ✓` when clean); the tooltip lists
   affected methods.
+
+Frames that conform today but skip a field the spec will later require carry a
+softer **amber** advisory instead of a red violation. The same three places
+show it: an `⚠ ADV N` timeline chip, an amber advisory block on the Spec tab
+(below the `✓ conforms` line) with an amber count on the tab itself, and an
+amber `⚠ N` next to the footer `spec` chip. The two fields the current schema
+flags are `agentInfo` (initialize response) and `clientInfo` (request).
 
 ## Performance dashboard
 

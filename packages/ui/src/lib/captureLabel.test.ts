@@ -25,9 +25,10 @@ describe('shortAgentName', () => {
         expect(shortAgentName('node /home/user/mock-agent.js')).toBe('mock-agent.js');
         expect(shortAgentName('node mock.js')).toBe('mock.js');
     });
-    it('falls back to the first token for plain commands', () => {
+    it('falls back to the first token basename for plain commands', () => {
         expect(shortAgentName('goose')).toBe('goose');
-        expect(shortAgentName('/usr/bin/claude')).toBe('/usr/bin/claude');
+        expect(shortAgentName('/usr/bin/claude')).toBe('claude');
+        expect(shortAgentName('/opt/homebrew/bin/goose acp')).toBe('Goose');
     });
     it('handles empty string', () => {
         expect(shortAgentName('')).toBe('');

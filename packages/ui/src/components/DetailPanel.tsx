@@ -119,6 +119,11 @@ export function DetailPanel({
                             ? validation.errors.length
                             : undefined
                     }
+                    advisoryBadge={
+                        validation && !validation.skipped && validation.advisories?.length
+                            ? validation.advisories.length
+                            : undefined
+                    }
                 >
                     Spec
                 </TabButton>
@@ -166,7 +171,7 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
     }
     if (validation.valid) {
         return (
-            <div className="space-y-2 font-mono text-[11px]">
+            <div className="space-y-3 font-mono text-[11px]">
                 <div className="inline-flex items-baseline gap-2">
                     <span className="rounded-sm border border-accent-ok/40 bg-accent-ok/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-accent-ok">
                         ✓ conforms
@@ -176,6 +181,7 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
                         from the ACP schema
                     </span>
                 </div>
+                <AdvisoryBlock advisories={validation.advisories} />
             </div>
         );
     }
@@ -200,6 +206,40 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
                             {e.keyword ?? 'error'} · {e.path === '/' ? '(root)' : e.path}
                         </div>
                         <div className="mt-0.5 text-ink-primary">{e.message}</div>
+                    </li>
+                ))}
+            </ul>
+            <AdvisoryBlock advisories={validation.advisories} />
+        </div>
+    );
+}
+
+function AdvisoryBlock({
+    advisories,
+}: {
+    advisories: ValidationResult['advisories'];
+}) {
+    if (!advisories || advisories.length === 0) return null;
+    return (
+        <div className="space-y-1.5">
+            <div className="inline-flex items-baseline gap-2">
+                <span className="rounded-sm border border-accent-warn/40 bg-accent-warn/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-accent-warn">
+                    ⚠ {advisories.length} advisor{advisories.length === 1 ? 'y' : 'ies'}
+                </span>
+                <span className="text-ink-muted">
+                    valid today — required in a future ACP version
+                </span>
+            </div>
+            <ul className="space-y-1.5">
+                {advisories.map((a, i) => (
+                    <li
+                        key={`${a.path}-${i}`}
+                        className="rounded-sm border border-accent-warn/25 bg-accent-warn/[0.04] px-2 py-1.5"
+                    >
+                        <div className="text-[10px] uppercase tracking-widest text-ink-muted">
+                            soon-required · {a.path}
+                        </div>
+                        <div className="mt-0.5 text-ink-primary">{a.message}</div>
                     </li>
                 ))}
             </ul>
@@ -342,12 +382,14 @@ function TabButton({
     active,
     onClick,
     badge,
+    advisoryBadge,
     tab: _tab,
 }: {
     children: React.ReactNode;
     active: boolean;
     onClick: () => void;
     badge?: number;
+    advisoryBadge?: number;
     tab?: DetailTab;
 }) {
     return (
@@ -363,6 +405,11 @@ function TabButton({
             {badge !== undefined && (
                 <span className="rounded-sm border border-accent-error/40 bg-accent-error/10 px-1 text-[9px] font-semibold text-accent-error">
                     {badge}
+                </span>
+            )}
+            {advisoryBadge !== undefined && (
+                <span className="rounded-sm border border-accent-warn/40 bg-accent-warn/10 px-1 text-[9px] font-semibold text-accent-warn">
+                    {advisoryBadge}
                 </span>
             )}
             {active && (

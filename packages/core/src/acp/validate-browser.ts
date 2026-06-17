@@ -12,6 +12,7 @@ export const knownAcpMethods = validator.knownAcpMethods;
 export type {
     AcpValidator,
     ValidationError,
+    ValidationAdvisory,
     ValidationResult,
     ValidationSkipReason,
     ValidateOptions,
