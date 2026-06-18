@@ -9,6 +9,7 @@ import {
     openDatabase,
 } from '@acp-devtools/core';
 import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
+import { zedSettingsPath } from '../lib/setup-config.js';
 
 type Status = 'ok' | 'warn' | 'fail' | 'info';
 
@@ -149,16 +150,7 @@ interface IdeProbe {
 }
 
 function probeZed(): IdeProbe {
-    const path =
-        platform() === 'win32'
-            ? join(process.env.APPDATA ?? '', 'Zed', 'settings.json')
-            : platform() === 'darwin'
-              ? join(homedir(), '.config', 'zed', 'settings.json')
-              : join(
-                    process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'),
-                    'zed',
-                    'settings.json',
-                );
+    const path = zedSettingsPath();
     return { name: 'Zed', path, exists: existsSync(path) };
 }
 

@@ -11,7 +11,7 @@ import {
 describe('AGENT_REGISTRY', () => {
     it('contains the documented shortcuts', () => {
         const keys = Object.keys(AGENT_REGISTRY).sort();
-        expect(keys).toEqual(['claude-code', 'codex', 'goose', 'opencode']);
+        expect(keys).toEqual(['claude-code', 'codex', 'goose', 'junie', 'opencode']);
     });
     it('defaults to claude-code', () => {
         expect(DEFAULT_AGENT).toBe('claude-code');
@@ -47,6 +47,7 @@ describe('isAgentShortcut', () => {
         expect(isAgentShortcut('codex')).toBe(true);
         expect(isAgentShortcut('goose')).toBe(true);
         expect(isAgentShortcut('opencode')).toBe(true);
+        expect(isAgentShortcut('junie')).toBe(true);
     });
     it('returns false for anything else', () => {
         expect(isAgentShortcut('unknown')).toBe(false);
@@ -59,11 +60,12 @@ describe('isAgentShortcut', () => {
 describe('listAgents', () => {
     it('returns all registry entries as an array', () => {
         const all = listAgents();
-        expect(all).toHaveLength(4);
+        expect(all).toHaveLength(5);
         expect(all.map((a) => a.shortName).sort()).toEqual([
             'claude-code',
             'codex',
             'goose',
+            'junie',
             'opencode',
         ]);
     });
@@ -71,7 +73,7 @@ describe('listAgents', () => {
         const first = listAgents();
         first.pop();
         const second = listAgents();
-        expect(second).toHaveLength(4);
+        expect(second).toHaveLength(5);
     });
 });
 
@@ -104,6 +106,13 @@ describe('detectAgentShortcut', () => {
     });
     it('matches codex', () => {
         expect(detectAgentShortcut('npx -y @zed-industries/codex-acp')?.shortName).toBe('codex');
+    });
+    it('matches junie, including the absolute-path launch JetBrains uses', () => {
+        expect(detectAgentShortcut('junie --acp=true')?.shortName).toBe('junie');
+        expect(detectAgentShortcut('junie --acp=true')?.displayName).toBe('Junie');
+        expect(
+            detectAgentShortcut('/Users/dev/.local/bin/junie --acp=true')?.displayName,
+        ).toBe('Junie');
     });
     it('returns null for unknown commands', () => {
         expect(detectAgentShortcut('node my-custom-agent.js')).toBeNull();

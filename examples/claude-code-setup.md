@@ -6,11 +6,13 @@ as an alias). It's powered by the Claude Agent SDK, which reads its OAuth token
 and project state from the directory pointed at by **`CLAUDE_CONFIG_DIR`**
 (defaulting to `~/.claude`).
 
-The config snippets below are in Zed's `agent_servers` format for concreteness,
-but the profile / env / auth recipes are editor-agnostic. JetBrains reads the
-same `agent_servers` JSON shape from `~/.jetbrains/acp.json`, with one
-difference — `command` must be an absolute path. See
-[jetbrains-config.md](jetbrains-config.md).
+`acp-devtools setup --editor zed --write` generates the base entry for you (see
+[zed-config.md](zed-config.md) / [jetbrains-config.md](jetbrains-config.md));
+this doc is the `CLAUDE_CONFIG_DIR` profile / env / auth layer on top of it. The
+config snippets below are in Zed's `agent_servers` format for concreteness, but
+the profile / env / auth recipes are editor-agnostic. JetBrains reads the same
+`agent_servers` JSON shape from `~/.jetbrains/acp.json`, with one difference —
+`command` must be an absolute path. See [jetbrains-config.md](jetbrains-config.md).
 
 ## Single-profile setup
 

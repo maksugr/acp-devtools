@@ -151,10 +151,10 @@ traffic (no IDE, no tokens burned); `mock-agent` does the inverse. Pair with
 </details>
 
 <details>
-<summary><b>Read-only MCP server</b> — 11 tools so an AI agent can query your captures</summary>
+<summary><b>Read-only MCP server</b> — 13 tools so an AI agent can query your captures</summary>
 
 Tools: `list_sessions`, `get_session_summary`, `find_spec_violations`,
-`diff_sessions`, `search_messages`, and 6 more. Wire via `acp-devtools mcp`
+`diff_sessions`, `search_messages`, and 8 more. Wire via `acp-devtools mcp`
 and add to your AI agent's MCP config.
 </details>
 
@@ -198,23 +198,32 @@ brew install acp-devtools
 acp-devtools ui                      # → http://127.0.0.1:3737/ (auto-opens)
 ```
 
-Connect any editor (Zed as an example) — open `~/.config/zed/settings.json` (`Cmd+,`) and merge:
+Connect your editor with `acp-devtools setup`, which writes the config with the
+absolute binary path filled in:
+
+```bash
+acp-devtools setup --editor zed --write                  # Claude Code (default) in Zed
+acp-devtools setup junie --editor jetbrains --write      # any registry shortcut
+acp-devtools setup --editor zed --write -- npx -y @your-scope/your-acp   # any custom agent
+```
+
+For Claude Code in Zed that's a one-line `agent_servers` entry — `acp-devtools`
+detects it was spawned by an editor (stdin is a pipe) and runs
+`proxy --agent claude-code` internally:
 
 ```json
 {
     "agent_servers": {
         "Claude Code (via ACP Devtools)": {
             "type": "custom",
-            "command": "acp-devtools"
+            "command": "/opt/homebrew/bin/acp-devtools"
         }
     }
 }
 ```
 
-That's the whole config for the default Claude Code setup — `acp-devtools`
-detects it was spawned by an editor (stdin is a pipe) and runs
-`proxy --agent claude-code` internally. Send a prompt → the proxy spawns the
-agent, and within a second the inspector shows the handshake:
+Send a prompt → the proxy spawns the agent, and within a second the inspector
+shows the handshake:
 
 ```
 ┌─ SESSION #1 · LIVE ────────────────────────────────────┐
@@ -227,12 +236,10 @@ agent, and within a second the inspector shows the handshake:
 └────────────────────────────────────────────────────────┘
 ```
 
-If the timeline stays empty after a prompt, the editor most likely couldn't
-find the binary:
-
-> If editor reports "agent command not found", replace `"acp-devtools"` with the
-> absolute path from `which acp-devtools` — GUI apps inherit a minimal `PATH`
-> that often misses Node binaries.
+Drop `--write` to print the block instead of writing it. If you hand-edit the
+config and the editor reports "agent command not found", its GUI can't resolve
+the binary — use the absolute path from `which acp-devtools` (what `setup`
+writes).
 
 Per-editor setups — each covers Claude Code, Codex, Goose, OpenCode, and how to
 wrap a custom agent — plus a Claude Code multi-profile / auth recipe:
@@ -267,12 +274,13 @@ Full reference: **[docs/cli.md](docs/cli.md)**. Task-driven walkthroughs
 ## MCP
 
 `acp-devtools mcp` exposes saved captures to an AI agent (Claude Code, Claude
-Desktop, …) as eleven read-only tools so you can ask it to investigate your own
-traces:
+Desktop, …) as thirteen read-only tools so you can ask it to investigate your own
+traces — or wire up a new agent:
 
 > "find spec violations in the last 10 sessions" ·
 > "compare p99 of `session/prompt` between WebStorm and Zed" ·
-> "diff sessions 41 and 42 — what changed?"
+> "diff sessions 41 and 42 — what changed?" ·
+> "add junie for zed"
 
 Setup in one command (Claude Code as an example):
 
@@ -297,14 +305,22 @@ actual capture in the [playground](#playground) in one click, `json` is the
 same redacted export in [`fixtures/handshakes/`](fixtures/handshakes/) for
 `acp-devtools import` or your own tooling. 
 
-Everything else should work but hasn't crossed our wire yet: run
+**Using any of these is the same regardless of status.** `untested` means we
+haven't captured it yet, not that it won't work. Any ACP agent runs through
+`acp-devtools setup --editor <zed|jetbrains> -- <its launch command>` (or
+`proxy <launch command>`); the launch command is the agent's own ACP entry point
+(`goose acp`, `junie --acp=true`, `npx -y @scope/acp`, …). The handful that are
+registry shortcuts — `acp-devtools agents` lists them — skip the command:
+`acp-devtools setup <name> --editor zed`.
+
+Got one working that's `untested`? Help flip the row: run
 [`fixtures/drive-full-turn.mjs`](fixtures/drive-full-turn.mjs) against it
-(`node fixtures/drive-full-turn.mjs <agent-command>` — exit 0 means a full
+(`node fixtures/drive-full-turn.mjs <launch command>` — exit 0 means a full
 prompt turn worked; exit 3 means the agent answered the handshake but needs
 an account for a full turn) and [open an
 issue](https://github.com/maksugr/acp-devtools/issues) with an `acp-devtools
 export` attached (auth tokens are redacted on export) — we'll mark the agent
-verified in the table.
+verified.
 
 ### Editors
 
@@ -354,7 +370,7 @@ verified in the table.
 | [GLM Agent](https://zed.dev/acp/agent/glm-acp-agent)                               | untested                                                                                                                  |
 | [Goose](https://block.github.io/goose/docs/guides/acp-clients)                     | **verified** — goose 1.37.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/goose-1.37.0.json) · [json](fixtures/handshakes/goose-1.37.0.json) |
 | [Grok Build](https://zed.dev/acp/agent/grok-build)                                 | untested                                                                                                                  |
-| [JetBrains Junie](https://junie.jetbrains.com)                                     | untested                                                                                                                  |
+| [JetBrains Junie](https://junie.jetbrains.com)                                     | **verified** — Junie CLI 26.6.15 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/junie-26.6.15.json) · [json](fixtures/handshakes/junie-26.6.15.json)                                                |
 | [Kilo](https://kilocode.ai)                                                        | untested                                                                                                                  |
 | [Kimi CLI](https://github.com/MoonshotAI/kimi-cli)                                 | handshake — Kimi Code CLI 1.47.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/kimi-code-cli-1.47.0.json) · [json](fixtures/handshakes/kimi-code-cli-1.47.0.json)                                         |
 | [Kiro CLI](https://kiro.dev/docs/cli/acp/)                                         | untested                                                                                                                  |
@@ -373,9 +389,9 @@ verified in the table.
 
 ### Launch shortcuts
 
-The built-in registry maps four common agents to ready commands. npm-based
+The built-in registry maps five common agents to ready commands. npm-based
 agents auto-install on first use via `npx -y …`; binary-based agents need a
-one-time install.
+one-time install. `acp-devtools agents` prints this list from the CLI.
 
 | Shortcut                  | What it runs                                   | Install                                          |
 | ------------------------- | ---------------------------------------------- | ------------------------------------------------ |
@@ -383,6 +399,7 @@ one-time install.
 | `codex`                   | `npx -y @zed-industries/codex-acp`             | npx — automatic                                  |
 | `goose`                   | `goose acp`                                    | install Goose from <https://goose-docs.ai> first |
 | `opencode`                | `opencode acp`                                 | `curl -fsSL https://opencode.ai/install \| bash` |
+| `junie`                   | `junie --acp=true`                             | install Junie CLI from <https://junie.jetbrains.com/> first |
 
 Every other agent runs through the explicit form:
 `acp-devtools proxy <your-command> [args…]`.

@@ -28,7 +28,7 @@ the project gets the tools:
 }
 ```
 
-Restart Claude Code; the eleven tools below become available (check `/mcp`). The
+Restart Claude Code; the thirteen tools below become available (check `/mcp`). The
 binary advertised here must be the same `acp-devtools` your proxy uses, so the
 database schemas match.
 
@@ -47,6 +47,8 @@ database schemas match.
 | `search_messages` | substring search across raw frames |
 | `find_spec_violations` | every frame that fails the ACP schema, plus `advisories` for valid frames missing a soon-required field |
 | `diff_sessions` | align two sessions; added / removed frames + field-level payload changes |
+| `list_agent_shortcuts` | the built-in agent shortcuts (`agent` values for `generate_editor_config`); same data as the CLI `acp-devtools agents` |
+| `generate_editor_config` | Zed/JetBrains config block to run an agent through the proxy, absolute path filled in (returns the text, the agent applies it) |
 
 Start with `get_session_summary` when you don't yet know what's wrong — it
 bundles metadata, totals, latency, and insights in one round-trip. Drill in with
@@ -56,7 +58,7 @@ bundles metadata, totals, latency, and insights in one round-trip. Drill in with
 
 - Every tool advertises MCP-spec `readOnlyHint: true`, `idempotentHint: true`,
   `openWorldHint: false` — host clients can use these as safety hints. Nothing
-  in the server writes to the database.
+  in the server writes to the database or to any file;
 - The server ships an `instructions` block on `initialize` that briefs the
   connecting LLM on the surface area, so an agent doesn't have to call
   `tools/list` and read every description to know where to start.

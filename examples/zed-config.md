@@ -1,40 +1,68 @@
 # Connecting Zed through ACP Devtools
 
-Zed reads ACP agent configuration from `~/.config/zed/settings.json` (Linux,
-macOS) or `%APPDATA%/Zed/settings.json` (Windows) under the `agent_servers`
-key. Each entry needs a `"type"` field:
+ACP Devtools wraps any ACP agent; Zed talks to it like a normal agent and never
+knows it's there, while every frame is recorded on the way through. One command
+generates the config.
 
-- `"type": "custom"` — a user-defined entry that launches your own binary;
-  this is what ACP Devtools needs
-- `"type": "registry"` — an agent shipped by Zed itself (Cursor, Codex, …) —
-  not what we use here
-
-The agent an entry runs is chosen by its `args`; with no `args`, ACP Devtools
-runs Claude Code. Examples for each are below.
-
-## 1. Make `acp-devtools` runnable
+## 1. Install
 
 ```bash
 npm install -g acp-devtools          # or: brew install maksugr/tap/acp-devtools
-
-# Capture the resolved path — varies by Node install location:
-which acp-devtools
-# Homebrew Node: /opt/homebrew/bin/acp-devtools
-# nvm:           /Users/you/.nvm/versions/node/v22.17.1/bin/acp-devtools
-# system Node:   /usr/local/bin/acp-devtools
 ```
 
 Building from a checkout instead? See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-Zed accepts a relative `command` and tries it against `PATH`, so for most users
-`"command": "acp-devtools"` is enough. Use the absolute path only if Zed's GUI
-process can't resolve the binary — its `PATH` on macOS is more restrictive than
-the shell's, which trips up `nvm` users in particular.
+## 2. Add the agent
 
-## 2. Add an entry to `agent_servers`
+`acp-devtools setup` writes a ready `agent_servers` entry into Zed's
+`settings.json`, with the absolute binary path filled in. Run it in a terminal —
+where `acp-devtools` resolves on PATH — and it bakes the right path in for Zed's
+GUI:
 
-Open `~/.config/zed/settings.json` (in Zed: `Cmd+,` or `zed: open settings`)
-and add (or merge) an entry. Across the examples below only `args` changes.
+```bash
+acp-devtools setup junie --editor zed --write                    # any registry shortcut
+acp-devtools setup --editor zed --write -- npx -y @your-scope/your-acp   # any other agent
+```
+
+With no agent it defaults to Claude Code. Drop `--write` to print the block
+instead of writing it. `--write` inserts only the `agent_servers.<name>` slot,
+leaving the rest of the file exactly as it was. Prefer to edit JSON yourself? See
+[Configure by hand](#configure-by-hand-optional) below.
+
+## 3. Start a chat
+
+Zed picks up the entry without a restart. Open the Agent panel (right sidebar →
+robot icon), select the new entry from the model picker, and send a prompt. ACP
+Devtools spawns the underlying agent, captures every JSON-RPC frame, and writes
+a discovery descriptor to `~/.acp-devtools/active/<pid>.json`.
+
+## 4. Open the inspector
+
+In a separate terminal:
+
+```bash
+acp-devtools ui
+# → browser auto-opens on http://127.0.0.1:3737/
+```
+
+The session picker (top right) auto-discovers the live capture; click the entry
+and the timeline fills with `initialize`, `session/new`, `session/prompt`, and
+streaming `session/update` chunks. Full tour of the inspector:
+[docs/ui.md](../docs/ui.md).
+
+## Configure by hand (optional)
+
+`setup` is the easy path; this is the shape it produces if you'd rather edit
+`settings.json` yourself (`Cmd+,` or `zed: open settings`). Zed reads
+`agent_servers` from `~/.config/zed/settings.json` (Linux, macOS) or
+`%APPDATA%/Zed/settings.json` (Windows). Each entry needs `"type": "custom"`;
+the agent is chosen by `args`, and with no `args` ACP Devtools runs Claude Code.
+
+`command` can be a bare `"acp-devtools"` — Zed tries it against PATH. Use the
+absolute path from `which acp-devtools` only if Zed's GUI can't resolve it; its
+macOS PATH is more restrictive than the shell's, which trips up `nvm` users.
+(`setup` sidesteps this by always writing the absolute path.) Across the
+examples below only `args` changes.
 
 ### Codex
 
@@ -69,9 +97,11 @@ Goose ships as a standalone binary — install it with the
 }
 ```
 
-The shortcut expands to `goose acp`, so `goose` must be on PATH. `opencode`
-(`"args": ["opencode"]`) works the same way after
-`curl -fsSL https://opencode.ai/install | bash`.
+The shortcut expands to `goose acp`, so `goose` must be on PATH. Every other
+registry shortcut works the same way — `"args": ["<name>"]`, with binary-based
+agents needing a one-time install first. The full list and what each expands to
+lives in the README's [Launch shortcuts](../README.md#launch-shortcuts) table
+(or `acp-devtools proxy --help`).
 
 ### A custom agent (not in the registry)
 
@@ -110,33 +140,12 @@ stdin and calls `proxy --agent claude-code` internally. Pin a profile with an
 `env` block; multi-profile and auth details are in
 [Claude Code setup](claude-code-setup.md).
 
-## 3. Save and start a chat
-
-Zed picks up the new `agent_servers` entry without restart. Open the Agent
-panel (right sidebar → robot icon), select the new entry from the model
-picker, and send a prompt. ACP Devtools spawns the underlying agent, captures
-every JSON-RPC frame, and writes a discovery descriptor to
-`~/.acp-devtools/active/<pid>.json`.
-
-## 4. Open the inspector
-
-In a separate terminal:
-
-```bash
-acp-devtools ui
-# → browser auto-opens on http://127.0.0.1:3737/
-```
-
-The session picker (top right) auto-discovers the live capture; click the entry
-and the timeline fills with `initialize`, `session/new`, `session/prompt`, and
-streaming `session/update` chunks. Full tour of the inspector:
-[docs/ui.md](../docs/ui.md).
-
 ## Troubleshooting
 
 **Zed shows "agent command not found".** Switch `command` to an absolute path
-returned by `which acp-devtools`. Zed's GUI process inherits a minimal PATH on
-macOS and often misses Node-installed binaries.
+returned by `which acp-devtools` (or re-run `setup`, which writes it for you).
+Zed's GUI process inherits a minimal PATH on macOS and often misses
+Node-installed binaries.
 
 **Multiple chats / multiple profiles.** Each capture binds its own ephemeral
 WebSocket port and registers a separate discovery file. Open as many chats as

@@ -13,6 +13,7 @@ import {
     defaultCapturesDbPath,
     extractSessionMetadata,
     findSessionsByClient,
+    listAgents,
     listSessionsSummary,
     openDatabase,
     percentile,
@@ -21,6 +22,7 @@ import {
     validateAcpMessage,
 } from '@acp-devtools/core';
 import { CLI_VERSION } from '../version.js';
+import { buildSetupPlan, renderConfigBlock } from '../lib/setup-config.js';
 
 /**
  * Server-level guidance shown to MCP clients on `initialize`. Helps the
@@ -32,7 +34,8 @@ Agent Client Protocol (ACP) sessions. ACP is the editor↔agent JSON-RPC
 protocol used by Claude Code, Goose, Codex, and other IDE agents.
 
 Every tool here is **read-only** — nothing in this server writes to the
-database. Use it to investigate:
+database or to any file (\`generate_editor_config\` only returns the config
+text to write; you apply it). Use it to investigate:
 
 - a slow session (\`get_latency_stats\` returns per-method p50/p99/max
   plus auto-detected insights: hotspot, long-tail, outlier, busiest,
@@ -48,6 +51,12 @@ database. Use it to investigate:
 - a regression or A/B comparison between two sessions
   (\`diff_sessions\` aligns two captures and reports added / removed
   frames and field-level payload changes)
+
+It also helps wire agents up: \`list_agent_shortcuts\` enumerates the known
+agents, and \`generate_editor_config({editor, agent})\` returns the
+Zed/JetBrains config block to run one through the proxy (e.g. "add junie for
+zed") — apply \`block\` to \`configPath\` with your own file tools, or run the
+returned \`writeCommand\`.
 
 A typical investigation:
 1. \`list_sessions\` to see what is captured
@@ -417,12 +426,13 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             description:
                 'Paginated, filtered slice of captured JSON-RPC frames from one session. Filterable by kind (request/response/notification/error/unknown), method substring (case-insensitive), and direction. Each returned frame includes seq (stable per-session id), timestamp (Unix ms), direction, kind, method, rpcId, raw bytes, parsed payload, and parseError if the frame failed to parse. Use offset+limit to paginate — `total` in the response is the size of the filtered set, not the page.',
             inputSchema: {
-                session_id: z
+                session_id: z.number().int().positive().describe('session id from list_sessions'),
+                offset: z
                     .number()
                     .int()
-                    .positive()
-                    .describe('session id from list_sessions'),
-                offset: z.number().int().nonnegative().optional().describe('skip this many filtered rows (default 0)'),
+                    .nonnegative()
+                    .optional()
+                    .describe('skip this many filtered rows (default 0)'),
                 limit: z
                     .number()
                     .int()
@@ -488,16 +498,14 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             description:
                 'Fetch a single captured frame by (session_id, seq). Returns the full record: raw JSON bytes, parsed payload, parseError (if any), direction, kind, method, rpcId, timestamp. Use this after find_spec_violations / get_session_messages narrows you down to a specific seq.',
             inputSchema: {
-                session_id: z
-                    .number()
-                    .int()
-                    .positive()
-                    .describe('session id from list_sessions'),
+                session_id: z.number().int().positive().describe('session id from list_sessions'),
                 seq: z
                     .number()
                     .int()
                     .positive()
-                    .describe('per-session sequence number from list_session_messages or find_spec_violations'),
+                    .describe(
+                        'per-session sequence number from list_session_messages or find_spec_violations',
+                    ),
             },
             outputSchema: {
                 session_id: z.number(),
@@ -522,11 +530,7 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             description:
                 'For a given JSON-RPC frame, return its request↔response partner — pass a request seq, get the response; pass a response seq, get the request. Includes latencyMs between the pair. Returns paired:null for orphan frames (request with no response, response with no matching id). Notifications and parse-failed frames have no pair.',
             inputSchema: {
-                session_id: z
-                    .number()
-                    .int()
-                    .positive()
-                    .describe('session id from list_sessions'),
+                session_id: z.number().int().positive().describe('session id from list_sessions'),
                 seq: z
                     .number()
                     .int()
@@ -536,9 +540,7 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             outputSchema: {
                 session_id: z.number(),
                 seq: z.number(),
-                paired: z
-                    .object({ pairSeq: z.number(), latencyMs: z.number() })
-                    .nullable(),
+                paired: z.object({ pairSeq: z.number(), latencyMs: z.number() }).nullable(),
             },
             annotations: annotations({ title: 'Get request↔response pair' }),
         },
@@ -556,11 +558,7 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             description:
                 'Case-insensitive substring search across raw JSON bytes of every frame in a session. Returns the matching seq, method, and the raw frame so you can confirm the hit. Useful for tracking down a specific session id, file path, prompt text, or error message across a long capture. Searches the raw JSON-RPC envelope — JSON-escaped characters (\\n, \\") are present.',
             inputSchema: {
-                session_id: z
-                    .number()
-                    .int()
-                    .positive()
-                    .describe('session id from list_sessions'),
+                session_id: z.number().int().positive().describe('session id from list_sessions'),
                 query: z
                     .string()
                     .min(1)
@@ -609,13 +607,9 @@ export function buildMcpServer(opts: McpOptions): McpServer {
         'find_spec_violations',
         {
             description:
-                'Validate every captured frame in a session against the ACP JSON schema (Draft 2020-12, ajv-compiled). Returns every offender with its seq, method, and per-error path + keyword + message. Schema-skipped frames (unknown methods, parse errors, generic envelopes) are not counted. Also returns `advisories`: frames valid under today\'s schema that omit a field the spec says will become mandatory (e.g. `agentInfo` on an initialize response, `clientInfo` on the request) — these never count as violations. Use the returned seq with get_message to inspect the offending raw payload. Start here when an agent is misbehaving but you don\'t yet know how.',
+                "Validate every captured frame in a session against the ACP JSON schema (Draft 2020-12, ajv-compiled). Returns every offender with its seq, method, and per-error path + keyword + message. Schema-skipped frames (unknown methods, parse errors, generic envelopes) are not counted. Also returns `advisories`: frames valid under today's schema that omit a field the spec says will become mandatory (e.g. `agentInfo` on an initialize response, `clientInfo` on the request) — these never count as violations. Use the returned seq with get_message to inspect the offending raw payload. Start here when an agent is misbehaving but you don't yet know how.",
             inputSchema: {
-                session_id: z
-                    .number()
-                    .int()
-                    .positive()
-                    .describe('session id from list_sessions'),
+                session_id: z.number().int().positive().describe('session id from list_sessions'),
             },
             outputSchema: {
                 session_id: z.number(),
@@ -629,12 +623,14 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                         .object({
                             seq: z.number(),
                             method: z.string().nullable(),
-                            errors: z.array(z.looseObject({
-                                keyword: z.string(),
-                                instancePath: z.string().optional(),
-                                schemaPath: z.string().optional(),
-                                message: z.string().optional(),
-                            })),
+                            errors: z.array(
+                                z.looseObject({
+                                    keyword: z.string(),
+                                    instancePath: z.string().optional(),
+                                    schemaPath: z.string().optional(),
+                                    message: z.string().optional(),
+                                }),
+                            ),
                         })
                         .loose(),
                 ),
@@ -692,16 +688,8 @@ export function buildMcpServer(opts: McpOptions): McpServer {
             description:
                 'Align two saved sessions and report what changed between them, across three layers. (1) `metadata`: high-signal differences in client/agent identity, capability matrices, protocol version, and runtime mode/model (JetBrains proxyConfig is excluded as volatile). (2) `perMethod`: per-method latency deltas (p50/p99/max and count, b−a). (3) `rows`: frame-level alignment via an LCS over (direction, kind, method) — matched frames compared field-by-field on the payload (volatile rpcId ignored), each row equal/changed/added/removed. A is the baseline, B is the new side. Use this for "worked yesterday, broke today" regressions and A/B comparisons of two agents on the same prompt — start with `metadata` and `perMethod`, which (unlike raw frames) do not drown in per-run noise. Equal frame rows are omitted unless include_equal is true; get_message(session_id, seq) with a row\'s a_seq/b_seq fetches the raw payload.',
             inputSchema: {
-                session_a: z
-                    .number()
-                    .int()
-                    .positive()
-                    .describe('baseline session id (left side)'),
-                session_b: z
-                    .number()
-                    .int()
-                    .positive()
-                    .describe('new session id (right side)'),
+                session_a: z.number().int().positive().describe('baseline session id (left side)'),
+                session_b: z.number().int().positive().describe('new session id (right side)'),
                 include_equal: z
                     .boolean()
                     .optional()
@@ -793,6 +781,102 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                 metadata: meta.changes,
                 perMethod,
                 rows,
+            });
+        },
+    );
+
+    server.registerTool(
+        'list_agent_shortcuts',
+        {
+            description:
+                'List the built-in agent shortcuts you can pass to generate_editor_config as `agent` (or that the CLI accepts as `acp-devtools <name>` / `proxy --agent <name>`). Each is a known ACP agent wired into the registry; anything else is still supported via generate_editor_config\'s `command` argument. Same data as the CLI `acp-devtools agents`.',
+            inputSchema: {},
+            outputSchema: {
+                agents: z.array(
+                    z.object({
+                        shortName: z.string(),
+                        displayName: z.string(),
+                        command: z.string(),
+                        args: z.array(z.string()),
+                        requiresExternalInstall: z.boolean(),
+                    }),
+                ),
+            },
+            annotations: annotations({ title: 'List agent shortcuts' }),
+        },
+        async () => {
+            const agents = listAgents().map((a) => ({
+                shortName: a.shortName,
+                displayName: a.displayName,
+                command: a.command,
+                args: [...a.args],
+                requiresExternalInstall: a.requiresExternalInstall ?? false,
+            }));
+            return structuredResult({ agents });
+        },
+    );
+
+    server.registerTool(
+        'generate_editor_config',
+        {
+            description:
+                'Generate the editor config (Zed or JetBrains) that runs an ACP agent through ACP Devtools, with the absolute acp-devtools binary path already filled in. Use this when the user asks to wire up / add an agent — e.g. "add junie for zed". Returns `block` (the JSON to add to the editor config), `configPath` (where it goes), and `writeCommand` (the equivalent `acp-devtools setup --write` to run instead). This tool only COMPUTES the config — it does not write any file; add `block` to `configPath` with your own file tools, or tell the user to run `writeCommand`. Pass `agent` for a registry shortcut (see list_agent_shortcuts) or `command` for any other agent (wrapped via `proxy`). Mirrors the CLI `acp-devtools setup`.',
+            inputSchema: {
+                editor: z.enum(['zed', 'jetbrains']).describe('target editor: zed or jetbrains'),
+                agent: z
+                    .string()
+                    .optional()
+                    .describe(
+                        'registry shortcut: junie, goose, codex, opencode, or claude-code (the default when neither agent nor command is given)',
+                    ),
+                command: z
+                    .array(z.string())
+                    .optional()
+                    .describe(
+                        'custom agent command tokens (e.g. ["npx","-y","@scope/acp"]), wrapped via proxy; ignored when `agent` is set',
+                    ),
+                name: z.string().optional().describe('display name override for the agent entry'),
+            },
+            outputSchema: {
+                displayName: z.string(),
+                editor: z.enum(['zed', 'jetbrains']),
+                configPath: z.string(),
+                dedicatedFile: z.boolean(),
+                entry: z.object({
+                    type: z.literal('custom'),
+                    command: z.string(),
+                    args: z.array(z.string()),
+                }),
+                block: z.string(),
+                writeCommand: z.string(),
+                requiresExternalInstall: z.boolean(),
+                installHint: z.string().optional(),
+            },
+            annotations: annotations({ title: 'Generate editor config' }),
+        },
+        async ({ editor, agent, command, name }) => {
+            const target = command && command.length > 0 ? command : agent ? [agent] : [];
+            const selfPath = process.argv[1] ?? 'acp-devtools';
+            const plan = buildSetupPlan({ target, editor, selfPath, name });
+            const writeParts = ['acp-devtools setup', `--editor ${editor}`, '--write'];
+            if (name) writeParts.push(`--name ${JSON.stringify(name)}`);
+            if (target.length === 1) writeParts.push(target[0]!);
+            else if (target.length > 1) writeParts.push('--', ...target);
+            const installHint = plan.isCustom
+                ? undefined
+                : plan.requiresExternalInstall
+                  ? plan.agentDescription
+                  : 'Installs automatically via npx on first run.';
+            return structuredResult({
+                displayName: plan.displayName,
+                editor,
+                configPath: plan.editor.configPath,
+                dedicatedFile: plan.editor.dedicatedFile,
+                entry: plan.entry,
+                block: renderConfigBlock(plan),
+                writeCommand: writeParts.join(' '),
+                requiresExternalInstall: plan.requiresExternalInstall,
+                ...(installHint !== undefined ? { installHint } : {}),
             });
         },
     );
@@ -890,12 +974,8 @@ function registerPrompts(server: McpServer): void {
             description:
                 'Compare per-method latency stats between two clients (e.g. WebStorm vs Zed). Finds typical sessions for each, runs get_latency_stats, and surfaces the methods where one client is significantly slower.',
             argsSchema: {
-                client_a: z
-                    .string()
-                    .describe('first client substring (e.g. "WebStorm")'),
-                client_b: z
-                    .string()
-                    .describe('second client substring (e.g. "Zed")'),
+                client_a: z.string().describe('first client substring (e.g. "WebStorm")'),
+                client_b: z.string().describe('second client substring (e.g. "Zed")'),
             },
         },
         ({ client_a, client_b }) => ({

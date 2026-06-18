@@ -8,6 +8,8 @@ describe('shortAgentName', () => {
         expect(shortAgentName('npx -y @zed-industries/codex-acp')).toBe('Codex');
         expect(shortAgentName('goose acp')).toBe('Goose');
         expect(shortAgentName('opencode acp')).toBe('OpenCode');
+        expect(shortAgentName('junie --acp=true')).toBe('Junie');
+        expect(shortAgentName('/Users/dev/.local/bin/junie --acp=true')).toBe('Junie');
     });
     it('resolves deprecated aliases to the canonical display name', () => {
         // The old Zed-scoped Claude Code package is still common in existing

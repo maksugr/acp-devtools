@@ -19,6 +19,8 @@ const KNOWN_SUBCOMMANDS = new Set([
     'inspect',
     'search',
     'session-info',
+    'setup',
+    'agents',
     'stats',
     'validate',
     'backfill-metadata',
