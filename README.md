@@ -354,7 +354,7 @@ verified in the table.
 | [GLM Agent](https://zed.dev/acp/agent/glm-acp-agent)                               | untested                                                                                                                  |
 | [Goose](https://block.github.io/goose/docs/guides/acp-clients)                     | **verified** — goose 1.37.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/goose-1.37.0.json) · [json](fixtures/handshakes/goose-1.37.0.json) |
 | [Grok Build](https://zed.dev/acp/agent/grok-build)                                 | untested                                                                                                                  |
-| [JetBrains Junie](https://junie.jetbrains.com)                                     | untested                                                                                                                  |
+| [JetBrains Junie](https://junie.jetbrains.com)                                     | **verified** — Junie CLI 26.6.15 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/junie-26.6.15.json) · [json](fixtures/handshakes/junie-26.6.15.json)                                                |
 | [Kilo](https://kilocode.ai)                                                        | untested                                                                                                                  |
 | [Kimi CLI](https://github.com/MoonshotAI/kimi-cli)                                 | handshake — Kimi Code CLI 1.47.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/kimi-code-cli-1.47.0.json) · [json](fixtures/handshakes/kimi-code-cli-1.47.0.json)                                         |
 | [Kiro CLI](https://kiro.dev/docs/cli/acp/)                                         | untested                                                                                                                  |
@@ -373,7 +373,7 @@ verified in the table.
 
 ### Launch shortcuts
 
-The built-in registry maps four common agents to ready commands. npm-based
+The built-in registry maps five common agents to ready commands. npm-based
 agents auto-install on first use via `npx -y …`; binary-based agents need a
 one-time install.
 
@@ -383,6 +383,7 @@ one-time install.
 | `codex`                   | `npx -y @zed-industries/codex-acp`             | npx — automatic                                  |
 | `goose`                   | `goose acp`                                    | install Goose from <https://goose-docs.ai> first |
 | `opencode`                | `opencode acp`                                 | `curl -fsSL https://opencode.ai/install \| bash` |
+| `junie`                   | `junie --acp=true`                             | install Junie CLI from <https://junie.jetbrains.com/> first |
 
 Every other agent runs through the explicit form:
 `acp-devtools proxy <your-command> [args…]`.

@@ -1,0 +1,1632 @@
+{
+    "version": 1,
+    "exportedAt": 1781793539340,
+    "tool": {
+        "name": "acp-devtools",
+        "version": "0.5.0"
+    },
+    "session": {
+        "id": 83,
+        "name": null,
+        "agentCommand": "/Users/dev/.local/bin/junie --acp=true",
+        "clientName": "WebStorm 2026.1.2",
+        "startedAt": 1781793155738,
+        "endedAt": null
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1781793155741,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":1,\"clientCapabilities\":{\"fs\":{\"readTextFile\":true,\"writeTextFile\":true},\"terminal\":false,\"auth\":{\"_meta\":{\"gateway\":true}},\"_meta\":{\"terminal-auth\":true}},\"clientInfo\":{\"name\":\"JetBrains.WebStorm\",\"version\":\"2026.1.2\",\"title\":\"WebStorm 2026.1.2\",\"_meta\":{\"platform\":\"intellij\"}},\"_meta\":{\"proxyConfig\":{\"proxies\":[{\"apiType\":{\"provider\":\"openai\"},\"proxy\":{\"url\":\"http://127.0.0.1:50000\",\"headers\":{\"proxy_key\":\"<REDACTED>\",\"X-IntelliJ-Proxy-Agent-ID\":\"<REDACTED>\"}}},{\"apiType\":{\"provider\":\"anthropic\"},\"proxy\":{\"url\":\"http://127.0.0.1:50001\",\"headers\":{\"proxy_key\":\"<REDACTED>\",\"X-IntelliJ-Proxy-Agent-ID\":\"<REDACTED>\"}}},{\"apiType\":{\"provider\":\"google\"},\"proxy\":{\"url\":\"http://127.0.0.1:50002\",\"headers\":{\"proxy_key\":\"<REDACTED>\",\"X-IntelliJ-Proxy-Agent-ID\":\"<REDACTED>\"}}}]}}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 1,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 1,
+                    "clientCapabilities": {
+                        "fs": {
+                            "readTextFile": true,
+                            "writeTextFile": true
+                        },
+                        "terminal": false,
+                        "auth": {
+                            "_meta": {
+                                "gateway": true
+                            }
+                        },
+                        "_meta": {
+                            "terminal-auth": true
+                        }
+                    },
+                    "clientInfo": {
+                        "name": "JetBrains.WebStorm",
+                        "version": "2026.1.2",
+                        "title": "WebStorm 2026.1.2",
+                        "_meta": {
+                            "platform": "intellij"
+                        }
+                    },
+                    "_meta": {
+                        "proxyConfig": {
+                            "proxies": [
+                                {
+                                    "apiType": {
+                                        "provider": "openai"
+                                    },
+                                    "proxy": {
+                                        "url": "http://127.0.0.1:50000",
+                                        "headers": {
+                                            "proxy_key": "<REDACTED>",
+                                            "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                                        }
+                                    }
+                                },
+                                {
+                                    "apiType": {
+                                        "provider": "anthropic"
+                                    },
+                                    "proxy": {
+                                        "url": "http://127.0.0.1:50001",
+                                        "headers": {
+                                            "proxy_key": "<REDACTED>",
+                                            "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                                        }
+                                    }
+                                },
+                                {
+                                    "apiType": {
+                                        "provider": "google"
+                                    },
+                                    "proxy": {
+                                        "url": "http://127.0.0.1:50002",
+                                        "headers": {
+                                            "proxy_key": "<REDACTED>",
+                                            "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "initialize",
+            "rpcId": 1
+        },
+        {
+            "seq": 2,
+            "timestamp": 1781793156820,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":1,\"result\":{\"protocolVersion\":1,\"agentCapabilities\":{\"loadSession\":true,\"promptCapabilities\":{\"audio\":false,\"image\":true,\"embeddedContext\":true},\"mcpCapabilities\":{\"http\":true,\"sse\":true},\"sessionCapabilities\":{\"fork\":{},\"list\":{},\"resume\":{},\"additionalDirectories\":{}},\"auth\":{}},\"authMethods\":[],\"agentInfo\":{\"name\":\"@jetbrains/junie\",\"version\":\"26.6.15 (1966.53)\",\"title\":\"Junie\"},\"_meta\":{\"requiredPlugins\":[{\"pluginId\":\"org.jetbrains.junie\",\"displayName\":\"Junie\",\"channel\":\"stable\",\"version\":\"261.1218.96\",\"comment\":\"Required for IDE integration\"}]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 1,
+                "result": {
+                    "protocolVersion": 1,
+                    "agentCapabilities": {
+                        "loadSession": true,
+                        "promptCapabilities": {
+                            "audio": false,
+                            "image": true,
+                            "embeddedContext": true
+                        },
+                        "mcpCapabilities": {
+                            "http": true,
+                            "sse": true
+                        },
+                        "sessionCapabilities": {
+                            "fork": {},
+                            "list": {},
+                            "resume": {},
+                            "additionalDirectories": {}
+                        },
+                        "auth": {}
+                    },
+                    "authMethods": [],
+                    "agentInfo": {
+                        "name": "@jetbrains/junie",
+                        "version": "26.6.15 (1966.53)",
+                        "title": "Junie"
+                    },
+                    "_meta": {
+                        "requiredPlugins": [
+                            {
+                                "pluginId": "org.jetbrains.junie",
+                                "displayName": "Junie",
+                                "channel": "stable",
+                                "version": "261.1218.96",
+                                "comment": "Required for IDE integration"
+                            }
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 1
+        },
+        {
+            "seq": 3,
+            "timestamp": 1781793156851,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":2,\"method\":\"session/new\",\"params\":{\"cwd\":\"/Users/dev/acp-devtools\",\"mcpServers\":[],\"_meta\":{\"additionalRoots\":[\"/Users/dev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents\"]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 2,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/Users/dev/acp-devtools",
+                    "mcpServers": [],
+                    "_meta": {
+                        "additionalRoots": [
+                            "/Users/dev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents"
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/new",
+            "rpcId": 2
+        },
+        {
+            "seq": 4,
+            "timestamp": 1781793157043,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":2,\"result\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 2,
+                "result": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 2
+        },
+        {
+            "seq": 5,
+            "timestamp": 1781793157063,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"available_commands_update\",\"availableCommands\":[{\"name\":\"usage\",\"description\":\"Displays session usage and remaining quota\"},{\"name\":\"ide\",\"description\":\"Displays IDE connection status and available services\"}]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "available_commands_update",
+                        "availableCommands": [
+                            {
+                                "name": "usage",
+                                "description": "Displays session usage and remaining quota"
+                            },
+                            {
+                                "name": "ide",
+                                "description": "Displays IDE connection status and available services"
+                            }
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 6,
+            "timestamp": 1781793157066,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"config_option_update\",\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "config_option_update",
+                        "configOptions": [
+                            {
+                                "type": "select",
+                                "id": "model",
+                                "name": "Model",
+                                "description": "Select the model Junie uses for responses",
+                                "currentValue": "claude-sonnet-4-6",
+                                "options": [
+                                    {
+                                        "value": "gemini-3-flash-preview",
+                                        "name": "Gemini 3 Flash Preview",
+                                        "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                    },
+                                    {
+                                        "value": "gemini-3.1-flash-lite",
+                                        "name": "Gemini 3.1 Flash Lite",
+                                        "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                    },
+                                    {
+                                        "value": "claude-sonnet-4-6",
+                                        "name": "Claude Sonnet 4.6",
+                                        "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-opus-4-6",
+                                        "name": "Claude Opus 4.6",
+                                        "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-opus-4-7",
+                                        "name": "Claude Opus 4.7",
+                                        "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-opus-4-8",
+                                        "name": "Claude Opus 4.8",
+                                        "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-fable-5",
+                                        "name": "Claude Fable 5",
+                                        "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                    },
+                                    {
+                                        "value": "gpt-5-2025-08-07",
+                                        "name": "GPT-5",
+                                        "description": "This top-tier model consumes credits similar to the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.3-codex",
+                                        "name": "GPT-5.3-codex",
+                                        "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.4",
+                                        "name": "GPT-5.4",
+                                        "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.5",
+                                        "name": "GPT-5.5",
+                                        "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.2-2025-12-11",
+                                        "name": "GPT-5.2",
+                                        "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gemini-3.1-pro-preview",
+                                        "name": "Gemini 3.1 Pro Preview",
+                                        "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                    },
+                                    {
+                                        "value": "gemini-3.5-flash",
+                                        "name": "Gemini 3.5 Flash",
+                                        "description": "Top-tier model, consumes 3x as many credits as the default."
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "boolean",
+                                "id": "brave_mode",
+                                "name": "Brave Mode",
+                                "description": "When enabled, Junie will execute commands without asking for approval",
+                                "currentValue": false
+                            },
+                            {
+                                "type": "boolean",
+                                "id": "think_more",
+                                "name": "Think More",
+                                "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                                "currentValue": false
+                            }
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 7,
+            "timestamp": 1781793157066,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"plan\",\"entries\":[]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "plan",
+                        "entries": []
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 8,
+            "timestamp": 1781793157093,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"config_option_update\",\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "config_option_update",
+                        "configOptions": [
+                            {
+                                "type": "select",
+                                "id": "model",
+                                "name": "Model",
+                                "description": "Select the model Junie uses for responses",
+                                "currentValue": "claude-sonnet-4-6",
+                                "options": [
+                                    {
+                                        "value": "gemini-3-flash-preview",
+                                        "name": "Gemini 3 Flash Preview",
+                                        "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                    },
+                                    {
+                                        "value": "claude-fable-5",
+                                        "name": "Claude Fable 5",
+                                        "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                    },
+                                    {
+                                        "value": "claude-opus-4-6",
+                                        "name": "Claude Opus 4.6",
+                                        "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-opus-4-7",
+                                        "name": "Claude Opus 4.7",
+                                        "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-opus-4-8",
+                                        "name": "Claude Opus 4.8",
+                                        "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "claude-sonnet-4-6",
+                                        "name": "Claude Sonnet 4.6",
+                                        "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gemini-3.1-flash-lite",
+                                        "name": "Gemini 3.1 Flash Lite",
+                                        "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                    },
+                                    {
+                                        "value": "gemini-3.1-pro-preview",
+                                        "name": "Gemini 3.1 Pro Preview",
+                                        "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                    },
+                                    {
+                                        "value": "gemini-3.5-flash",
+                                        "name": "Gemini 3.5 Flash",
+                                        "description": "Top-tier model, consumes 3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5-2025-08-07",
+                                        "name": "GPT-5",
+                                        "description": "This top-tier model consumes credits similar to the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.2-2025-12-11",
+                                        "name": "GPT-5.2",
+                                        "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.3-codex",
+                                        "name": "GPT-5.3-codex",
+                                        "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.4",
+                                        "name": "GPT-5.4",
+                                        "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                    },
+                                    {
+                                        "value": "gpt-5.5",
+                                        "name": "GPT-5.5",
+                                        "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "boolean",
+                                "id": "brave_mode",
+                                "name": "Brave Mode",
+                                "description": "When enabled, Junie will execute commands without asking for approval",
+                                "currentValue": false
+                            },
+                            {
+                                "type": "boolean",
+                                "id": "think_more",
+                                "name": "Think More",
+                                "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                                "currentValue": false
+                            }
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 9,
+            "timestamp": 1781793159217,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":3,\"method\":\"session/set_config_option\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configId\":\"model\",\"value\":\"claude-sonnet-4-6\"},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 3,
+                "method": "session/set_config_option",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configId": "model",
+                    "value": "claude-sonnet-4-6"
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/set_config_option",
+            "rpcId": 3
+        },
+        {
+            "seq": 10,
+            "timestamp": 1781793159220,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":3,\"result\":{\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 3,
+                "result": {
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 3
+        },
+        {
+            "seq": 11,
+            "timestamp": 1781793159378,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":4,\"method\":\"session/set_config_option\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configId\":\"brave_mode\",\"type\":\"boolean\",\"value\":false},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 4,
+                "method": "session/set_config_option",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configId": "brave_mode",
+                    "type": "boolean",
+                    "value": false
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/set_config_option",
+            "rpcId": 4
+        },
+        {
+            "seq": 12,
+            "timestamp": 1781793159380,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":4,\"result\":{\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 4,
+                "result": {
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 4
+        },
+        {
+            "seq": 13,
+            "timestamp": 1781793159517,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":5,\"method\":\"session/set_config_option\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configId\":\"think_more\",\"type\":\"boolean\",\"value\":false},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 5,
+                "method": "session/set_config_option",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configId": "think_more",
+                    "type": "boolean",
+                    "value": false
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/set_config_option",
+            "rpcId": 5
+        },
+        {
+            "seq": 14,
+            "timestamp": 1781793159518,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":5,\"result\":{\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 5,
+                "result": {
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 5
+        },
+        {
+            "seq": 15,
+            "timestamp": 1781793159662,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":6,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"prompt\":[{\"type\":\"text\",\"text\":\"Hi!\"}],\"_meta\":{\"additionalRoots\":[\"/Users/dev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents\"]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 6,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "Hi!"
+                        }
+                    ],
+                    "_meta": {
+                        "additionalRoots": [
+                            "/Users/dev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents"
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/prompt",
+            "rpcId": 6
+        },
+        {
+            "seq": 16,
+            "timestamp": 1781793167318,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\"Hi! How can I help you today?\"}}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": "Hi! How can I help you today?"
+                        }
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 17,
+            "timestamp": 1781793167320,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":6,\"result\":{\"stopReason\":\"end_turn\"},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 6,
+                "result": {
+                    "stopReason": "end_turn"
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 6
+        },
+        {
+            "seq": 18,
+            "timestamp": 1781793185891,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":7,\"method\":\"session/set_config_option\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configId\":\"model\",\"value\":\"claude-sonnet-4-6\"},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 7,
+                "method": "session/set_config_option",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configId": "model",
+                    "value": "claude-sonnet-4-6"
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/set_config_option",
+            "rpcId": 7
+        },
+        {
+            "seq": 19,
+            "timestamp": 1781793185893,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":7,\"result\":{\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 7,
+                "result": {
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 7
+        },
+        {
+            "seq": 20,
+            "timestamp": 1781793186051,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":8,\"method\":\"session/set_config_option\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configId\":\"brave_mode\",\"type\":\"boolean\",\"value\":false},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 8,
+                "method": "session/set_config_option",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configId": "brave_mode",
+                    "type": "boolean",
+                    "value": false
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/set_config_option",
+            "rpcId": 8
+        },
+        {
+            "seq": 21,
+            "timestamp": 1781793186052,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":8,\"result\":{\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 8,
+                "result": {
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 8
+        },
+        {
+            "seq": 22,
+            "timestamp": 1781793186203,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":9,\"method\":\"session/set_config_option\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"configId\":\"think_more\",\"type\":\"boolean\",\"value\":false},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 9,
+                "method": "session/set_config_option",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "configId": "think_more",
+                    "type": "boolean",
+                    "value": false
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/set_config_option",
+            "rpcId": 9
+        },
+        {
+            "seq": 23,
+            "timestamp": 1781793186204,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":9,\"result\":{\"configOptions\":[{\"type\":\"select\",\"id\":\"model\",\"name\":\"Model\",\"description\":\"Select the model Junie uses for responses\",\"currentValue\":\"claude-sonnet-4-6\",\"options\":[{\"value\":\"gemini-3-flash-preview\",\"name\":\"Gemini 3 Flash Preview\",\"description\":\"Top-tier model, good for everyday work. Fast and inexpensive.\"},{\"value\":\"claude-fable-5\",\"name\":\"Claude Fable 5\",\"description\":\"The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks.\"},{\"value\":\"claude-opus-4-6\",\"name\":\"Claude Opus 4.6\",\"description\":\"This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-7\",\"name\":\"Claude Opus 4.7\",\"description\":\"New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-opus-4-8\",\"name\":\"Claude Opus 4.8\",\"description\":\"Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default.\"},{\"value\":\"claude-sonnet-4-6\",\"name\":\"Claude Sonnet 4.6\",\"description\":\"This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default.\"},{\"value\":\"gemini-3.1-flash-lite\",\"name\":\"Gemini 3.1 Flash Lite\",\"description\":\"Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality.\"},{\"value\":\"gemini-3.1-pro-preview\",\"name\":\"Gemini 3.1 Pro Preview\",\"description\":\"This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance.\"},{\"value\":\"gemini-3.5-flash\",\"name\":\"Gemini 3.5 Flash\",\"description\":\"Top-tier model, consumes 3x as many credits as the default.\"},{\"value\":\"gpt-5-2025-08-07\",\"name\":\"GPT-5\",\"description\":\"This top-tier model consumes credits similar to the default.\"},{\"value\":\"gpt-5.2-2025-12-11\",\"name\":\"GPT-5.2\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.3-codex\",\"name\":\"GPT-5.3-codex\",\"description\":\"This top-tier model consumes 1.5–2x as many credits as the default.\"},{\"value\":\"gpt-5.4\",\"name\":\"GPT-5.4\",\"description\":\"Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default.\"},{\"value\":\"gpt-5.5\",\"name\":\"GPT-5.5\",\"description\":\"The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default.\"}]},{\"type\":\"boolean\",\"id\":\"brave_mode\",\"name\":\"Brave Mode\",\"description\":\"When enabled, Junie will execute commands without asking for approval\",\"currentValue\":false},{\"type\":\"boolean\",\"id\":\"think_more\",\"name\":\"Think More\",\"description\":\"When enabled, Junie will spend more effort on reasoning before responding\",\"currentValue\":false}]},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 9,
+                "result": {
+                    "configOptions": [
+                        {
+                            "type": "select",
+                            "id": "model",
+                            "name": "Model",
+                            "description": "Select the model Junie uses for responses",
+                            "currentValue": "claude-sonnet-4-6",
+                            "options": [
+                                {
+                                    "value": "gemini-3-flash-preview",
+                                    "name": "Gemini 3 Flash Preview",
+                                    "description": "Top-tier model, good for everyday work. Fast and inexpensive."
+                                },
+                                {
+                                    "value": "claude-fable-5",
+                                    "name": "Claude Fable 5",
+                                    "description": "The most powerful Anthropic model. Consumes 5-10x as many credits as the default. Not available for cybersecurity and biology tasks."
+                                },
+                                {
+                                    "value": "claude-opus-4-6",
+                                    "name": "Claude Opus 4.6",
+                                    "description": "This top-tier model is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-7",
+                                    "name": "Claude Opus 4.7",
+                                    "description": "New version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-opus-4-8",
+                                    "name": "Claude Opus 4.8",
+                                    "description": "Latest version of Opus. It is recommended for medium or complex tasks. Consumes 2-3x as many credits as the default."
+                                },
+                                {
+                                    "value": "claude-sonnet-4-6",
+                                    "name": "Claude Sonnet 4.6",
+                                    "description": "This top-tier model, good for everyday work, consumes 1.3–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gemini-3.1-flash-lite",
+                                    "name": "Gemini 3.1 Flash Lite",
+                                    "description": "Recommended inexpensive model that consumes 1.5–3x fewer credits than the default, with only a small loss in quality."
+                                },
+                                {
+                                    "value": "gemini-3.1-pro-preview",
+                                    "name": "Gemini 3.1 Pro Preview",
+                                    "description": "This model is in preview. Response times may vary, and credit usage may be significantly higher than expected. Please monitor your balance."
+                                },
+                                {
+                                    "value": "gemini-3.5-flash",
+                                    "name": "Gemini 3.5 Flash",
+                                    "description": "Top-tier model, consumes 3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5-2025-08-07",
+                                    "name": "GPT-5",
+                                    "description": "This top-tier model consumes credits similar to the default."
+                                },
+                                {
+                                    "value": "gpt-5.2-2025-12-11",
+                                    "name": "GPT-5.2",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.3-codex",
+                                    "name": "GPT-5.3-codex",
+                                    "description": "This top-tier model consumes 1.5–2x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.4",
+                                    "name": "GPT-5.4",
+                                    "description": "Similar quality to GPT-5.3-codex, consumes 2–3x as many credits as the default."
+                                },
+                                {
+                                    "value": "gpt-5.5",
+                                    "name": "GPT-5.5",
+                                    "description": "The most advanced coding model by OpenAI, consumes 3–6x as many credits as the default."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "brave_mode",
+                            "name": "Brave Mode",
+                            "description": "When enabled, Junie will execute commands without asking for approval",
+                            "currentValue": false
+                        },
+                        {
+                            "type": "boolean",
+                            "id": "think_more",
+                            "name": "Think More",
+                            "description": "When enabled, Junie will spend more effort on reasoning before responding",
+                            "currentValue": false
+                        }
+                    ]
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 9
+        },
+        {
+            "seq": 24,
+            "timestamp": 1781793186359,
+            "direction": "editor-to-agent",
+            "kind": "request",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcRequest\",\"id\":10,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"prompt\":[{\"type\":\"text\",\"text\":\"What can you say about this project?\"}],\"_meta\":{\"additionalRoots\":[\"/Users/dev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents\"]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcRequest",
+                "id": 10,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "What can you say about this project?"
+                        }
+                    ],
+                    "_meta": {
+                        "additionalRoots": [
+                            "/Users/dev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents"
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/prompt",
+            "rpcId": 10
+        },
+        {
+            "seq": 25,
+            "timestamp": 1781793191598,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\"I am about to open and review the project's main documentation file.\"}}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": "I am about to open and review the project's main documentation file."
+                        }
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 26,
+            "timestamp": 1781793191668,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"tool_call\",\"toolCallId\":\"a525ad46-c847-4a1d-8aa2-fa60a5b629b7\",\"title\":\"Open README.md\",\"kind\":\"other\",\"status\":\"in_progress\",\"content\":[],\"locations\":[]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "tool_call",
+                        "toolCallId": "a525ad46-c847-4a1d-8aa2-fa60a5b629b7",
+                        "title": "Open README.md",
+                        "kind": "other",
+                        "status": "in_progress",
+                        "content": [],
+                        "locations": []
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 27,
+            "timestamp": 1781793191749,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\"a525ad46-c847-4a1d-8aa2-fa60a5b629b7\",\"title\":\"Open README.md\",\"kind\":\"other\",\"status\":\"in_progress\",\"content\":[],\"locations\":[]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "tool_call_update",
+                        "toolCallId": "a525ad46-c847-4a1d-8aa2-fa60a5b629b7",
+                        "title": "Open README.md",
+                        "kind": "other",
+                        "status": "in_progress",
+                        "content": [],
+                        "locations": []
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 28,
+            "timestamp": 1781793191751,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\"a525ad46-c847-4a1d-8aa2-fa60a5b629b7\",\"title\":\"Open README.md\",\"kind\":\"read\",\"status\":\"in_progress\",\"content\":[{\"type\":\"content\",\"content\":{\"type\":\"text\",\"text\":\"README.md\"}}],\"locations\":[{\"path\":\"/Users/dev/acp-devtools/README.md\"}]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "tool_call_update",
+                        "toolCallId": "a525ad46-c847-4a1d-8aa2-fa60a5b629b7",
+                        "title": "Open README.md",
+                        "kind": "read",
+                        "status": "in_progress",
+                        "content": [
+                            {
+                                "type": "content",
+                                "content": {
+                                    "type": "text",
+                                    "text": "README.md"
+                                }
+                            }
+                        ],
+                        "locations": [
+                            {
+                                "path": "/Users/dev/acp-devtools/README.md"
+                            }
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 29,
+            "timestamp": 1781793192899,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\"a525ad46-c847-4a1d-8aa2-fa60a5b629b7\",\"title\":\"Open README.md\",\"kind\":\"read\",\"status\":\"completed\",\"content\":[{\"type\":\"content\",\"content\":{\"type\":\"text\",\"text\":\"README.md\"}}],\"locations\":[{\"path\":\"/Users/dev/acp-devtools/README.md\"}]}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "tool_call_update",
+                        "toolCallId": "a525ad46-c847-4a1d-8aa2-fa60a5b629b7",
+                        "title": "Open README.md",
+                        "kind": "read",
+                        "status": "completed",
+                        "content": [
+                            {
+                                "type": "content",
+                                "content": {
+                                    "type": "text",
+                                    "text": "README.md"
+                                }
+                            }
+                        ],
+                        "locations": [
+                            {
+                                "path": "/Users/dev/acp-devtools/README.md"
+                            }
+                        ]
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 30,
+            "timestamp": 1781793204215,
+            "direction": "agent-to-editor",
+            "kind": "notification",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcNotification\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"session-260618-163236-1bqj\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"content\":{\"type\":\"text\",\"text\":\"**ACP Devtools**\\n\\nThis is **`acp-devtools`** — a developer tool for inspecting, debugging, and validating traffic between code editors and AI coding agents using the **Agent Client Protocol (ACP)**.\\n\\n**What is ACP?**\\nThe [Agent Client Protocol](https://agentclientprotocol.com) is an open, newline-delimited JSON-RPC wire format that lets editors (WebStorm, Zed, IntelliJ, Neovim, VS Code via ReSharper) communicate with coding agents (Claude Code, Codex, Goose, OpenCode, and 40+ others) over stdio.\\n\\n**What does this project do?**\\n`acp-devtools` acts as a **transparent proxy** sitting in the stdio pipe between the editor and the agent — neither side knows it's there. It:\\n\\n- **Captures** every JSON-RPC frame in both directions\\n- **Stores** sessions in SQLite\\n- **Streams** data to a live web inspector UI\\n- **Validates** frames against the official ACP JSON schema\\n- **Provides** a CLI and a read-only MCP server\\n\\n**Key Features**\\n- **Timeline + JSON detail** — scrollable frame list with full payload inspection, spec-aware tree view\\n- **Stream clusters** — `agent_message_chunk` runs collapse into one row with a shimmer bar\\n- **Spec validation** — invalid frames get badges; CLI exits with code 1 for CI gating\\n- **Performance dashboard** — per-method p50/p99/max latencies, waterfall chart, auto-detected insights\\n- **Multi-session diff** — frame-level + metadata + per-method p99 deltas\\n- **Playground** — browser-based inspector at [playground.acp-devtools.dev](https://playground.acp-devtools.dev)\\n\\n**Who it's for**\\n- **Agent authors** — validate wire output against the spec\\n- **Editor/plugin developers** — inspect what the other side sends\\n- **Debuggers** — find why a prompt took 60s, replay broken sessions\\n- **CI pipelines** — gate releases on spec conformance and latency regressions\\n\\n**Tech Stack**\\n- **Node.js ≥ 22** (TypeScript)\\n- **SQLite** for session storage\\n- **Vitest** for testing\\n- **ESLint** for linting\\n- MIT licensed, published on npm as [`acp-devtools`](https://www.npmjs.com/package/acp-devtools)\\n\"}}},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcNotification",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "session-260618-163236-1bqj",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "content": {
+                            "type": "text",
+                            "text": "**ACP Devtools**\n\nThis is **`acp-devtools`** — a developer tool for inspecting, debugging, and validating traffic between code editors and AI coding agents using the **Agent Client Protocol (ACP)**.\n\n**What is ACP?**\nThe [Agent Client Protocol](https://agentclientprotocol.com) is an open, newline-delimited JSON-RPC wire format that lets editors (WebStorm, Zed, IntelliJ, Neovim, VS Code via ReSharper) communicate with coding agents (Claude Code, Codex, Goose, OpenCode, and 40+ others) over stdio.\n\n**What does this project do?**\n`acp-devtools` acts as a **transparent proxy** sitting in the stdio pipe between the editor and the agent — neither side knows it's there. It:\n\n- **Captures** every JSON-RPC frame in both directions\n- **Stores** sessions in SQLite\n- **Streams** data to a live web inspector UI\n- **Validates** frames against the official ACP JSON schema\n- **Provides** a CLI and a read-only MCP server\n\n**Key Features**\n- **Timeline + JSON detail** — scrollable frame list with full payload inspection, spec-aware tree view\n- **Stream clusters** — `agent_message_chunk` runs collapse into one row with a shimmer bar\n- **Spec validation** — invalid frames get badges; CLI exits with code 1 for CI gating\n- **Performance dashboard** — per-method p50/p99/max latencies, waterfall chart, auto-detected insights\n- **Multi-session diff** — frame-level + metadata + per-method p99 deltas\n- **Playground** — browser-based inspector at [playground.acp-devtools.dev](https://playground.acp-devtools.dev)\n\n**Who it's for**\n- **Agent authors** — validate wire output against the spec\n- **Editor/plugin developers** — inspect what the other side sends\n- **Debuggers** — find why a prompt took 60s, replay broken sessions\n- **CI pipelines** — gate releases on spec conformance and latency regressions\n\n**Tech Stack**\n- **Node.js ≥ 22** (TypeScript)\n- **SQLite** for session storage\n- **Vitest** for testing\n- **ESLint** for linting\n- MIT licensed, published on npm as [`acp-devtools`](https://www.npmjs.com/package/acp-devtools)\n"
+                        }
+                    }
+                },
+                "jsonrpc": "2.0"
+            },
+            "method": "session/update"
+        },
+        {
+            "seq": 31,
+            "timestamp": 1781793204215,
+            "direction": "agent-to-editor",
+            "kind": "response",
+            "raw": "{\"type\":\"com.agentclientprotocol.rpc.JsonRpcResponse\",\"id\":10,\"result\":{\"stopReason\":\"end_turn\"},\"jsonrpc\":\"2.0\"}",
+            "payload": {
+                "type": "com.agentclientprotocol.rpc.JsonRpcResponse",
+                "id": 10,
+                "result": {
+                    "stopReason": "end_turn"
+                },
+                "jsonrpc": "2.0"
+            },
+            "rpcId": 10
+        }
+    ]
+}

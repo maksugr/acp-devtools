@@ -40,7 +40,7 @@ acp-devtools proxy --save-to /tmp/session.db \
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--agent <name>` | — | preset for a known agent (`claude-code`, `codex`, `goose`, `opencode`) |
+| `--agent <name>` | — | preset for a known agent (`claude-code`, `codex`, `goose`, `opencode`, `junie`) |
 | `--log <mode>` | `none` | per-message log to stderr (`json`, `pretty`, `none`) |
 | `--cwd <dir>` | inherit | working directory for the agent process |
 | `--save-to <file>` | `~/.acp-devtools/captures.db` | shared captures SQLite |

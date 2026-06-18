@@ -69,9 +69,11 @@ Goose ships as a standalone binary — install it with the
 }
 ```
 
-The shortcut expands to `goose acp`, so `goose` must be on PATH. `opencode`
-(`"args": ["opencode"]`) works the same way after
-`curl -fsSL https://opencode.ai/install | bash`.
+The shortcut expands to `goose acp`, so `goose` must be on PATH. Every other
+registry shortcut works the same way — `"args": ["<name>"]`, with binary-based
+agents needing a one-time install first. The full list and what each expands to
+lives in the README's [Launch shortcuts](../README.md#launch-shortcuts) table
+(or `acp-devtools proxy --help`).
 
 ### A custom agent (not in the registry)
 

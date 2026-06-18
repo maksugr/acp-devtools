@@ -50,9 +50,12 @@ shown in the IDE's agent picker. Across the examples below only `args` changes �
 }
 ```
 
-Codex installs automatically via npx on first run. `goose` (`"args": ["goose"]`)
-and `opencode` (`"args": ["opencode"]`) work the same way — their binary just
-has to be on PATH.
+Codex installs automatically via npx on first run. Every other registry shortcut
+works the same way — `"args": ["<name>"]` — with binary-based agents (Goose,
+OpenCode, Junie, …) needing a one-time install first. The full list and what each
+expands to lives in the README's
+[Launch shortcuts](../README.md#launch-shortcuts) table (or
+`acp-devtools proxy --help`).
 
 ### A custom agent (not in the registry)
 

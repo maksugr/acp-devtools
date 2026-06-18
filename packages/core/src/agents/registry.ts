@@ -68,6 +68,14 @@ export const AGENT_REGISTRY: Readonly<Record<string, AgentDefinition>> = {
         args: ['acp'],
         requiresExternalInstall: true,
     },
+    junie: {
+        shortName: 'junie',
+        displayName: 'Junie',
+        description: 'JetBrains Junie CLI — install separately, then this runs `junie --acp=true`',
+        command: 'junie',
+        args: ['--acp=true'],
+        requiresExternalInstall: true,
+    },
 };
 
 /** The agent picked when `acp-devtools` is launched with no arguments. */
