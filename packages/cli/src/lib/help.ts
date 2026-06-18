@@ -33,7 +33,7 @@ export const GROUPS: CommandGroup[] = [
     },
     { title: 'View', commands: ['ui', 'replay'] },
     { title: 'Manage', commands: ['export', 'import', 'delete', 'backfill-metadata'] },
-    { title: 'Setup', commands: ['doctor', 'mcp'] },
+    { title: 'Setup', commands: ['setup', 'agents', 'doctor', 'mcp'] },
 ];
 
 // One-line summaries shown in the overview. Kept short on purpose — the full
@@ -55,6 +55,8 @@ export const SUMMARIES: Record<string, string> = {
     import: 'Import a JSON export into the store',
     delete: 'Delete saved sessions permanently',
     'backfill-metadata': 'Recompute session metadata columns',
+    setup: 'Generate an editor config for an agent',
+    agents: 'List the built-in agent shortcuts',
     doctor: 'Diagnose setup and report issues',
     mcp: 'Expose captures to Claude over MCP',
 };
@@ -117,6 +119,17 @@ const EXAMPLES: Record<string, string[]> = {
     replay: ['acp-devtools replay 12', 'acp-devtools replay --file session-12.json'],
     validate: ['acp-devtools validate 12'],
     'session-info': ['acp-devtools session-info 12'],
+    setup: [
+        '# See which agent shortcuts exist',
+        'acp-devtools agents',
+        '',
+        '# Print a Zed config block for a registry agent',
+        'acp-devtools setup junie --editor zed',
+        '',
+        '# Wrap a custom agent and write it straight into the JetBrains config',
+        'acp-devtools setup --editor jetbrains --write -- npx -y @your-scope/your-acp',
+    ],
+    agents: ['acp-devtools agents', '', '# Machine-readable', 'acp-devtools agents --json'],
     doctor: ['acp-devtools doctor'],
     mcp: ['# Read-only MCP server over stdio (wire into .claude/mcp_servers.json)', 'acp-devtools mcp'],
     'backfill-metadata': [

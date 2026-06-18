@@ -19,6 +19,8 @@ const EXPECTED_TOOLS = [
     'search_messages',
     'find_spec_violations',
     'diff_sessions',
+    'list_agent_shortcuts',
+    'generate_editor_config',
 ];
 
 let tmp: string;
@@ -249,13 +251,67 @@ describe('MCP server — prompts', () => {
 });
 
 describe('MCP server — tools/call', () => {
+    it('list_agent_shortcuts returns the registry shortcuts', async () => {
+        const { client, close } = await withClient();
+        try {
+            const res = await client.callTool({ name: 'list_agent_shortcuts', arguments: {} });
+            const body = parseJsonContent(
+                (res.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as { agents: Array<{ shortName: string; displayName: string }> };
+            const names = body.agents.map((a) => a.shortName);
+            expect(names).toContain('junie');
+            expect(names).toContain('goose');
+            expect(body.agents.find((a) => a.shortName === 'junie')?.displayName).toBe('Junie');
+        } finally {
+            await close();
+        }
+    });
+
+    it('generate_editor_config builds a registry-agent block and a custom proxy block', async () => {
+        const { client, close } = await withClient();
+        try {
+            const reg = await client.callTool({
+                name: 'generate_editor_config',
+                arguments: { editor: 'zed', agent: 'junie' },
+            });
+            const regBody = parseJsonContent(
+                (reg.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as {
+                displayName: string;
+                configPath: string;
+                entry: { command: string; args: string[] };
+                block: string;
+                writeCommand: string;
+                requiresExternalInstall: boolean;
+            };
+            expect(regBody.displayName).toBe('Junie (via ACP Devtools)');
+            expect(regBody.entry.args).toEqual(['junie']);
+            expect(regBody.configPath).toMatch(/settings\.json$/);
+            expect(regBody.block).toContain('agent_servers');
+            expect(regBody.writeCommand).toContain('--write');
+            expect(regBody.requiresExternalInstall).toBe(true);
+
+            const custom = await client.callTool({
+                name: 'generate_editor_config',
+                arguments: { editor: 'jetbrains', command: ['npx', '-y', '@foo/acp'] },
+            });
+            const customBody = parseJsonContent(
+                (custom.content as Array<{ text?: unknown }>)[0]?.text,
+            ) as { entry: { args: string[] }; configPath: string };
+            expect(customBody.entry.args).toEqual(['proxy', 'npx', '-y', '@foo/acp']);
+            expect(customBody.configPath).toMatch(/acp\.json$/);
+        } finally {
+            await close();
+        }
+    });
+
     it('list_sessions returns the seeded session', async () => {
         const { client, close } = await withClient();
         try {
             const res = await client.callTool({ name: 'list_sessions', arguments: { limit: 10 } });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { sessions: Array<{ id: number; client_name: string | null }> };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                sessions: Array<{ id: number; client_name: string | null }>;
+            };
             expect(body.sessions.length).toBeGreaterThan(0);
             expect(body.sessions[0]?.id).toBe(sessionId);
             expect(body.sessions[0]?.client_name).toBe('Zed');
@@ -296,9 +352,7 @@ describe('MCP server — tools/call', () => {
                 name: 'get_session_metadata',
                 arguments: { session_id: sessionId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as {
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
                 metadata: {
                     protocolVersion: number | null;
                     client: { title: string | null };
@@ -320,9 +374,7 @@ describe('MCP server — tools/call', () => {
                 name: 'get_latency_stats',
                 arguments: { session_id: sessionId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as {
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
                 perMethod: Array<{ method: string; count: number }>;
                 insights: Array<{ kind: string }>;
                 sessionLatency: { sampleSize: number };
@@ -346,12 +398,14 @@ describe('MCP server — tools/call', () => {
                 name: 'get_session_summary',
                 arguments: { session_id: sessionId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as {
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
                 session_id: number;
                 metadata: { client: { title: string | null } };
-                totals: { messages: number; direction: Record<string, number>; kind: Record<string, number> };
+                totals: {
+                    messages: number;
+                    direction: Record<string, number>;
+                    kind: Record<string, number>;
+                };
                 latency: { sampleSize: number };
                 perMethod: unknown[];
                 insights: unknown[];
@@ -394,9 +448,9 @@ describe('MCP server — tools/call', () => {
                 name: 'get_message',
                 arguments: { session_id: sessionId, seq: 1 },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { message: { seq: number; method?: string } };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                message: { seq: number; method?: string };
+            };
             expect(body.message.seq).toBe(1);
             expect(body.message.method).toBe('initialize');
         } finally {
@@ -424,9 +478,9 @@ describe('MCP server — tools/call', () => {
                 name: 'get_paired',
                 arguments: { session_id: sessionId, seq: 1 },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { paired: { pairSeq: number; latencyMs: number } | null };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                paired: { pairSeq: number; latencyMs: number } | null;
+            };
             expect(body.paired?.pairSeq).toBe(2);
             expect(body.paired?.latencyMs).toBeGreaterThanOrEqual(0);
         } finally {
@@ -441,9 +495,10 @@ describe('MCP server — tools/call', () => {
                 name: 'search_messages',
                 arguments: { session_id: sessionId, query: 'initialize' },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { matches: Array<{ seq: number }>; total: number };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                matches: Array<{ seq: number }>;
+                total: number;
+            };
             expect(body.matches.length).toBeGreaterThan(0);
             expect(body.total).toBe(body.matches.length);
         } finally {
@@ -479,13 +534,15 @@ describe('MCP server — tools/call', () => {
                 name: 'diff_sessions',
                 arguments: { session_a: sessionId, session_b: otherId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as {
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
                 summary: { changed: number; removed: number };
                 metadata: Array<{ path: string }>;
                 perMethod: Array<{ method: string; kind: string }>;
-                rows: Array<{ op: string; method: string | null; changes: Array<{ path: string }> }>;
+                rows: Array<{
+                    op: string;
+                    method: string | null;
+                    changes: Array<{ path: string }>;
+                }>;
             };
             // A has initialize + response; B has only a changed initialize →
             // initialize is "changed" (protocolVersion 1 → 2), response is removed.
@@ -565,11 +622,14 @@ describe('MCP server — tools/call', () => {
                 name: 'diff_sessions',
                 arguments: { session_a: sessionId, session_b: longerId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as {
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
                 summary: { added: number };
-                rows: Array<{ op: string; method: string | null; a_seq: number | null; b_seq: number | null }>;
+                rows: Array<{
+                    op: string;
+                    method: string | null;
+                    a_seq: number | null;
+                    b_seq: number | null;
+                }>;
             };
             const added = body.rows.find((r) => r.op === 'added');
             expect(added?.method).toBe('session/new');
@@ -588,9 +648,11 @@ describe('MCP server — tools/call', () => {
                 name: 'find_spec_violations',
                 arguments: { session_id: sessionId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { checked: number; violations: Array<unknown>; advisories: Array<unknown> };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                checked: number;
+                violations: Array<unknown>;
+                advisories: Array<unknown>;
+            };
             expect(body.checked).toBeGreaterThan(0);
             expect(Array.isArray(body.violations)).toBe(true);
             // Default seed carries clientInfo + agentInfo → no advisories.
@@ -603,25 +665,29 @@ describe('MCP server — tools/call', () => {
     it('find_spec_violations reports soon-required advisories for missing agentInfo', async () => {
         const db = openDatabase(dbPath);
         const session = Session.start(db, { name: 'no-agent-info', agentCommand: 'mock' });
-        session.record(mk(1, {
-            payload: {
-                jsonrpc: '2.0',
-                id: 1,
-                method: 'initialize',
-                params: { protocolVersion: 1 },
-            } as unknown as CapturedMessage['payload'],
-        }));
-        session.record(mk(2, {
-            direction: 'agent-to-editor',
-            kind: 'response',
-            method: undefined,
-            rpcId: '1',
-            payload: {
-                jsonrpc: '2.0',
-                id: 1,
-                result: { protocolVersion: 1, agentCapabilities: {} },
-            } as unknown as CapturedMessage['payload'],
-        }));
+        session.record(
+            mk(1, {
+                payload: {
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'initialize',
+                    params: { protocolVersion: 1 },
+                } as unknown as CapturedMessage['payload'],
+            }),
+        );
+        session.record(
+            mk(2, {
+                direction: 'agent-to-editor',
+                kind: 'response',
+                method: undefined,
+                rpcId: '1',
+                payload: {
+                    jsonrpc: '2.0',
+                    id: 1,
+                    result: { protocolVersion: 1, agentCapabilities: {} },
+                } as unknown as CapturedMessage['payload'],
+            }),
+        );
         session.close();
         const noInfoId = session.info.id;
         db.close();
@@ -632,9 +698,9 @@ describe('MCP server — tools/call', () => {
                 name: 'find_spec_violations',
                 arguments: { session_id: noInfoId },
             });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { advisories: Array<{ path: string }> };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                advisories: Array<{ path: string }>;
+            };
             const paths = body.advisories.map((a) => a.path);
             expect(paths).toContain('agentInfo');
             expect(paths).toContain('clientInfo');
@@ -823,7 +889,11 @@ describe('MCP server — tools/call', () => {
             try {
                 const res = await client.callTool({
                     name: 'diff_sessions',
-                    arguments: { session_a: sessionId, session_b: sessionIdB, include_equal: false },
+                    arguments: {
+                        session_a: sessionId,
+                        session_b: sessionIdB,
+                        include_equal: false,
+                    },
                 });
                 const text = (res.content as Array<{ text?: unknown }>)[0]?.text as string;
                 expect(text).not.toContain(SECRET);

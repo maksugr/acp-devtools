@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -176,7 +176,11 @@ beforeAll(() => {
     const s5 = Session.start(db, { name: 'no-agent-info', agentCommand: 'mock' });
     s5.record(req('initialize', { protocolVersion: 1, clientCapabilities: {} }));
     s5.record(
-        resp(1, { protocolVersion: 1, agentCapabilities: { promptCapabilities: {} }, authMethods: [] }),
+        resp(1, {
+            protocolVersion: 1,
+            agentCapabilities: { promptCapabilities: {} },
+            authMethods: [],
+        }),
     );
     s5.close();
     id5 = s5.info.id;
@@ -191,435 +195,756 @@ afterAll(() => {
 
 describe('CLI integration — per-command behavior', () => {
     describe('diff', () => {
-        it('aligns two sessions with set-membership labels', async () => {
-            const r = await run(['diff', String(id1), String(id2), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out).toMatch(/same/);
-            expect(r.out).toMatch(/differs/);
-        }, TIMEOUT);
+        it(
+            'aligns two sessions with set-membership labels',
+            async () => {
+                const r = await run(['diff', String(id1), String(id2), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/same/);
+                expect(r.out).toMatch(/differs/);
+            },
+            TIMEOUT,
+        );
 
-        it('--json keeps stable machine field names and consistent totals', async () => {
-            const r = await run(['diff', String(id1), String(id2), '--db', dbPath, '--json']);
-            expect(r.code).toBe(0);
-            const j = JSON.parse(r.out) as {
-                summary: { equal: number; changed: number; added: number; removed: number; total: number };
-                rows: unknown[];
-            };
-            expect(Object.keys(j.summary).sort()).toEqual(
-                ['added', 'changed', 'equal', 'removed', 'total'].sort(),
-            );
-            const { equal, changed, added, removed, total } = j.summary;
-            expect(equal + changed + added + removed).toBe(total);
-        }, TIMEOUT);
+        it(
+            '--json keeps stable machine field names and consistent totals',
+            async () => {
+                const r = await run(['diff', String(id1), String(id2), '--db', dbPath, '--json']);
+                expect(r.code).toBe(0);
+                const j = JSON.parse(r.out) as {
+                    summary: {
+                        equal: number;
+                        changed: number;
+                        added: number;
+                        removed: number;
+                        total: number;
+                    };
+                    rows: unknown[];
+                };
+                expect(Object.keys(j.summary).sort()).toEqual(
+                    ['added', 'changed', 'equal', 'removed', 'total'].sort(),
+                );
+                const { equal, changed, added, removed, total } = j.summary;
+                expect(equal + changed + added + removed).toBe(total);
+            },
+            TIMEOUT,
+        );
 
-        it('reports identical sessions', async () => {
-            const r = await run(['diff', String(id1), String(id1), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out).toMatch(/identical/i);
-        }, TIMEOUT);
+        it(
+            'reports identical sessions',
+            async () => {
+                const r = await run(['diff', String(id1), String(id1), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/identical/i);
+            },
+            TIMEOUT,
+        );
 
-        it('redacts auth tokens by default and reports the count on stderr', async () => {
-            const r = await run(['diff', String(id4), String(id2), '--db', dbPath, '--json']);
-            expect(r.code).toBe(0);
-            expect(r.out).not.toContain(SECRET_TOKEN);
-            expect(r.out).toContain('<REDACTED>');
-            expect(r.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
-            expect(r.err).toMatch(/--raw/);
-        }, TIMEOUT);
+        it(
+            'redacts auth tokens by default and reports the count on stderr',
+            async () => {
+                const r = await run(['diff', String(id4), String(id2), '--db', dbPath, '--json']);
+                expect(r.code).toBe(0);
+                expect(r.out).not.toContain(SECRET_TOKEN);
+                expect(r.out).toContain('<REDACTED>');
+                expect(r.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
+                expect(r.err).toMatch(/--raw/);
+            },
+            TIMEOUT,
+        );
 
-        it('--raw keeps tokens and warns explicitly on stderr', async () => {
-            const r = await run(['diff', String(id4), String(id2), '--db', dbPath, '--json', '--raw']);
-            expect(r.code).toBe(0);
-            expect(r.out).toContain(SECRET_TOKEN);
-            expect(r.err).toMatch(/--raw was set/);
-            expect(r.err).toMatch(/do not share publicly/);
-        }, TIMEOUT);
+        it(
+            '--raw keeps tokens and warns explicitly on stderr',
+            async () => {
+                const r = await run([
+                    'diff',
+                    String(id4),
+                    String(id2),
+                    '--db',
+                    dbPath,
+                    '--json',
+                    '--raw',
+                ]);
+                expect(r.code).toBe(0);
+                expect(r.out).toContain(SECRET_TOKEN);
+                expect(r.err).toMatch(/--raw was set/);
+                expect(r.err).toMatch(/do not share publicly/);
+            },
+            TIMEOUT,
+        );
 
-        it('emits no redaction summary when there is nothing to redact', async () => {
-            const r = await run(['diff', String(id1), String(id2), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.err).not.toMatch(/redacted/);
-        }, TIMEOUT);
+        it(
+            'emits no redaction summary when there is nothing to redact',
+            async () => {
+                const r = await run(['diff', String(id1), String(id2), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.err).not.toMatch(/redacted/);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('export', () => {
-        it('exports a session by id as valid JSON', async () => {
-            const r = await run(['export', String(id1), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            const j = JSON.parse(r.out) as { session: { id: number }; messages: unknown[] };
-            expect(j.session.id).toBe(id1);
-            expect(j.messages.length).toBe(2);
-        }, TIMEOUT);
+        it(
+            'exports a session by id as valid JSON',
+            async () => {
+                const r = await run(['export', String(id1), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                const j = JSON.parse(r.out) as { session: { id: number }; messages: unknown[] };
+                expect(j.session.id).toBe(id1);
+                expect(j.messages.length).toBe(2);
+            },
+            TIMEOUT,
+        );
 
-        it('with no id exports the latest', async () => {
-            const r = await run(['export', '--db', dbPath]);
-            expect(r.code).toBe(0);
-            const j = JSON.parse(r.out) as { session: { id: number } };
-            expect(j.session.id).toBe(id5); // newest
-        }, TIMEOUT);
+        it(
+            'with no id exports the latest',
+            async () => {
+                const r = await run(['export', '--db', dbPath]);
+                expect(r.code).toBe(0);
+                const j = JSON.parse(r.out) as { session: { id: number } };
+                expect(j.session.id).toBe(id5); // newest
+            },
+            TIMEOUT,
+        );
 
-        it('redacts auth tokens by default and reports the count on stderr', async () => {
-            const r = await run(['export', String(id4), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out).not.toContain(SECRET_TOKEN);
-            expect(r.out).toContain('<REDACTED>');
-            expect(r.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
-            expect(r.err).toMatch(/--raw/);
-        }, TIMEOUT);
+        it(
+            'redacts auth tokens by default and reports the count on stderr',
+            async () => {
+                const r = await run(['export', String(id4), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out).not.toContain(SECRET_TOKEN);
+                expect(r.out).toContain('<REDACTED>');
+                expect(r.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
+                expect(r.err).toMatch(/--raw/);
+            },
+            TIMEOUT,
+        );
 
-        it('--raw keeps tokens and warns explicitly on stderr', async () => {
-            const r = await run(['export', String(id4), '--db', dbPath, '--raw']);
-            expect(r.code).toBe(0);
-            expect(r.out).toContain(SECRET_TOKEN);
-            expect(r.out).not.toContain('<REDACTED>');
-            expect(r.err).toMatch(/--raw was set/);
-            expect(r.err).toMatch(/do not share publicly/);
-        }, TIMEOUT);
+        it(
+            '--raw keeps tokens and warns explicitly on stderr',
+            async () => {
+                const r = await run(['export', String(id4), '--db', dbPath, '--raw']);
+                expect(r.code).toBe(0);
+                expect(r.out).toContain(SECRET_TOKEN);
+                expect(r.out).not.toContain('<REDACTED>');
+                expect(r.err).toMatch(/--raw was set/);
+                expect(r.err).toMatch(/do not share publicly/);
+            },
+            TIMEOUT,
+        );
 
-        it('emits no redaction summary when there is nothing to redact', async () => {
-            const r = await run(['export', String(id1), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.err).not.toMatch(/redacted/);
-        }, TIMEOUT);
+        it(
+            'emits no redaction summary when there is nothing to redact',
+            async () => {
+                const r = await run(['export', String(id1), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.err).not.toMatch(/redacted/);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('replay', () => {
-        it('binds a WebSocket and streams the recorded session', async () => {
-            const { WebSocket } = await import('ws');
-            const child = spawn(
-                process.execPath,
-                ['--import', 'tsx', cliEntry, 'replay', String(id1), '--db', dbPath, '--ws-port', '0'],
-                {
-                    cwd: repoRoot,
-                    env: { ...process.env, ACP_DEVTOOLS_HOME: home },
-                    stdio: ['ignore', 'ignore', 'pipe'],
-                },
-            );
-            try {
-                const url = await new Promise<string>((resolve, reject) => {
-                    let err = '';
-                    const to = setTimeout(() => reject(new Error(`no ws url:\n${err}`)), 10_000);
-                    child.stderr.on('data', (d: Buffer) => {
-                        err += d.toString();
-                        const m = err.match(/on (ws:\/\/\S+)/);
-                        if (m) {
-                            clearTimeout(to);
-                            resolve(m[1]!);
-                        }
-                    });
-                    child.on('error', reject);
-                });
-                const events = await new Promise<Array<{ type: string }>>((resolve, reject) => {
-                    const ws = new WebSocket(url);
-                    const got: Array<{ type: string }> = [];
-                    const to = setTimeout(() => {
-                        ws.close();
-                        resolve(got);
-                    }, 4000);
-                    ws.on('message', (data: Buffer) => {
-                        try {
-                            const e = JSON.parse(data.toString()) as { type: string };
-                            got.push(e);
-                            if (e.type === 'replay.done' || e.type === 'session.end') {
+        it(
+            'binds a WebSocket and streams the recorded session',
+            async () => {
+                const { WebSocket } = await import('ws');
+                const child = spawn(
+                    process.execPath,
+                    [
+                        '--import',
+                        'tsx',
+                        cliEntry,
+                        'replay',
+                        String(id1),
+                        '--db',
+                        dbPath,
+                        '--ws-port',
+                        '0',
+                    ],
+                    {
+                        cwd: repoRoot,
+                        env: { ...process.env, ACP_DEVTOOLS_HOME: home },
+                        stdio: ['ignore', 'ignore', 'pipe'],
+                    },
+                );
+                try {
+                    const url = await new Promise<string>((resolve, reject) => {
+                        let err = '';
+                        const to = setTimeout(
+                            () => reject(new Error(`no ws url:\n${err}`)),
+                            10_000,
+                        );
+                        child.stderr.on('data', (d: Buffer) => {
+                            err += d.toString();
+                            const m = err.match(/on (ws:\/\/\S+)/);
+                            if (m) {
                                 clearTimeout(to);
-                                ws.close();
-                                resolve(got);
+                                resolve(m[1]!);
                             }
-                        } catch {
-                            // ignore non-JSON frames
-                        }
+                        });
+                        child.on('error', reject);
                     });
-                    ws.on('error', reject);
-                });
-                const types = events.map((e) => e.type);
-                expect(types).toContain('session.start');
-                expect(types).toContain('message');
-            } finally {
-                child.kill('SIGKILL');
-            }
-        }, TIMEOUT);
+                    const events = await new Promise<Array<{ type: string }>>((resolve, reject) => {
+                        const ws = new WebSocket(url);
+                        const got: Array<{ type: string }> = [];
+                        const to = setTimeout(() => {
+                            ws.close();
+                            resolve(got);
+                        }, 4000);
+                        ws.on('message', (data: Buffer) => {
+                            try {
+                                const e = JSON.parse(data.toString()) as { type: string };
+                                got.push(e);
+                                if (e.type === 'replay.done' || e.type === 'session.end') {
+                                    clearTimeout(to);
+                                    ws.close();
+                                    resolve(got);
+                                }
+                            } catch {
+                                // ignore non-JSON frames
+                            }
+                        });
+                        ws.on('error', reject);
+                    });
+                    const types = events.map((e) => e.type);
+                    expect(types).toContain('session.start');
+                    expect(types).toContain('message');
+                } finally {
+                    child.kill('SIGKILL');
+                }
+            },
+            TIMEOUT,
+        );
 
-        it('errors on a missing --db without binding', async () => {
-            const r = await run(['replay', String(id1), '--db', missingDb]);
-            expect(r.code).toBe(1);
-            expect(r.err).toMatch(/no such database/);
-        }, TIMEOUT);
+        it(
+            'errors on a missing --db without binding',
+            async () => {
+                const r = await run(['replay', String(id1), '--db', missingDb]);
+                expect(r.code).toBe(1);
+                expect(r.err).toMatch(/no such database/);
+            },
+            TIMEOUT,
+        );
 
-        it('rejects a session id together with --file', async () => {
-            const r = await run(['replay', String(id1), '--file', 'whatever.json', '--db', dbPath]);
-            expect(r.code).toBe(2);
-        }, TIMEOUT);
+        it(
+            'rejects a session id together with --file',
+            async () => {
+                const r = await run([
+                    'replay',
+                    String(id1),
+                    '--file',
+                    'whatever.json',
+                    '--db',
+                    dbPath,
+                ]);
+                expect(r.code).toBe(2);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('import', () => {
-        it('imports a JSON export into a fresh database', async () => {
-            const expFile = join(workDir, 'exp.json');
-            const exp = await run(['export', String(id1), '--db', dbPath]);
-            writeFileSync(expFile, exp.out);
-            const freshDb = join(home, 'imported.db');
-            const r = await run(['import', expFile, '--db', freshDb]);
-            expect(r.code).toBe(0);
-            expect(existsSync(freshDb)).toBe(true);
-            const list = await run(['list', '--db', freshDb, '--json']);
-            expect((JSON.parse(list.out) as unknown[]).length).toBe(1);
-        }, TIMEOUT);
+        it(
+            'imports a JSON export into a fresh database',
+            async () => {
+                const expFile = join(workDir, 'exp.json');
+                const exp = await run(['export', String(id1), '--db', dbPath]);
+                writeFileSync(expFile, exp.out);
+                const freshDb = join(home, 'imported.db');
+                const r = await run(['import', expFile, '--db', freshDb]);
+                expect(r.code).toBe(0);
+                expect(existsSync(freshDb)).toBe(true);
+                const list = await run(['list', '--db', freshDb, '--json']);
+                expect((JSON.parse(list.out) as unknown[]).length).toBe(1);
+            },
+            TIMEOUT,
+        );
 
-        it('rejects malformed JSON with exit 1', async () => {
-            const badFile = join(workDir, 'bad.json');
-            writeFileSync(badFile, '{garbage');
-            const r = await run(['import', badFile, '--db', join(home, 'i2.db')]);
-            expect(r.code).toBe(1);
-            expect(r.err).toMatch(/invalid JSON|import failed/i);
-        }, TIMEOUT);
+        it(
+            'rejects malformed JSON with exit 1',
+            async () => {
+                const badFile = join(workDir, 'bad.json');
+                writeFileSync(badFile, '{garbage');
+                const r = await run(['import', badFile, '--db', join(home, 'i2.db')]);
+                expect(r.code).toBe(1);
+                expect(r.err).toMatch(/invalid JSON|import failed/i);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('delete', () => {
-        it('deletes a session and reports a missing --db distinctly', async () => {
-            // Work on a throwaway copy so we don't disturb the shared db.
-            const delDb = join(home, 'del.db');
-            const exp = await run(['export', String(id1), '--db', dbPath]);
-            const f = join(workDir, 'for-del.json');
-            writeFileSync(f, exp.out);
-            await run(['import', f, '--db', delDb]);
-            const del = await run(['delete', '1', '--db', delDb]);
-            expect(del.code).toBe(0);
-            expect(del.out + del.err).toMatch(/deleted/i);
-            const after = await run(['list', '--db', delDb, '--json']);
-            expect((JSON.parse(after.out) as unknown[]).length).toBe(0);
+        it(
+            'deletes a session and reports a missing --db distinctly',
+            async () => {
+                // Work on a throwaway copy so we don't disturb the shared db.
+                const delDb = join(home, 'del.db');
+                const exp = await run(['export', String(id1), '--db', dbPath]);
+                const f = join(workDir, 'for-del.json');
+                writeFileSync(f, exp.out);
+                await run(['import', f, '--db', delDb]);
+                const del = await run(['delete', '1', '--db', delDb]);
+                expect(del.code).toBe(0);
+                expect(del.out + del.err).toMatch(/deleted/i);
+                const after = await run(['list', '--db', delDb, '--json']);
+                expect((JSON.parse(after.out) as unknown[]).length).toBe(0);
 
-            const missing = await run(['delete', '1', '--db', missingDb]);
-            expect(missing.code).toBe(1);
-            expect(missing.err).toMatch(/no such database/);
-        }, TIMEOUT);
+                const missing = await run(['delete', '1', '--db', missingDb]);
+                expect(missing.code).toBe(1);
+                expect(missing.err).toMatch(/no such database/);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('list', () => {
-        it('--json returns the seeded sessions', async () => {
-            const r = await run(['list', '--db', dbPath, '--json']);
-            expect(r.code).toBe(0);
-            const rows = JSON.parse(r.out) as Array<{ id: number }>;
-            expect(rows.map((s) => s.id)).toEqual(expect.arrayContaining([id1, id2, id3]));
-        }, TIMEOUT);
+        it(
+            '--json returns the seeded sessions',
+            async () => {
+                const r = await run(['list', '--db', dbPath, '--json']);
+                expect(r.code).toBe(0);
+                const rows = JSON.parse(r.out) as Array<{ id: number }>;
+                expect(rows.map((s) => s.id)).toEqual(expect.arrayContaining([id1, id2, id3]));
+            },
+            TIMEOUT,
+        );
 
-        it('a missing --db lists nothing (exit 0, no stray file)', async () => {
-            const r = await run(['list', '--db', missingDb]);
-            expect(r.code).toBe(0);
-            expect(existsSync(missingDb)).toBe(false);
-        }, TIMEOUT);
+        it(
+            'a missing --db lists nothing (exit 0, no stray file)',
+            async () => {
+                const r = await run(['list', '--db', missingDb]);
+                expect(r.code).toBe(0);
+                expect(existsSync(missingDb)).toBe(false);
+            },
+            TIMEOUT,
+        );
 
-        it('--client with a small --limit still finds buried matches (filter before LIMIT)', async () => {
-            // id1 (Zed) is the OLDEST session; newest-2 are WebStorm/broken.
-            const r = await run(['list', '--db', dbPath, '--client', 'Zed', '--limit', '2', '--json']);
-            expect(r.code).toBe(0);
-            const rows = JSON.parse(r.out) as Array<{ id: number }>;
-            expect(rows.map((s) => s.id)).toEqual([id1]);
-        }, TIMEOUT);
+        it(
+            '--client with a small --limit still finds buried matches (filter before LIMIT)',
+            async () => {
+                // id1 (Zed) is the OLDEST session; newest-2 are WebStorm/broken.
+                const r = await run([
+                    'list',
+                    '--db',
+                    dbPath,
+                    '--client',
+                    'Zed',
+                    '--limit',
+                    '2',
+                    '--json',
+                ]);
+                expect(r.code).toBe(0);
+                const rows = JSON.parse(r.out) as Array<{ id: number }>;
+                expect(rows.map((s) => s.id)).toEqual([id1]);
+            },
+            TIMEOUT,
+        );
 
-        it('rejects --saved --imported together with exit 2', async () => {
-            const r = await run(['list', '--db', dbPath, '--saved', '--imported']);
-            expect(r.code).toBe(2);
-            expect(r.err).toMatch(/mutually exclusive/);
-        }, TIMEOUT);
+        it(
+            'rejects --saved --imported together with exit 2',
+            async () => {
+                const r = await run(['list', '--db', dbPath, '--saved', '--imported']);
+                expect(r.code).toBe(2);
+                expect(r.err).toMatch(/mutually exclusive/);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('inspect', () => {
-        it('prints rows for a session', async () => {
-            const r = await run(['inspect', String(id1), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out).toMatch(/initialize/);
-        }, TIMEOUT);
+        it(
+            'prints rows for a session',
+            async () => {
+                const r = await run(['inspect', String(id1), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/initialize/);
+            },
+            TIMEOUT,
+        );
 
-        it('exits 1 when a filter matches nothing (grep-style)', async () => {
-            const r = await run(['inspect', String(id1), '--db', dbPath, '--method', 'zzznope']);
-            expect(r.code).toBe(1);
-        }, TIMEOUT);
+        it(
+            'exits 1 when a filter matches nothing (grep-style)',
+            async () => {
+                const r = await run([
+                    'inspect',
+                    String(id1),
+                    '--db',
+                    dbPath,
+                    '--method',
+                    'zzznope',
+                ]);
+                expect(r.code).toBe(1);
+            },
+            TIMEOUT,
+        );
 
-        it('--format jsonl emits one JSON object per line', async () => {
-            const r = await run(['inspect', String(id1), '--db', dbPath, '--format', 'jsonl']);
-            expect(r.code).toBe(0);
-            const lines = r.out.trim().split('\n');
-            expect(() => lines.map((l) => JSON.parse(l))).not.toThrow();
-        }, TIMEOUT);
+        it(
+            '--format jsonl emits one JSON object per line',
+            async () => {
+                const r = await run(['inspect', String(id1), '--db', dbPath, '--format', 'jsonl']);
+                expect(r.code).toBe(0);
+                const lines = r.out.trim().split('\n');
+                expect(() => lines.map((l) => JSON.parse(l))).not.toThrow();
+            },
+            TIMEOUT,
+        );
     });
 
     describe('search', () => {
-        it('exits 0 on a hit', async () => {
-            const r = await run(['search', 'initialize', '--db', dbPath]);
-            expect(r.code).toBe(0);
-        }, TIMEOUT);
+        it(
+            'exits 0 on a hit',
+            async () => {
+                const r = await run(['search', 'initialize', '--db', dbPath]);
+                expect(r.code).toBe(0);
+            },
+            TIMEOUT,
+        );
 
-        it('exits 1 on no match (grep-style)', async () => {
-            const r = await run(['search', 'zzznopezzz', '--db', dbPath]);
-            expect(r.code).toBe(1);
-        }, TIMEOUT);
+        it(
+            'exits 1 on no match (grep-style)',
+            async () => {
+                const r = await run(['search', 'zzznopezzz', '--db', dbPath]);
+                expect(r.code).toBe(1);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('session-info', () => {
-        it('prints derived metadata; --json is valid', async () => {
-            const text = await run(['session-info', String(id1), '--db', dbPath]);
-            expect(text.code).toBe(0);
-            expect(text.out).toMatch(/Zed/);
-            const json = await run(['session-info', String(id1), '--db', dbPath, '--json']);
-            expect(() => JSON.parse(json.out)).not.toThrow();
-        }, TIMEOUT);
+        it(
+            'prints derived metadata; --json is valid',
+            async () => {
+                const text = await run(['session-info', String(id1), '--db', dbPath]);
+                expect(text.code).toBe(0);
+                expect(text.out).toMatch(/Zed/);
+                const json = await run(['session-info', String(id1), '--db', dbPath, '--json']);
+                expect(() => JSON.parse(json.out)).not.toThrow();
+            },
+            TIMEOUT,
+        );
 
-        it('does not repeat the version when the client title embeds it', async () => {
-            const r = await run(['session-info', String(id2), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out).toContain('WebStorm 2.0');
-            expect(r.out).not.toContain('WebStorm 2.0 v2.0');
-        }, TIMEOUT);
+        it(
+            'does not repeat the version when the client title embeds it',
+            async () => {
+                const r = await run(['session-info', String(id2), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out).toContain('WebStorm 2.0');
+                expect(r.out).not.toContain('WebStorm 2.0 v2.0');
+            },
+            TIMEOUT,
+        );
 
-        it('redacts proxyConfig tokens by default (text and --json)', async () => {
-            const text = await run(['session-info', String(id4), '--db', dbPath]);
-            expect(text.code).toBe(0);
-            expect(text.out).not.toContain(SECRET_TOKEN);
-            expect(text.out).toContain('<REDACTED>');
-            expect(text.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
-            const json = await run(['session-info', String(id4), '--db', dbPath, '--json']);
-            expect(json.out).not.toContain(SECRET_TOKEN);
-        }, TIMEOUT);
+        it(
+            'redacts proxyConfig tokens by default (text and --json)',
+            async () => {
+                const text = await run(['session-info', String(id4), '--db', dbPath]);
+                expect(text.code).toBe(0);
+                expect(text.out).not.toContain(SECRET_TOKEN);
+                expect(text.out).toContain('<REDACTED>');
+                expect(text.err).toMatch(/redacted 1 field\(s\) across 1 message\(s\)/);
+                const json = await run(['session-info', String(id4), '--db', dbPath, '--json']);
+                expect(json.out).not.toContain(SECRET_TOKEN);
+            },
+            TIMEOUT,
+        );
 
-        it('--raw keeps tokens and warns explicitly on stderr', async () => {
-            const r = await run(['session-info', String(id4), '--db', dbPath, '--raw']);
-            expect(r.code).toBe(0);
-            expect(r.out).toContain(SECRET_TOKEN);
-            expect(r.err).toMatch(/--raw was set/);
-        }, TIMEOUT);
+        it(
+            '--raw keeps tokens and warns explicitly on stderr',
+            async () => {
+                const r = await run(['session-info', String(id4), '--db', dbPath, '--raw']);
+                expect(r.code).toBe(0);
+                expect(r.out).toContain(SECRET_TOKEN);
+                expect(r.err).toMatch(/--raw was set/);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('stats', () => {
-        it('aggregates a session; --json is valid', async () => {
-            const r = await run(['stats', String(id1), '--db', dbPath, '--json']);
-            expect(r.code).toBe(0);
-            const j = JSON.parse(r.out) as { total: number };
-            expect(j.total).toBe(2);
-        }, TIMEOUT);
+        it(
+            'aggregates a session; --json is valid',
+            async () => {
+                const r = await run(['stats', String(id1), '--db', dbPath, '--json']);
+                expect(r.code).toBe(0);
+                const j = JSON.parse(r.out) as { total: number };
+                expect(j.total).toBe(2);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('validate', () => {
-        it('exits 0 for a conformant session', async () => {
-            const r = await run(['validate', String(id1), '--db', dbPath]);
-            expect(r.code).toBe(0);
-        }, TIMEOUT);
+        it(
+            'exits 0 for a conformant session',
+            async () => {
+                const r = await run(['validate', String(id1), '--db', dbPath]);
+                expect(r.code).toBe(0);
+            },
+            TIMEOUT,
+        );
 
-        it('exits 1 and reports violations for a broken session', async () => {
-            const r = await run(['validate', String(id3), '--db', dbPath]);
-            expect(r.code).toBe(1);
-            expect(r.out + r.err).toMatch(/violation|must have required/i);
-        }, TIMEOUT);
+        it(
+            'exits 1 and reports violations for a broken session',
+            async () => {
+                const r = await run(['validate', String(id3), '--db', dbPath]);
+                expect(r.code).toBe(1);
+                expect(r.out + r.err).toMatch(/violation|must have required/i);
+            },
+            TIMEOUT,
+        );
 
-        it('reports a soon-required advisory without failing exit code', async () => {
-            const r = await run(['validate', String(id5), '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out + r.err).toMatch(/advisor/i);
-            expect(r.out).toMatch(/agentInfo/);
-        }, TIMEOUT);
+        it(
+            'reports a soon-required advisory without failing exit code',
+            async () => {
+                const r = await run(['validate', String(id5), '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out + r.err).toMatch(/advisor/i);
+                expect(r.out).toMatch(/agentInfo/);
+            },
+            TIMEOUT,
+        );
 
-        it('--json includes an advisories array', async () => {
-            const r = await run(['validate', String(id5), '--db', dbPath, '--json']);
-            expect(r.code).toBe(0);
-            const j = JSON.parse(r.out) as {
-                advisories: Array<{ path: string; method: string | null }>;
-            };
-            expect(j.advisories.some((a) => a.path === 'agentInfo')).toBe(true);
-            expect(j.advisories.some((a) => a.path === 'clientInfo')).toBe(true);
-        }, TIMEOUT);
+        it(
+            '--json includes an advisories array',
+            async () => {
+                const r = await run(['validate', String(id5), '--db', dbPath, '--json']);
+                expect(r.code).toBe(0);
+                const j = JSON.parse(r.out) as {
+                    advisories: Array<{ path: string; method: string | null }>;
+                };
+                expect(j.advisories.some((a) => a.path === 'agentInfo')).toBe(true);
+                expect(j.advisories.some((a) => a.path === 'clientInfo')).toBe(true);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('backfill-metadata', () => {
-        it('runs over all sessions', async () => {
-            const r = await run(['backfill-metadata', '--db', dbPath]);
-            expect(r.code).toBe(0);
-            expect(r.out).toMatch(/OK/);
-        }, TIMEOUT);
+        it(
+            'runs over all sessions',
+            async () => {
+                const r = await run(['backfill-metadata', '--db', dbPath]);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/OK/);
+            },
+            TIMEOUT,
+        );
 
-        it('accepts a single id positionally', async () => {
-            const r = await run(['backfill-metadata', String(id1), '--db', dbPath]);
-            expect(r.code).toBe(0);
-        }, TIMEOUT);
+        it(
+            'accepts a single id positionally',
+            async () => {
+                const r = await run(['backfill-metadata', String(id1), '--db', dbPath]);
+                expect(r.code).toBe(0);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('doctor', () => {
-        it('reports environment and state', async () => {
-            const r = await run(['doctor']);
-            expect(r.code).toBe(0);
-            expect(r.out).toMatch(/Environment/);
-            expect(r.out).toMatch(/captures database/);
+        it(
+            'reports environment and state',
+            async () => {
+                const r = await run(['doctor']);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/Environment/);
+                expect(r.out).toMatch(/captures database/);
+            },
+            TIMEOUT,
+        );
+    });
+
+    describe('setup', () => {
+        it(
+            'prints a Zed config block for a registry agent',
+            async () => {
+                const r = await run(['setup', 'junie', '--editor', 'zed', '--no-color']);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/"agent_servers"/);
+                expect(r.out).toMatch(/Junie \(via ACP Devtools\)/);
+                expect(r.out).toMatch(/"junie"/);
+                expect(r.out).toMatch(/settings\.json/);
+                expect(r.out).toMatch(/--write/);
+            },
+            TIMEOUT,
+        );
+
+        it(
+            'wraps a custom command via proxy for JetBrains',
+            async () => {
+                const r = await run([
+                    'setup',
+                    '--editor',
+                    'jetbrains',
+                    '--no-color',
+                    '--',
+                    'npx',
+                    '-y',
+                    '@foo/acp',
+                ]);
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/acp\.json/);
+                expect(r.out).toMatch(/"proxy"/);
+                expect(r.out).toMatch(/@foo\/acp/);
+            },
+            TIMEOUT,
+        );
+
+        it(
+            'writes (and updates) the config file with --write --config-path',
+            async () => {
+                const cfg = join(home, 'setup-acp.json');
+                const first = await run([
+                    'setup',
+                    'junie',
+                    '--editor',
+                    'jetbrains',
+                    '--write',
+                    '--config-path',
+                    cfg,
+                    '--no-color',
+                ]);
+                expect(first.code).toBe(0);
+                expect(first.out).toMatch(/wrote/);
+                const parsed = JSON.parse(readFileSync(cfg, 'utf8'));
+                expect(parsed.agent_servers['Junie (via ACP Devtools)'].args).toEqual(['junie']);
+
+                const again = await run([
+                    'setup',
+                    'junie',
+                    '--editor',
+                    'jetbrains',
+                    '--write',
+                    '--config-path',
+                    cfg,
+                    '--no-color',
+                ]);
+                expect(again.code).toBe(0);
+                expect(again.out).toMatch(/updated/);
+            },
+            TIMEOUT,
+        );
+
+        it(
+            'exits 2 on a missing or unknown editor',
+            async () => {
+                const missing = await run(['setup', 'junie', '--no-color']);
+                expect(missing.code).toBe(2);
+                expect(missing.err).toMatch(/--editor is required/);
+                const unknown = await run(['setup', 'junie', '--editor', 'vscode', '--no-color']);
+                expect(unknown.code).toBe(2);
+                expect(unknown.err).toMatch(/unknown editor/);
+            },
+            TIMEOUT,
+        );
+    });
+
+    describe('agents', () => {
+        it('lists the built-in shortcuts as a table and as JSON', async () => {
+            const table = await run(['agents']);
+            expect(table.code).toBe(0);
+            expect(table.out).toMatch(/SHORTCUT/);
+            expect(table.out).toMatch(/junie/);
+            expect(table.out).toMatch(/goose/);
+
+            const json = await run(['agents', '--json']);
+            expect(json.code).toBe(0);
+            const parsed = JSON.parse(json.out) as Array<{ shortName: string }>;
+            expect(parsed.map((a) => a.shortName)).toContain('junie');
         }, TIMEOUT);
     });
 
     describe('mock-agent / mock-editor', () => {
-        it('mock-agent replays the recorded agent side from stdin', async () => {
-            const reqLine = JSON.stringify({
-                jsonrpc: '2.0',
-                id: 1,
-                method: 'initialize',
-                params: validInitParams,
-            });
-            const r = await run(['mock-agent', '--session', String(id1), '--db', dbPath], {
-                stdin: reqLine + '\n',
-            });
-            expect(r.code).toBe(0);
-            expect(r.out).toMatch(/protocolVersion|agentInfo/);
-        }, TIMEOUT);
+        it(
+            'mock-agent replays the recorded agent side from stdin',
+            async () => {
+                const reqLine = JSON.stringify({
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'initialize',
+                    params: validInitParams,
+                });
+                const r = await run(['mock-agent', '--session', String(id1), '--db', dbPath], {
+                    stdin: reqLine + '\n',
+                });
+                expect(r.code).toBe(0);
+                expect(r.out).toMatch(/protocolVersion|agentInfo/);
+            },
+            TIMEOUT,
+        );
 
-        it('mock-editor drives an agent through the recorded editor side', async () => {
-            const r = await run([
-                'mock-editor',
-                '--session',
-                String(id1),
-                '--db',
-                dbPath,
-                process.execPath,
-                join(repoRoot, 'fixtures/mock-agent.js'),
-            ]);
-            expect(r.code).toBe(0);
-        }, TIMEOUT);
+        it(
+            'mock-editor drives an agent through the recorded editor side',
+            async () => {
+                const r = await run([
+                    'mock-editor',
+                    '--session',
+                    String(id1),
+                    '--db',
+                    dbPath,
+                    process.execPath,
+                    join(repoRoot, 'fixtures/mock-agent.js'),
+                ]);
+                expect(r.code).toBe(0);
+            },
+            TIMEOUT,
+        );
 
-        it('mock-agent fails on a missing database', async () => {
-            const r = await run(['mock-agent', '--session', '1', '--db', missingDb]);
-            expect(r.code).not.toBe(0);
-            expect(r.err).toMatch(/no such database/);
-        }, TIMEOUT);
+        it(
+            'mock-agent fails on a missing database',
+            async () => {
+                const r = await run(['mock-agent', '--session', '1', '--db', missingDb]);
+                expect(r.code).not.toBe(0);
+                expect(r.err).toMatch(/no such database/);
+            },
+            TIMEOUT,
+        );
 
-        it('mock-editor fails on a missing database', async () => {
-            const r = await run([
-                'mock-editor',
-                '--session',
-                '1',
-                '--db',
-                missingDb,
-                process.execPath,
-                join(repoRoot, 'fixtures/mock-agent.js'),
-            ]);
-            expect(r.code).not.toBe(0);
-            expect(r.err).toMatch(/no such database/);
-        }, TIMEOUT);
+        it(
+            'mock-editor fails on a missing database',
+            async () => {
+                const r = await run([
+                    'mock-editor',
+                    '--session',
+                    '1',
+                    '--db',
+                    missingDb,
+                    process.execPath,
+                    join(repoRoot, 'fixtures/mock-agent.js'),
+                ]);
+                expect(r.code).not.toBe(0);
+                expect(r.err).toMatch(/no such database/);
+            },
+            TIMEOUT,
+        );
     });
 
     describe('mcp (spawned stdio server)', () => {
-        it('serves the read-only tools over a real process', async () => {
-            const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
-            const { StdioClientTransport } = await import(
-                '@modelcontextprotocol/sdk/client/stdio.js'
-            );
-            const transport = new StdioClientTransport({
-                command: process.execPath,
-                args: ['--import', 'tsx', cliEntry, 'mcp', '--db', dbPath],
-                cwd: repoRoot,
-                env: { ...process.env, ACP_DEVTOOLS_HOME: home } as Record<string, string>,
-            });
-            const client = new Client({ name: 'cli-it', version: '1.0.0' });
-            try {
-                await client.connect(transport);
-                const names = (await client.listTools()).tools.map((t) => t.name);
-                expect(names).toContain('list_sessions');
-                expect(names).toContain('diff_sessions');
-            } finally {
-                await client.close();
-            }
-        }, TIMEOUT);
+        it(
+            'serves the read-only tools over a real process',
+            async () => {
+                const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
+                const { StdioClientTransport } =
+                    await import('@modelcontextprotocol/sdk/client/stdio.js');
+                const transport = new StdioClientTransport({
+                    command: process.execPath,
+                    args: ['--import', 'tsx', cliEntry, 'mcp', '--db', dbPath],
+                    cwd: repoRoot,
+                    env: { ...process.env, ACP_DEVTOOLS_HOME: home } as Record<string, string>,
+                });
+                const client = new Client({ name: 'cli-it', version: '1.0.0' });
+                try {
+                    await client.connect(transport);
+                    const names = (await client.listTools()).tools.map((t) => t.name);
+                    expect(names).toContain('list_sessions');
+                    expect(names).toContain('diff_sessions');
+                } finally {
+                    await client.close();
+                }
+            },
+            TIMEOUT,
+        );
     });
 });
 
@@ -639,11 +964,15 @@ describe('CLI integration — exit-code contract (all commands)', () => {
         ['diff (b)', ['diff', '1', 'abc']],
         ['backfill-metadata', ['backfill-metadata', 'abc']],
     ];
-    it.each(invalidCases)('%s rejects a non-numeric id with exit 2', async (_name, args) => {
-        const r = await run([...args, '--db', dbPath]);
-        expect(r.code).toBe(2);
-        expect(r.err).toMatch(/invalid id/);
-    }, TIMEOUT);
+    it.each(invalidCases)(
+        '%s rejects a non-numeric id with exit 2',
+        async (_name, args) => {
+            const r = await run([...args, '--db', dbPath]);
+            expect(r.code).toBe(2);
+            expect(r.err).toMatch(/invalid id/);
+        },
+        TIMEOUT,
+    );
 
     const notFoundCases: Array<[string, string[]]> = [
         ['stats', ['stats', '999999']],
@@ -654,10 +983,14 @@ describe('CLI integration — exit-code contract (all commands)', () => {
         ['replay', ['replay', '999999']],
         ['delete', ['delete', '999999']],
     ];
-    it.each(notFoundCases)('%s exits 1 for a non-existent session', async (_name, args) => {
-        const r = await run([...args, '--db', dbPath]);
-        expect(r.code).toBe(1);
-    }, TIMEOUT);
+    it.each(notFoundCases)(
+        '%s exits 1 for a non-existent session',
+        async (_name, args) => {
+            const r = await run([...args, '--db', dbPath]);
+            expect(r.code).toBe(1);
+        },
+        TIMEOUT,
+    );
 
     const missingDbCases: Array<[string, string[]]> = [
         ['stats', ['stats', '1']],
@@ -670,12 +1003,16 @@ describe('CLI integration — exit-code contract (all commands)', () => {
         ['search', ['search', 'x']],
         ['backfill-metadata', ['backfill-metadata']],
     ];
-    it.each(missingDbCases)('%s errors on a missing --db (no stray file)', async (_name, args) => {
-        const r = await run([...args, '--db', missingDb]);
-        expect(r.code).toBe(1);
-        expect(r.err).toMatch(/no such database/);
-        expect(existsSync(missingDb)).toBe(false);
-    }, TIMEOUT);
+    it.each(missingDbCases)(
+        '%s errors on a missing --db (no stray file)',
+        async (_name, args) => {
+            const r = await run([...args, '--db', missingDb]);
+            expect(r.code).toBe(1);
+            expect(r.err).toMatch(/no such database/);
+            expect(existsSync(missingDb)).toBe(false);
+        },
+        TIMEOUT,
+    );
 
     it('no command created a stray database file in the repo root', () => {
         // The original footgun left `./24` behind. Nothing run above should
@@ -688,29 +1025,43 @@ describe('CLI integration — exit-code contract (all commands)', () => {
 });
 
 describe('CLI integration — help output', () => {
-    it('the overview groups commands and shows examples', async () => {
-        const r = await run(['--help']);
-        expect(r.code).toBe(0);
-        expect(r.out).toContain('acp.devtools');
-        for (const section of ['CAPTURE', 'INSPECT', 'VIEW', 'MANAGE', 'SETUP', 'EXAMPLES']) {
-            expect(r.out).toContain(section);
-        }
-        expect(r.out).toContain('acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp');
-    }, TIMEOUT);
+    it(
+        'the overview groups commands and shows examples',
+        async () => {
+            const r = await run(['--help']);
+            expect(r.code).toBe(0);
+            expect(r.out).toContain('acp.devtools');
+            for (const section of ['CAPTURE', 'INSPECT', 'VIEW', 'MANAGE', 'SETUP', 'EXAMPLES']) {
+                expect(r.out).toContain(section);
+            }
+            expect(r.out).toContain(
+                'acp-devtools proxy npx -y @agentclientprotocol/claude-agent-acp',
+            );
+        },
+        TIMEOUT,
+    );
 
-    it('a leaf command uses the custom renderer (USAGE/OPTIONS/EXAMPLES, no commander default)', async () => {
-        const r = await run(['list', '--help']);
-        expect(r.code).toBe(0);
-        expect(r.out).toContain('USAGE');
-        expect(r.out).toContain('OPTIONS');
-        expect(r.out).toContain('EXAMPLES');
-        expect(r.out).not.toContain('Usage:');
-    }, TIMEOUT);
+    it(
+        'a leaf command uses the custom renderer (USAGE/OPTIONS/EXAMPLES, no commander default)',
+        async () => {
+            const r = await run(['list', '--help']);
+            expect(r.code).toBe(0);
+            expect(r.out).toContain('USAGE');
+            expect(r.out).toContain('OPTIONS');
+            expect(r.out).toContain('EXAMPLES');
+            expect(r.out).not.toContain('Usage:');
+        },
+        TIMEOUT,
+    );
 
-    it('emits no ANSI escapes when piped (non-TTY stdout)', async () => {
-        const r = await run(['--help']);
-        expect(r.out.includes(String.fromCharCode(27))).toBe(false);
-    }, TIMEOUT);
+    it(
+        'emits no ANSI escapes when piped (non-TTY stdout)',
+        async () => {
+            const r = await run(['--help']);
+            expect(r.out.includes(String.fromCharCode(27))).toBe(false);
+        },
+        TIMEOUT,
+    );
 });
 
 // Regression: `acp-devtools list_session` (typo of `list`) used to fall
@@ -718,25 +1069,31 @@ describe('CLI integration — help output', () => {
 // before spawn ENOENT'd. Unknown commands must now error out cleanly,
 // touching neither captures.db nor process.exit==0.
 describe('CLI integration — unknown command', () => {
-    it('rejects an unknown subcommand without writing to captures.db', async () => {
-        const db = openDatabase(dbPath);
-        const before = (db.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number }).n;
-        db.close();
+    it(
+        'rejects an unknown subcommand without writing to captures.db',
+        async () => {
+            const db = openDatabase(dbPath);
+            const before = (db.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number })
+                .n;
+            db.close();
 
-        const r = await run(['list_session']);
-        expect(r.code).not.toBe(0);
-        expect(r.err).toMatch(/unknown command/i);
+            const r = await run(['list_session']);
+            expect(r.code).not.toBe(0);
+            expect(r.err).toMatch(/unknown command/i);
 
-        const db2 = openDatabase(dbPath);
-        const after = (db2.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number }).n;
-        const strays = (db2
-            .prepare('SELECT id FROM sessions WHERE agent_command = ?')
-            .all('list_session') as Array<{ id: number }>);
-        db2.close();
+            const db2 = openDatabase(dbPath);
+            const after = (db2.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number })
+                .n;
+            const strays = db2
+                .prepare('SELECT id FROM sessions WHERE agent_command = ?')
+                .all('list_session') as Array<{ id: number }>;
+            db2.close();
 
-        expect(after).toBe(before);
-        expect(strays).toEqual([]);
-    }, TIMEOUT);
+            expect(after).toBe(before);
+            expect(strays).toEqual([]);
+        },
+        TIMEOUT,
+    );
 });
 
 // Regression: mock-agent --realtime used to emit NOTHING when stdin closed
@@ -789,84 +1146,112 @@ describe('CLI integration — mock commands', () => {
 
     const editorLine = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n';
 
-    it('mock-agent --realtime emits recorded frames even when stdin closes immediately', async () => {
-        const scriptPath = join(home, 'rt-script.json');
-        writeScript(scriptPath);
-        const r = await run(['mock-agent', '--script', scriptPath, '--realtime'], {
-            stdin: editorLine,
-        });
-        expect(r.code).toBe(0);
-        expect(r.out).toContain('REALTIME_MARKER');
-    }, TIMEOUT);
+    it(
+        'mock-agent --realtime emits recorded frames even when stdin closes immediately',
+        async () => {
+            const scriptPath = join(home, 'rt-script.json');
+            writeScript(scriptPath);
+            const r = await run(['mock-agent', '--script', scriptPath, '--realtime'], {
+                stdin: editorLine,
+            });
+            expect(r.code).toBe(0);
+            expect(r.out).toContain('REALTIME_MARKER');
+        },
+        TIMEOUT,
+    );
 
-    it('mock-agent (instant, no --realtime) also emits the recorded frame', async () => {
-        const scriptPath = join(home, 'instant-script.json');
-        writeScript(scriptPath);
-        const r = await run(['mock-agent', '--script', scriptPath], { stdin: editorLine });
-        expect(r.code).toBe(0);
-        expect(r.out).toContain('REALTIME_MARKER');
-    }, TIMEOUT);
+    it(
+        'mock-agent (instant, no --realtime) also emits the recorded frame',
+        async () => {
+            const scriptPath = join(home, 'instant-script.json');
+            writeScript(scriptPath);
+            const r = await run(['mock-agent', '--script', scriptPath], { stdin: editorLine });
+            expect(r.code).toBe(0);
+            expect(r.out).toContain('REALTIME_MARKER');
+        },
+        TIMEOUT,
+    );
 
-    it('mock-agent rejects --script + --session with exit 2 (invalid usage)', async () => {
-        const scriptPath = join(home, 'mx-script.json');
-        writeScript(scriptPath);
-        const r = await run(['mock-agent', '--script', scriptPath, '--session', '1', '--db', dbPath]);
-        expect(r.code).toBe(2);
-        expect(r.err).toMatch(/mutually exclusive/);
-    }, TIMEOUT);
+    it(
+        'mock-agent rejects --script + --session with exit 2 (invalid usage)',
+        async () => {
+            const scriptPath = join(home, 'mx-script.json');
+            writeScript(scriptPath);
+            const r = await run([
+                'mock-agent',
+                '--script',
+                scriptPath,
+                '--session',
+                '1',
+                '--db',
+                dbPath,
+            ]);
+            expect(r.code).toBe(2);
+            expect(r.err).toMatch(/mutually exclusive/);
+        },
+        TIMEOUT,
+    );
 
-    it('mock-editor rejects --script + --session with exit 2 (invalid usage)', async () => {
-        const scriptPath = join(home, 'mx-script-2.json');
-        writeScript(scriptPath);
-        const r = await run([
-            'mock-editor',
-            '--script',
-            scriptPath,
-            '--session',
-            '1',
-            '--db',
-            dbPath,
-            'node',
-            join(repoRoot, 'fixtures/mock-agent.js'),
-        ]);
-        expect(r.code).toBe(2);
-        expect(r.err).toMatch(/mutually exclusive/);
-    }, TIMEOUT);
+    it(
+        'mock-editor rejects --script + --session with exit 2 (invalid usage)',
+        async () => {
+            const scriptPath = join(home, 'mx-script-2.json');
+            writeScript(scriptPath);
+            const r = await run([
+                'mock-editor',
+                '--script',
+                scriptPath,
+                '--session',
+                '1',
+                '--db',
+                dbPath,
+                'node',
+                join(repoRoot, 'fixtures/mock-agent.js'),
+            ]);
+            expect(r.code).toBe(2);
+            expect(r.err).toMatch(/mutually exclusive/);
+        },
+        TIMEOUT,
+    );
 });
 
 describe('CLI integration — drive-full-turn fixture', () => {
-    it('completes a full prompt turn against the mock agent (exit 0, capture saved)', async () => {
-        const saveTo = join(home, 'drive-full-turn.db');
-        const r = await new Promise<Run>((resolve, reject) => {
-            const child = spawn(
-                process.execPath,
-                [
-                    join(repoRoot, 'fixtures/drive-full-turn.mjs'),
+    it(
+        'completes a full prompt turn against the mock agent (exit 0, capture saved)',
+        async () => {
+            const saveTo = join(home, 'drive-full-turn.db');
+            const r = await new Promise<Run>((resolve, reject) => {
+                const child = spawn(
                     process.execPath,
-                    join(repoRoot, 'fixtures/mock-agent.js'),
-                ],
-                {
-                    cwd: repoRoot,
-                    env: { ...process.env, ACP_DEVTOOLS_HOME: home, DRIVE_SAVE_TO: saveTo },
-                    stdio: ['ignore', 'pipe', 'pipe'],
-                },
-            );
-            let out = '';
-            let err = '';
-            child.stdout.on('data', (d: Buffer) => (out += d.toString()));
-            child.stderr.on('data', (d: Buffer) => (err += d.toString()));
-            const killer = setTimeout(() => {
-                child.kill('SIGKILL');
-                reject(new Error(`drive-full-turn timed out\n${err}`));
-            }, TIMEOUT - 2000);
-            child.on('error', reject);
-            child.on('close', (code) => {
-                clearTimeout(killer);
-                resolve({ code, out, err });
+                    [
+                        join(repoRoot, 'fixtures/drive-full-turn.mjs'),
+                        process.execPath,
+                        join(repoRoot, 'fixtures/mock-agent.js'),
+                    ],
+                    {
+                        cwd: repoRoot,
+                        env: { ...process.env, ACP_DEVTOOLS_HOME: home, DRIVE_SAVE_TO: saveTo },
+                        stdio: ['ignore', 'pipe', 'pipe'],
+                    },
+                );
+                let out = '';
+                let err = '';
+                child.stdout.on('data', (d: Buffer) => (out += d.toString()));
+                child.stderr.on('data', (d: Buffer) => (err += d.toString()));
+                const killer = setTimeout(() => {
+                    child.kill('SIGKILL');
+                    reject(new Error(`drive-full-turn timed out\n${err}`));
+                }, TIMEOUT - 2000);
+                child.on('error', reject);
+                child.on('close', (code) => {
+                    clearTimeout(killer);
+                    resolve({ code, out, err });
+                });
             });
-        });
-        expect(r.code).toBe(0);
-        expect(r.err).toContain('full turn completed — stopReason: end_turn');
-        expect(existsSync(saveTo)).toBe(true);
-    }, TIMEOUT);
+            expect(r.code).toBe(0);
+            expect(r.err).toContain('full turn completed — stopReason: end_turn');
+            expect(existsSync(saveTo)).toBe(true);
+        },
+        TIMEOUT,
+    );
 });

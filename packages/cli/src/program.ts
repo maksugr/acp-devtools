@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { registerAgentsCommand } from './commands/agents.js';
 import { registerBackfillMetadataCommand } from './commands/backfill-metadata.js';
 import { registerDeleteCommand } from './commands/delete.js';
 import { registerDiffCommand } from './commands/diff.js';
@@ -14,6 +15,7 @@ import { registerProxyCommand } from './commands/proxy.js';
 import { registerReplayCommand } from './commands/replay.js';
 import { registerSearchCommand } from './commands/search.js';
 import { registerSessionInfoCommand } from './commands/session-info.js';
+import { registerSetupCommand } from './commands/setup.js';
 import { registerStatsCommand } from './commands/stats.js';
 import { registerUiCommand } from './commands/ui.js';
 import { registerValidateCommand } from './commands/validate.js';
@@ -47,6 +49,8 @@ export function buildProgram(): Command {
     registerInspectCommand(program);
     registerSearchCommand(program);
     registerSessionInfoCommand(program);
+    registerSetupCommand(program);
+    registerAgentsCommand(program);
     registerStatsCommand(program);
     registerBackfillMetadataCommand(program);
     registerMcpCommand(program);

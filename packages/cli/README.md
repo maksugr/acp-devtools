@@ -20,11 +20,18 @@ The `acp-devtools` binary is one CLI with subcommands plus a bundled UI:
   per method and auto-detected hotspots, request↔response pairing,
   spec-aware JSON tree, multi-day session waterfall.
 - **`mcp`** — Model Context Protocol server (stdio) that exposes the
-  capture store as eleven read-only tools: `list_sessions`,
+  capture store as thirteen read-only tools: `list_sessions`,
   `find_sessions_by_client`, `get_session_metadata`, `get_latency_stats`,
   `get_session_summary`, `get_session_messages`, `get_message`,
   `get_paired`, `search_messages`, `find_spec_violations`,
-  `diff_sessions`.
+  `diff_sessions`, `list_agent_shortcuts`, and `generate_editor_config`
+  (the MCP twins of `agents` / `setup` — list shortcuts, return the editor
+  config block for an agent).
+- **`setup`** — generates the Zed / JetBrains config that runs an agent
+  through ACP Devtools, with the absolute binary path filled in. Prints
+  the block, or `--write` merges it into the editor config file.
+- **`agents`** — lists the built-in agent shortcuts (the names `setup` /
+  `proxy --agent` accept), straight from the registry.
 - **`replay`** — re-emits any saved session over the same WebSocket so
   the inspector treats it as if it were live.
 - **`diff` / `inspect` / `stats` / `search` / `session-info` / `validate` /
@@ -97,7 +104,7 @@ Or check a project-scoped `.mcp.json` into the repo root:
 }
 ```
 
-After restarting Claude Code the eleven tools above become available (check
+After restarting Claude Code the thirteen tools above become available (check
 `/mcp`). Every
 tool advertises `readOnlyHint: true`, `idempotentHint: true`,
 `openWorldHint: false` per the MCP annotations spec, and the server emits

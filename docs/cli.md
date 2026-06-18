@@ -8,7 +8,7 @@ Every UI control has a CLI equivalent — the inspector is one frontend among ot
 | **Inspect** | `list`, `inspect`, `search`, `stats`, `diff`, `session-info`, `validate` |
 | **View** | `ui`, `replay` |
 | **Manage** | `export`, `import`, `delete`, `backfill-metadata` |
-| **Setup** | `doctor`, `mcp` |
+| **Setup** | `setup`, `agents`, `doctor`, `mcp` |
 
 The inspector and MCP server have their own docs: [UI guide](ui.md) ·
 [MCP server](mcp.md). Scenario-driven walkthroughs (headless debugging, A/B
@@ -597,6 +597,56 @@ acp-devtools mock-editor --session 23 \
 The agent inherits the current environment; pass anything special via the shell
 (`FOO=bar acp-devtools mock-editor …`). Signals (SIGINT, SIGTERM) are forwarded
 to the child agent.
+
+## `setup [target…]`
+
+Generates the editor config that runs an agent through ACP Devtools, with the
+absolute `acp-devtools` path already filled in. `target` is a registry shortcut
+(`junie`, `goose`, `codex`, …); anything after `--` is wrapped as a custom
+`proxy <command>`. With no target it defaults to Claude Code.
+
+```bash
+acp-devtools setup junie --editor zed                # print a Zed block
+acp-devtools setup junie --editor jetbrains --write  # merge into ~/.jetbrains/acp.json
+acp-devtools setup --editor zed -- npx -y @your-scope/your-acp   # custom agent
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--editor <name>` | — | required: `zed` or `jetbrains` |
+| `--name <label>` | derived | display name for the agent entry |
+| `--config-path <path>` | per-editor default | override the config file location |
+| `--write` | off | merge into the config file instead of printing |
+| `--no-color` | — | disable ANSI colour |
+
+Without `--write` it prints the block plus where to paste it; with `--write` it
+inserts only the `agent_servers.<name>` slot into the file (creating it if
+missing), preserving the rest byte-for-byte — existing indentation and key order
+stay as they were. Only a genuine JSON syntax error makes it refuse and print the
+block to paste instead (exit `1`). Missing or unknown `--editor` exits `2`.
+
+## `agents`
+
+Lists the built-in agent shortcuts — the names you can pass to `proxy --agent`,
+`setup`, or the bare `acp-devtools <name>` form. The list is the registry itself,
+so it stays current as agents are added.
+
+```bash
+acp-devtools agents          # table: shortcut · name · what it runs · install
+acp-devtools agents --json   # machine-readable
+```
+
+```
+SHORTCUT     NAME         RUNS                                          INSTALL
+claude-code  Claude Code  npx -y @agentclientprotocol/claude-agent-acp  auto via npx
+codex        Codex        npx -y @zed-industries/codex-acp              auto via npx
+goose        Goose        goose acp                                     install separately
+opencode     OpenCode     opencode acp                                  install separately
+junie        Junie        junie --acp=true                             install separately
+```
+
+Anything outside this list runs through the explicit form:
+`acp-devtools setup --editor <ed> -- <command…>` (or `proxy <command…>`).
 
 ## `doctor`
 
