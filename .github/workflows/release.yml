@@ -35,6 +35,9 @@ jobs:
         permissions:
             contents: write # tag + GitHub Release
             id-token: write # npm trusted publishing + provenance
+        outputs:
+            version: ${{ steps.state.outputs.version }}
+            published: ${{ steps.publish.outputs.tarball != '' }}
         env:
             SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         steps:
@@ -94,6 +97,15 @@ jobs:
                   npm publish "$TGZ" --access public --provenance
                   echo "tarball=$TGZ" >> "$GITHUB_OUTPUT"
 
+            # The Homebrew job runs on macOS and needs the exact bytes we published.
+            - uses: actions/upload-artifact@v7
+              if: steps.state.outputs.publish == 'true'
+              with:
+                  name: npm-tarball
+                  path: ${{ steps.publish.outputs.tarball }}
+                  if-no-files-found: error
+                  retention-days: 7
+
             - name: Tag and create GitHub Release
               if: steps.state.outputs.tag == 'true'
               env:
@@ -103,65 +115,6 @@ jobs:
                   set -euo pipefail
                   node scripts/release-notes.mjs "$V" > "$RUNNER_TEMP/notes.md"
                   gh release create "v$V" --target "$SHA" --title "v$V" --notes-file "$RUNNER_TEMP/notes.md"
-
-            - name: Bump Homebrew formula
-              env:
-                  HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-                  V: ${{ steps.state.outputs.version }}
-                  TARBALL: ${{ steps.publish.outputs.tarball }}
-              run: |
-                  set -euo pipefail
-                  if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
-                      echo "::notice::HOMEBREW_TAP_TOKEN not set — skipping the Homebrew bump."
-                      exit 0
-                  fi
-
-                  git clone --depth 1 "https://x-access-token:$HOMEBREW_TAP_TOKEN@github.com/maksugr/homebrew-tap.git" "$RUNNER_TEMP/tap"
-                  F="$RUNNER_TEMP/tap/Formula/acp-devtools.rb"
-                  URL="https://registry.npmjs.org/acp-devtools/-/acp-devtools-$V.tgz"
-                  if grep -q "acp-devtools-$V.tgz" "$F"; then
-                      echo "Formula already at $V."
-                      exit 0
-                  fi
-
-                  # This run published: hash the very file we uploaded. A re-run
-                  # after an earlier publish has no local file, so fetch it —
-                  # by then the registry serves it, but allow up to 20 minutes.
-                  if [ -n "$TARBALL" ] && [ -f "$TARBALL" ]; then
-                      PKG="$TARBALL"
-                  else
-                      PKG="$RUNNER_TEMP/pkg.tgz"
-                      for _ in $(seq 1 80); do
-                          curl -fsSL "$URL" -o "$PKG" && break
-                          sleep 15
-                      done
-                      test -s "$PKG" || { echo "::error::$URL still not downloadable after 20 minutes."; exit 1; }
-                  fi
-                  SUM=$(sha256sum "$PKG" | cut -d' ' -f1)
-
-                  # Cross-check against the registry's own integrity hash: a
-                  # mismatch means we would ship a formula users can't install.
-                  LOCAL="sha512-$(openssl dgst -sha512 -binary "$PKG" | base64 -w0)"
-                  REMOTE=""
-                  for _ in $(seq 1 20); do
-                      REMOTE=$(npm view "acp-devtools@$V" dist.integrity 2>/dev/null || true)
-                      [ -n "$REMOTE" ] && break
-                      sleep 15
-                  done
-                  if [ -z "$REMOTE" ]; then
-                      echo "::warning::npm doesn't list acp-devtools@$V yet — formula pushed without the integrity cross-check."
-                  elif [ "$REMOTE" != "$LOCAL" ]; then
-                      echo "::error::Tarball integrity mismatch: npm has $REMOTE, the hashed file is $LOCAL."
-                      exit 1
-                  fi
-
-                  cd "$RUNNER_TEMP/tap"
-                  sed -i -E "s#^(  url \")[^\"]+(\")#\1$URL\2#; s#^(  sha256 \")[0-9a-f]+(\")#\1$SUM\2#" "$F"
-                  grep -q "acp-devtools-$V.tgz" "$F"
-                  grep -q "$SUM" "$F"
-                  git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-                      commit -am "acp-devtools $V"
-                  git push
 
             - name: Summary
               env:
@@ -174,3 +127,105 @@ jobs:
                       echo "- npm: $([ "$PUBLISH" = true ] && echo "published" || echo "already published — skipped")"
                       echo "- GitHub Release: $([ "$TAG" = true ] && echo "created v$V" || echo "v$V already exists — skipped")"
                   } >> "$GITHUB_STEP_SUMMARY"
+
+    # Bumps maksugr/homebrew-tap, but only after the updated formula installs
+    # and passes its `test do` block on macOS — a formula that can't install
+    # never reaches users. Skipped when HOMEBREW_TAP_TOKEN isn't configured.
+    homebrew:
+        name: Bump Homebrew formula
+        needs: release
+        runs-on: macos-latest
+        permissions:
+            contents: read
+        env:
+            SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+            V: ${{ needs.release.outputs.version }}
+        steps:
+            - name: Check for the tap token
+              id: token
+              env:
+                  HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+              run: |
+                  if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
+                      echo "::notice::HOMEBREW_TAP_TOKEN not set — skipping the Homebrew bump."
+                      echo "enabled=false" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "enabled=true" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - uses: actions/checkout@v7
+              if: steps.token.outputs.enabled == 'true'
+              with:
+                  ref: ${{ env.SHA }}
+
+            - uses: actions/setup-node@v7
+              if: steps.token.outputs.enabled == 'true'
+              with:
+                  node-version: '24'
+                  package-manager-cache: false
+
+            - uses: actions/download-artifact@v8
+              if: steps.token.outputs.enabled == 'true' && needs.release.outputs.published == 'true'
+              with:
+                  name: npm-tarball
+                  path: ${{ runner.temp }}/published
+
+            - name: Update, test and push the formula
+              if: steps.token.outputs.enabled == 'true'
+              env:
+                  HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  git clone --depth 1 "https://x-access-token:$HOMEBREW_TAP_TOKEN@github.com/maksugr/homebrew-tap.git" "$RUNNER_TEMP/tap"
+                  F="$RUNNER_TEMP/tap/Formula/acp-devtools.rb"
+                  URL="https://registry.npmjs.org/acp-devtools/-/acp-devtools-$V.tgz"
+                  if grep -q "acp-devtools-$V.tgz" "$F"; then
+                      echo "Formula already at $V."
+                      exit 0
+                  fi
+
+                  # This run published: use the very file we uploaded. A re-run
+                  # after an earlier publish has no artifact, so fetch it — by
+                  # then the registry serves it, but allow up to 20 minutes.
+                  PKG="$RUNNER_TEMP/published/acp-devtools-$V.tgz"
+                  if [ ! -f "$PKG" ]; then
+                      PKG="$RUNNER_TEMP/acp-devtools-$V.tgz"
+                      for _ in $(seq 1 80); do
+                          curl -fsSL "$URL" -o "$PKG" && break
+                          sleep 15
+                      done
+                      test -s "$PKG" || { echo "::error::$URL still not downloadable after 20 minutes."; exit 1; }
+                  fi
+                  SUM=$(shasum -a 256 "$PKG" | cut -d' ' -f1)
+
+                  # Cross-check against the registry's own integrity hash: a
+                  # mismatch means we would ship a formula users can't install.
+                  LOCAL="sha512-$(openssl dgst -sha512 -binary "$PKG" | openssl base64 -A)"
+                  REMOTE=""
+                  for _ in $(seq 1 20); do
+                      REMOTE=$(npm view "acp-devtools@$V" dist.integrity 2>/dev/null || true)
+                      [ -n "$REMOTE" ] && break
+                      sleep 15
+                  done
+                  if [ -z "$REMOTE" ]; then
+                      echo "::warning::npm doesn't list acp-devtools@$V yet — skipping the integrity cross-check."
+                  elif [ "$REMOTE" != "$LOCAL" ]; then
+                      echo "::error::Tarball integrity mismatch: npm has $REMOTE, the hashed file is $LOCAL."
+                      exit 1
+                  fi
+
+                  sed -i.bak -E "s#^(  url \")[^\"]+(\")#\1$URL\2#; s#^(  sha256 \")[0-9a-f]+(\")#\1$SUM\2#" "$F"
+                  rm -f "$F.bak"
+                  grep -q "acp-devtools-$V.tgz" "$F"
+                  grep -q "$SUM" "$F"
+
+                  # Install and test the updated formula before it goes out. The
+                  # local file has the same bytes as $URL (sha256 above), so this
+                  # doesn't depend on how fast the registry serves the tarball.
+                  bash scripts/homebrew/test-formula.sh "$F" "$PKG"
+
+                  cd "$RUNNER_TEMP/tap"
+                  git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                      commit -am "acp-devtools $V"
+                  git push
+                  echo "### Homebrew: formula bumped to $V and tested on macOS" >> "$GITHUB_STEP_SUMMARY"

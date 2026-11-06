@@ -78,18 +78,52 @@ jobs:
                   & "./node_modules/.bin/acp-devtools.cmd" --version
                   & "./node_modules/.bin/acp-devtools.cmd" doctor
 
-    # Single required status check for the matrix above: branch rules can
-    # require `ci-ok` instead of listing every OS × Node combination, and
-    # adding a matrix entry doesn't need a settings change.
+    # Installs the Homebrew formula from the current tap against a tarball
+    # packed from this commit, so a change that breaks `brew install` (native
+    # binding, bin link, `--version`) fails here instead of on users' machines.
+    homebrew:
+        name: homebrew formula
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: '24'
+                  cache: 'npm'
+
+            - run: npm ci
+
+            - run: npm run build:full
+
+            - name: Pack the CLI
+              id: pack
+              working-directory: packages/cli
+              run: |
+                  NAME=$(npm pack --pack-destination "$RUNNER_TEMP" --silent | tail -n1)
+                  echo "tarball=$RUNNER_TEMP/$NAME" >> "$GITHUB_OUTPUT"
+
+            - name: Fetch the formula from the tap
+              run: curl -fsSL https://raw.githubusercontent.com/maksugr/homebrew-tap/HEAD/Formula/acp-devtools.rb -o "$RUNNER_TEMP/acp-devtools.rb"
+
+            - name: Install and test the formula against this build
+              env:
+                  TARBALL: ${{ steps.pack.outputs.tarball }}
+              run: bash scripts/homebrew/test-formula.sh "$RUNNER_TEMP/acp-devtools.rb" "$TARBALL"
+
+    # Single required status check for everything above: branch rules can
+    # require `ci-ok` instead of listing every job, and adding a job or a
+    # matrix entry doesn't need a settings change.
     ci-ok:
         name: ci-ok
         if: always()
-        needs: [ci]
+        needs: [ci, homebrew]
         runs-on: ubuntu-latest
         steps:
-            - name: All matrix jobs passed
+            - name: All jobs passed
               env:
-                  RESULT: ${{ needs.ci.result }}
+                  MATRIX: ${{ needs.ci.result }}
+                  HOMEBREW: ${{ needs.homebrew.result }}
               run: |
-                  echo "matrix result: $RESULT"
-                  test "$RESULT" = "success"
+                  echo "matrix: $MATRIX, homebrew formula: $HOMEBREW"
+                  test "$MATRIX" = "success" && test "$HOMEBREW" = "success"
