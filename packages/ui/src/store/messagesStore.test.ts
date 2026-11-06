@@ -45,7 +45,11 @@ function mkMessage(overrides: Partial<CapturedMessage> = {}): CapturedMessage {
     };
 }
 
-function chunk(sessionId: string, text: string, overrides: Partial<CapturedMessage> = {}): CapturedMessage {
+function chunk(
+    sessionId: string,
+    text: string,
+    overrides: Partial<CapturedMessage> = {},
+): CapturedMessage {
     return mkMessage({
         direction: 'agent-to-editor',
         kind: 'notification',
@@ -194,11 +198,9 @@ describe('appendMessages — rAF batching API', () => {
         send({ type: 'session.start', session: sessionFixture() });
         send({ type: 'message', message: mkMessage() }); // seq 1
         useMessagesStore.getState().clear();
-        useMessagesStore.getState().appendMessages([
-            mkMessage({ seq: 1 }),
-            mkMessage({ seq: 2 }),
-            mkMessage({ seq: 3 }),
-        ]);
+        useMessagesStore
+            .getState()
+            .appendMessages([mkMessage({ seq: 1 }), mkMessage({ seq: 2 }), mkMessage({ seq: 3 })]);
         const seqs = useMessagesStore.getState().messages.map((m) => m.seq);
         // seq 1 was already cleared; only seq 2 and 3 survive.
         expect(seqs).toEqual([2, 3]);
@@ -211,13 +213,9 @@ describe('appendMessages — rAF batching API', () => {
             subscriberFires += 1;
         });
         try {
-            useMessagesStore.getState().appendMessages([
-                mkMessage(),
-                mkMessage(),
-                mkMessage(),
-                mkMessage(),
-                mkMessage(),
-            ]);
+            useMessagesStore
+                .getState()
+                .appendMessages([mkMessage(), mkMessage(), mkMessage(), mkMessage(), mkMessage()]);
             // One set() call → one subscriber notification, regardless of
             // batch size. Regression for the WS replay storm: 1392 frames
             // arriving one-at-a-time used to fire 1392 subscribers (each
@@ -310,7 +308,7 @@ describe('applyFilters', () => {
         expect(out).toHaveLength(6);
     });
 
-    it('STREAM chip is INDEPENDENT of NOTIFICATION chip (today\'s bug)', () => {
+    it("STREAM chip is INDEPENDENT of NOTIFICATION chip (today's bug)", () => {
         // notification off, but streams on — chunks should still appear.
         const filters = initialFilters();
         filters.kinds.delete('notification');
@@ -348,12 +346,39 @@ describe('buildRequestIndex', () => {
         const messages: CapturedMessage[] = [
             mkMessage({ method: 'a', rpcId: 1, kind: 'request' }),
             mkMessage({ method: 'b', rpcId: 2, kind: 'request' }),
-            mkMessage({ rpcId: 1, kind: 'response', method: undefined }),
-            mkMessage({ rpcId: 2, kind: 'error', method: undefined }),
+            mkMessage({
+                rpcId: 1,
+                kind: 'response',
+                method: undefined,
+                direction: 'agent-to-editor',
+            }),
+            mkMessage({ rpcId: 2, kind: 'error', method: undefined, direction: 'agent-to-editor' }),
         ];
         const idx = buildRequestIndex(messages);
         expect(idx.get(messages[2]!.seq)).toBe(messages[0]!.seq);
         expect(idx.get(messages[3]!.seq)).toBe(messages[1]!.seq);
+    });
+
+    it('keeps editor and agent requests apart when they share an id', () => {
+        seqCounter = 0;
+        const messages: CapturedMessage[] = [
+            mkMessage({ method: 'session/prompt', rpcId: 2 }),
+            mkMessage({
+                method: 'session/request_permission',
+                rpcId: 2,
+                direction: 'agent-to-editor',
+            }),
+            mkMessage({ rpcId: 2, kind: 'response', method: undefined }),
+            mkMessage({
+                rpcId: 2,
+                kind: 'response',
+                method: undefined,
+                direction: 'agent-to-editor',
+            }),
+        ];
+        const idx = buildRequestIndex(messages);
+        expect(idx.get(messages[2]!.seq)).toBe(messages[1]!.seq);
+        expect(idx.get(messages[3]!.seq)).toBe(messages[0]!.seq);
     });
 
     it('ignores messages with no rpcId', () => {

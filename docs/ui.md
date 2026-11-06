@@ -50,7 +50,9 @@ delivered. Every label has a tooltip on hover.
 - **Stream clusters** — consecutive `agent_message_chunk` notifications collapse
   into one `STR` row with a chunk count and a shimmer bar while still streaming.
 - **Latency annotations** — responses show `+Nms`/`+Ns` since their paired
-  request, tone-colored fast→slow.
+  request, tone-colored fast→slow. Pairing is by direction + JSON-RPC id, so an
+  editor request and an agent request that share an id never steal each
+  other's reply.
 - **Sticky-bottom scroll** keeps the newest frame in view during a live
   capture; scroll up to pause autoscroll.
 - **FilterBar** — direction chips (`→ OUT` / `← IN`), kind chips

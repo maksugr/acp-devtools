@@ -71,9 +71,7 @@ export class PlaybackEngine {
             const msg = this.messages[this.pointer]!;
             if (msg.direction === this.ourDirection) {
                 const prev = this.pointer > 0 ? this.messages[this.pointer - 1]! : null;
-                const deltaSincePrevMs = prev
-                    ? Math.max(0, msg.timestamp - prev.timestamp)
-                    : 0;
+                const deltaSincePrevMs = prev ? Math.max(0, msg.timestamp - prev.timestamp) : 0;
                 this.pointer += 1;
                 return {
                     kind: 'emit',
@@ -102,9 +100,17 @@ export class PlaybackEngine {
         if (msg.direction === this.ourDirection) return false;
 
         // Map scriptRpcId → realRpcId so a later response from script can be
-        // patched to use the real id. Notifications carry no id, skip.
+        // patched to use the real id. Only the other side's *requests* define
+        // ids we answer with — their responses carry our ids, and letting one
+        // overwrite the mapping (ids are per-sender, so they can collide)
+        // would send our next reply under the wrong id.
         const realId = extractRpcId(line);
-        if (msg.rpcId !== undefined && msg.rpcId !== null && realId !== undefined) {
+        if (
+            msg.kind === 'request' &&
+            msg.rpcId !== undefined &&
+            msg.rpcId !== null &&
+            realId !== undefined
+        ) {
             this.scriptIdToRealId.set(String(msg.rpcId), realId);
         }
         this.pointer += 1;

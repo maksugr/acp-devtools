@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { CapturedMessage } from './types.js';
-import { buildPairIndex, buildPerMethodStats, mean, percentile } from './method-stats.js';
+import {
+    buildPairIndex,
+    buildPerMethodStats,
+    mean,
+    percentile,
+    rpcCorrelationKey,
+} from './method-stats.js';
 
 const mk = (overrides: Partial<CapturedMessage> & { seq: number }): CapturedMessage => ({
     timestamp: 1_700_000_000_000 + overrides.seq * 1000,
@@ -38,6 +44,62 @@ describe('buildPairIndex (core re-home)', () => {
             timestamp: req.timestamp - 50,
         });
         expect(buildPairIndex([req, rsp]).get(1)?.latencyMs).toBe(0);
+    });
+});
+
+describe('request/response correlation across directions', () => {
+    // Editor and agent number their requests independently, so the same id
+    // can be in flight both ways: an editor `session/prompt` and an agent
+    // `session/request_permission`, both `id: 2`.
+    const collision = (): CapturedMessage[] => [
+        mk({ seq: 1, rpcId: 2, method: 'session/prompt', timestamp: 0 }),
+        mk({
+            seq: 2,
+            rpcId: 2,
+            method: 'session/request_permission',
+            direction: 'agent-to-editor',
+            timestamp: 100,
+        }),
+        mk({ seq: 3, rpcId: 2, kind: 'response', method: undefined, timestamp: 5_000 }),
+        mk({
+            seq: 4,
+            rpcId: 2,
+            kind: 'response',
+            method: undefined,
+            direction: 'agent-to-editor',
+            timestamp: 9_000,
+        }),
+    ];
+
+    it('pairs each response with the request from the opposite side', () => {
+        const idx = buildPairIndex(collision());
+        expect(idx.get(1)).toEqual({ pairSeq: 4, latencyMs: 9_000 });
+        expect(idx.get(4)).toEqual({ pairSeq: 1, latencyMs: 9_000 });
+        expect(idx.get(2)).toEqual({ pairSeq: 3, latencyMs: 4_900 });
+        expect(idx.get(3)).toEqual({ pairSeq: 2, latencyMs: 4_900 });
+    });
+
+    it('feeds per-method stats the right latencies', () => {
+        const messages = collision();
+        const stats = buildPerMethodStats(messages, buildPairIndex(messages));
+        const byMethod = Object.fromEntries(stats.map((s) => [s.method, s.latencies]));
+        expect(byMethod['session/prompt']).toEqual([9_000]);
+        expect(byMethod['session/request_permission']).toEqual([4_900]);
+    });
+
+    it('does not pair a response travelling the same way as the request', () => {
+        const req = mk({ seq: 1, rpcId: 7 });
+        const sameWay = mk({ seq: 2, rpcId: 7, kind: 'response', method: undefined });
+        expect(buildPairIndex([req, sameWay]).size).toBe(0);
+    });
+
+    it('keys requests by their own direction and replies by the opposite one', () => {
+        const req = mk({ seq: 1, rpcId: 'a' });
+        const rsp = mk({ seq: 2, rpcId: 'a', kind: 'error', direction: 'agent-to-editor' });
+        expect(rpcCorrelationKey(req)).toBe(rpcCorrelationKey(rsp));
+        expect(
+            rpcCorrelationKey(mk({ seq: 3, kind: 'notification', rpcId: undefined })),
+        ).toBeNull();
     });
 });
 
@@ -118,9 +180,6 @@ describe('buildPerMethodStats', () => {
             mk({ seq: 4, method: 'b', rpcId: 101 }),
         ];
         const stats = buildPerMethodStats(msgs);
-        expect(stats.map((s) => `${s.method}:${s.kind}`)).toEqual([
-            'b:request',
-            'a:notification',
-        ]);
+        expect(stats.map((s) => `${s.method}:${s.kind}`)).toEqual(['b:request', 'a:notification']);
     });
 });

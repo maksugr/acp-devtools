@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CapturedMessage, SessionRecord, WsEvent } from '@acp-devtools/core';
 import type { SessionExport } from '@acp-devtools/core/storage/export';
+import { rpcCorrelationKey } from '@acp-devtools/core/acp/method-stats';
 
 export type ConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error';
 export type DetailTab = 'tree' | 'raw' | 'meta' | 'spec';
@@ -104,148 +105,145 @@ interface PersistedFilters {
 export const useMessagesStore = create<MessagesState>()(
     persist<MessagesState, [], [], { filters: PersistedFilters }>(
         (set) => ({
-    session: null,
-    messages: [],
-    connection: 'idle',
-    lastError: null,
-    selectedSeq: null,
-    replayDone: false,
-    filters: initialFilters,
-    playback: { playhead: null, playing: false, speed: 1 },
-    detailTab: 'tree',
-    clearedUpToSeq: null,
+            session: null,
+            messages: [],
+            connection: 'idle',
+            lastError: null,
+            selectedSeq: null,
+            replayDone: false,
+            filters: initialFilters,
+            playback: { playhead: null, playing: false, speed: 1 },
+            detailTab: 'tree',
+            clearedUpToSeq: null,
 
-    handleEvent: (event) => {
-        switch (event.type) {
-            case 'session.start':
+            handleEvent: (event) => {
+                switch (event.type) {
+                    case 'session.start':
+                        set((state) => {
+                            const sameSession =
+                                state.session !== null && state.session.id === event.session.id;
+                            // Fresh mount: state.session is still null but selectedSeq /
+                            // clearedUpToSeq / playback may have been hydrated from the
+                            // URL. Treat the very first session.start as part of that
+                            // hydration so we do NOT stomp on a shareable link.
+                            const isInitial = state.session === null;
+                            const keepUserState = sameSession || isInitial;
+                            return {
+                                session: event.session,
+                                messages: [],
+                                selectedSeq: keepUserState ? state.selectedSeq : null,
+                                replayDone: false,
+                                clearedUpToSeq: keepUserState ? state.clearedUpToSeq : null,
+                                playback: keepUserState
+                                    ? state.playback
+                                    : { ...state.playback, playhead: null, playing: false },
+                            };
+                        });
+                        return;
+                    case 'message':
+                        set((state) => {
+                            if (
+                                state.clearedUpToSeq !== null &&
+                                event.message.seq <= state.clearedUpToSeq
+                            ) {
+                                return {};
+                            }
+                            return { messages: [...state.messages, event.message] };
+                        });
+                        return;
+                    case 'replay.done':
+                        set({ replayDone: true });
+                        return;
+                    case 'session.end':
+                        set({ session: event.session });
+                        return;
+                }
+            },
+
+            setConnection: (status, error = null) => set({ connection: status, lastError: error }),
+            select: (seq) => set({ selectedSeq: seq }),
+            setSearch: (search) => set((s) => ({ filters: { ...s.filters, search } })),
+            toggleDirection: (dir) =>
+                set((s) => {
+                    const next = new Set(s.filters.directions);
+                    if (next.has(dir)) next.delete(dir);
+                    else next.add(dir);
+                    return { filters: { ...s.filters, directions: next } };
+                }),
+            toggleKind: (kind) =>
+                set((s) => {
+                    const next = new Set(s.filters.kinds);
+                    if (next.has(kind)) next.delete(kind);
+                    else next.add(kind);
+                    return { filters: { ...s.filters, kinds: next } };
+                }),
+            toggleStreams: () =>
+                set((s) => ({ filters: { ...s.filters, showStreams: !s.filters.showStreams } })),
+            setPlayhead: (playhead) => set((s) => ({ playback: { ...s.playback, playhead } })),
+            setPlaying: (playing) => set((s) => ({ playback: { ...s.playback, playing } })),
+            setPlaybackSpeed: (speed) => set((s) => ({ playback: { ...s.playback, speed } })),
+            setDetailTab: (tab) => set({ detailTab: tab }),
+            appendMessages: (msgs) => {
+                if (msgs.length === 0) return;
                 set((state) => {
-                    const sameSession =
-                        state.session !== null && state.session.id === event.session.id;
-                    // Fresh mount: state.session is still null but selectedSeq /
-                    // clearedUpToSeq / playback may have been hydrated from the
-                    // URL. Treat the very first session.start as part of that
-                    // hydration so we do NOT stomp on a shareable link.
+                    const filtered =
+                        state.clearedUpToSeq !== null
+                            ? msgs.filter((m) => m.seq > state.clearedUpToSeq!)
+                            : msgs;
+                    if (filtered.length === 0) return state;
+                    return { messages: [...state.messages, ...filtered] };
+                });
+            },
+            loadFromExport: (exp) => {
+                set((state) => {
+                    // First load (nothing open yet) keeps URL-hydrated selection /
+                    // playhead so a deep link — `?url=…&seq=…&play=…`, the playground's
+                    // share format — restores scroll position. Dropping a new export
+                    // over an already-open session is a deliberate switch, so reset.
                     const isInitial = state.session === null;
-                    const keepUserState = sameSession || isInitial;
                     return {
-                        session: event.session,
-                        messages: [],
-                        selectedSeq: keepUserState ? state.selectedSeq : null,
-                        replayDone: false,
-                        clearedUpToSeq: keepUserState ? state.clearedUpToSeq : null,
-                        playback: keepUserState
-                            ? state.playback
-                            : { ...state.playback, playhead: null, playing: false },
+                        session: {
+                            id: exp.session.id,
+                            name: exp.session.name,
+                            agentCommand: exp.session.agentCommand,
+                            startedAt: exp.session.startedAt,
+                            endedAt: exp.session.endedAt,
+                            clientName: exp.session.clientName,
+                            importedAt: exp.exportedAt,
+                            clientVersion: null,
+                            clientPlatform: null,
+                            agentName: null,
+                            agentVersion: null,
+                            protocolVersion: null,
+                            currentMode: null,
+                            currentModel: null,
+                            agentCapabilitiesJson: null,
+                        },
+                        messages: exp.messages,
+                        selectedSeq: isInitial ? state.selectedSeq : null,
+                        replayDone: true,
+                        clearedUpToSeq: isInitial ? state.clearedUpToSeq : null,
+                        playback: isInitial
+                            ? { ...state.playback, playing: false }
+                            : { playhead: null, playing: false, speed: 1 },
+                        connection: 'idle',
+                        lastError: null,
                     };
                 });
-                return;
-            case 'message':
+            },
+            clear: () =>
                 set((state) => {
-                    if (
-                        state.clearedUpToSeq !== null &&
-                        event.message.seq <= state.clearedUpToSeq
-                    ) {
-                        return {};
-                    }
-                    return { messages: [...state.messages, event.message] };
-                });
-                return;
-            case 'replay.done':
-                set({ replayDone: true });
-                return;
-            case 'session.end':
-                set({ session: event.session });
-                return;
-        }
-    },
-
-    setConnection: (status, error = null) => set({ connection: status, lastError: error }),
-    select: (seq) => set({ selectedSeq: seq }),
-    setSearch: (search) => set((s) => ({ filters: { ...s.filters, search } })),
-    toggleDirection: (dir) =>
-        set((s) => {
-            const next = new Set(s.filters.directions);
-            if (next.has(dir)) next.delete(dir);
-            else next.add(dir);
-            return { filters: { ...s.filters, directions: next } };
+                    const lastSeq =
+                        state.messages.length > 0
+                            ? state.messages[state.messages.length - 1]!.seq
+                            : state.clearedUpToSeq;
+                    return {
+                        messages: [],
+                        selectedSeq: null,
+                        clearedUpToSeq: lastSeq,
+                    };
+                }),
         }),
-    toggleKind: (kind) =>
-        set((s) => {
-            const next = new Set(s.filters.kinds);
-            if (next.has(kind)) next.delete(kind);
-            else next.add(kind);
-            return { filters: { ...s.filters, kinds: next } };
-        }),
-    toggleStreams: () =>
-        set((s) => ({ filters: { ...s.filters, showStreams: !s.filters.showStreams } })),
-    setPlayhead: (playhead) =>
-        set((s) => ({ playback: { ...s.playback, playhead } })),
-    setPlaying: (playing) =>
-        set((s) => ({ playback: { ...s.playback, playing } })),
-    setPlaybackSpeed: (speed) =>
-        set((s) => ({ playback: { ...s.playback, speed } })),
-    setDetailTab: (tab) => set({ detailTab: tab }),
-    appendMessages: (msgs) => {
-        if (msgs.length === 0) return;
-        set((state) => {
-            const filtered =
-                state.clearedUpToSeq !== null
-                    ? msgs.filter((m) => m.seq > state.clearedUpToSeq!)
-                    : msgs;
-            if (filtered.length === 0) return state;
-            return { messages: [...state.messages, ...filtered] };
-        });
-    },
-    loadFromExport: (exp) => {
-        set((state) => {
-            // First load (nothing open yet) keeps URL-hydrated selection /
-            // playhead so a deep link — `?url=…&seq=…&play=…`, the playground's
-            // share format — restores scroll position. Dropping a new export
-            // over an already-open session is a deliberate switch, so reset.
-            const isInitial = state.session === null;
-            return {
-                session: {
-                    id: exp.session.id,
-                    name: exp.session.name,
-                    agentCommand: exp.session.agentCommand,
-                    startedAt: exp.session.startedAt,
-                    endedAt: exp.session.endedAt,
-                    clientName: exp.session.clientName,
-                    importedAt: exp.exportedAt,
-                    clientVersion: null,
-                    clientPlatform: null,
-                    agentName: null,
-                    agentVersion: null,
-                    protocolVersion: null,
-                    currentMode: null,
-                    currentModel: null,
-                    agentCapabilitiesJson: null,
-                },
-                messages: exp.messages,
-                selectedSeq: isInitial ? state.selectedSeq : null,
-                replayDone: true,
-                clearedUpToSeq: isInitial ? state.clearedUpToSeq : null,
-                playback: isInitial
-                    ? { ...state.playback, playing: false }
-                    : { playhead: null, playing: false, speed: 1 },
-                connection: 'idle',
-                lastError: null,
-            };
-        });
-    },
-    clear: () =>
-        set((state) => {
-            const lastSeq =
-                state.messages.length > 0
-                    ? state.messages[state.messages.length - 1]!.seq
-                    : state.clearedUpToSeq;
-            return {
-                messages: [],
-                selectedSeq: null,
-                clearedUpToSeq: lastSeq,
-            };
-        }),
-    }),
         {
             name: 'acp.messages.v1',
             partialize: (state) => ({
@@ -272,10 +270,7 @@ export const useMessagesStore = create<MessagesState>()(
     ),
 );
 
-export function applyFilters(
-    messages: CapturedMessage[],
-    filters: Filters,
-): CapturedMessage[] {
+export function applyFilters(messages: CapturedMessage[], filters: Filters): CapturedMessage[] {
     const q = filters.search.trim().toLowerCase();
     return messages.filter((m) => {
         if (!filters.directions.has(m.direction)) return false;
@@ -297,18 +292,25 @@ export function applyFilters(
     });
 }
 
-export function selectMessage(messages: CapturedMessage[], seq: number | null): CapturedMessage | null {
+export function selectMessage(
+    messages: CapturedMessage[],
+    seq: number | null,
+): CapturedMessage | null {
     if (seq === null) return null;
     return messages.find((m) => m.seq === seq) ?? null;
 }
 
-/** Map each response seq → request seq via JSON-RPC id, for latency annotations. */
+/**
+ * Map each response seq → request seq, for latency annotations. Correlates by
+ * direction + JSON-RPC id (`rpcCorrelationKey`), since editor and agent number
+ * their requests independently.
+ */
 export function buildRequestIndex(messages: CapturedMessage[]): Map<number, number> {
     const idToRequestSeq = new Map<string, number>();
     const responseToRequest = new Map<number, number>();
     for (const m of messages) {
-        if (m.rpcId === undefined || m.rpcId === null) continue;
-        const key = String(m.rpcId);
+        const key = rpcCorrelationKey(m);
+        if (key === null) continue;
         if (m.kind === 'request') {
             idToRequestSeq.set(key, m.seq);
         } else if (m.kind === 'response' || m.kind === 'error') {

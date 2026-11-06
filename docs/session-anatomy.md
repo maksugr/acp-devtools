@@ -43,7 +43,8 @@ terminals — happens *inside* a turn.
 
 `→ OUT` is editor→agent, `← IN` is agent→editor — same labels as the
 inspector timeline. KIND is the JSON-RPC frame type: `REQ` expects a
-response, `RSP` answers it (paired by JSON-RPC `id`), `NTF` is
+response, `RSP` answers it (paired by JSON-RPC `id` — each side numbers its
+own requests, so the reply travels the opposite way to its request), `NTF` is
 fire-and-forget. The inspector adds three more: `STR` for a collapsed run of
 streaming chunks, `ERR` for an error response, `UNK` for a line that isn't
 valid JSON-RPC (the last two are covered in
