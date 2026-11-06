@@ -16,32 +16,32 @@ The session header (left of the picker) tells you **what** you're looking at;
 the connection chip (right of the actions menu) tells you **how** it's being
 delivered. Every label has a tooltip on hover.
 
-| Header label | Meaning |
-|---|---|
-| `SESSION #N` | live capture — proxy is still running, frames are arriving |
-| `REPLAY #N` | playback of a saved session from the database |
+| Header label  | Meaning                                                              |
+| ------------- | -------------------------------------------------------------------- |
+| `SESSION #N`  | live capture — proxy is still running, frames are arriving           |
+| `REPLAY #N`   | playback of a saved session from the database                        |
 | `IMPORTED #N` | playback of a session loaded from a JSON file (`imported_at` is set) |
 
-| Connection chip | Meaning |
-|---|---|
-| `LIVE` | WebSocket attached to a running proxy; frames stream in real time |
-| `REPLAY` | WebSocket serving a finished session from the database |
-| `FILE` | viewing an imported session — the proxy is unrelated, nothing is reconnecting |
-| `WAITING` | reconnect loop is trying to reach the WS, exponential backoff |
-| `IDLE` | no capture selected (e.g. the proxy ended and replay finished) |
-| `CLOSED` | server closed the socket; click the chip to retry |
-| `ERROR` | the most recent connection attempt failed with the error in the tooltip |
+| Connection chip | Meaning                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| `LIVE`          | WebSocket attached to a running proxy; frames stream in real time             |
+| `REPLAY`        | WebSocket serving a finished session from the database                        |
+| `FILE`          | viewing an imported session — the proxy is unrelated, nothing is reconnecting |
+| `WAITING`       | reconnect loop is trying to reach the WS, exponential backoff                 |
+| `IDLE`          | no capture selected (e.g. the proxy ended and replay finished)                |
+| `CLOSED`        | server closed the socket; click the chip to retry                             |
+| `ERROR`         | the most recent connection attempt failed with the error in the tooltip       |
 
-| Row badge | Meaning |
-|---|---|
-| `REQ` | JSON-RPC request (expects a response) |
-| `RSP` | JSON-RPC response (carries `result`) |
-| `NTF` | JSON-RPC notification (one-way, no id) |
-| `ERR` | error response (carries `error.code`/`error.message`) |
-| `UNK` | the frame did not parse as JSON-RPC; raw bytes are still preserved |
-| `STR` | collapsed run of consecutive `agent_message_chunk` notifications |
-| `⚠ SPEC N` | the frame fails the official ACP schema with `N` ajv errors (see [Spec validation](#spec-validation)) |
-| `⚠ ADV N` | the frame is valid but omits `N` soon-required fields (amber, see [Spec validation](#spec-validation)) |
+| Row badge  | Meaning                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| `REQ`      | JSON-RPC request (expects a response)                                                                  |
+| `RSP`      | JSON-RPC response (carries `result`)                                                                   |
+| `NTF`      | JSON-RPC notification (one-way, no id)                                                                 |
+| `ERR`      | error response (carries `error.code`/`error.message`)                                                  |
+| `UNK`      | the frame did not parse as JSON-RPC; raw bytes are still preserved                                     |
+| `STR`      | collapsed run of consecutive `agent_message_chunk` notifications                                       |
+| `⚠ SPEC N` | the frame fails the official ACP schema with `N` ajv errors (see [Spec validation](#spec-validation))  |
+| `⚠ ADV N`  | the frame is valid but omits `N` soon-required fields (amber, see [Spec validation](#spec-validation)) |
 
 ## Timeline
 
@@ -50,7 +50,9 @@ delivered. Every label has a tooltip on hover.
 - **Stream clusters** — consecutive `agent_message_chunk` notifications collapse
   into one `STR` row with a chunk count and a shimmer bar while still streaming.
 - **Latency annotations** — responses show `+Nms`/`+Ns` since their paired
-  request, tone-colored fast→slow.
+  request, tone-colored fast→slow. Pairing is by direction + JSON-RPC id, so an
+  editor request and an agent request that share an id never steal each
+  other's reply.
 - **Sticky-bottom scroll** keeps the newest frame in view during a live
   capture; scroll up to pause autoscroll.
 - **FilterBar** — direction chips (`→ OUT` / `← IN`), kind chips
@@ -65,7 +67,7 @@ Selecting a row renders its full JSON-RPC frame in three tabs:
 - **Tree** — expandable, type-colored JSON with vertical guides. It is
   **spec-aware**: when the method maps to a known ACP request/response/
   notification, the top shows the schema-def name (e.g. `ACP TYPE
-  InitializeRequest`) and a one-line description. Each field carries a ⓘ hover
+InitializeRequest`) and a one-line description. Each field carries a ⓘ hover
   tooltip from the schema, and a `⚠ ext` badge marks anything under `_meta` or
   fields not declared in the spec — handy for spotting editor-specific
   extensions.
@@ -149,11 +151,11 @@ the data came from a process, the database, or a file you just opened.
 
 ## Keyboard shortcuts
 
-| Key | Action |
-|---|---|
-| `J` / `K` | next / previous frame |
-| `Esc` | close the detail panel or an open drawer |
-| `⌘K` / `Ctrl+K` | command palette |
+| Key             | Action                                   |
+| --------------- | ---------------------------------------- |
+| `J` / `K`       | next / previous frame                    |
+| `Esc`           | close the detail panel or an open drawer |
+| `⌘K` / `Ctrl+K` | command palette                          |
 
 Browser **Back** closes an open drawer (info / perf / diff) rather than leaving
 the page.
@@ -162,22 +164,22 @@ the page.
 
 `acp-devtools ui` serves the React bundle plus a small API:
 
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/active` | live captures from the discovery directory |
-| `GET /api/sessions` | saved sessions in the database |
-| `GET /api/sessions/:id/messages` | full frame list for one session (used by diff) |
-| `GET /api/info` | binary path, used by the empty state to pre-fill snippets |
-| `POST /api/import` | insert a JSON export as a new session (sets `imported_at`) |
-| `DELETE /api/sessions/:id` | remove a session and cascade-delete its messages |
-| `WS /replay/:id` | stream a saved session |
+| Endpoint                         | Purpose                                                    |
+| -------------------------------- | ---------------------------------------------------------- |
+| `GET /api/active`                | live captures from the discovery directory                 |
+| `GET /api/sessions`              | saved sessions in the database                             |
+| `GET /api/sessions/:id/messages` | full frame list for one session (used by diff)             |
+| `GET /api/info`                  | binary path, used by the empty state to pre-fill snippets  |
+| `POST /api/import`               | insert a JSON export as a new session (sets `imported_at`) |
+| `DELETE /api/sessions/:id`       | remove a session and cascade-delete its messages           |
+| `WS /replay/:id`                 | stream a saved session                                     |
 
 Everything binds to `127.0.0.1` by default, and every `/api/*` request plus
 the replay WebSocket upgrade must carry a loopback `Host` header
 (`127.0.0.1` / `localhost` / `[::1]`) — anything else gets `403`. That
 closes the classic DNS-rebinding hole where a hostile page resolves its
 own domain to `127.0.0.1` and reads the API from your browser. Two honest
-caveats remain: the API has no authentication (any *local* process can
+caveats remain: the API has no authentication (any _local_ process can
 read it — same trust level as the database file itself), and
 `/api/sessions/:id/messages` returns frames as captured, unredacted.
 Binding a non-loopback address with `--host` extends the allowed `Host`

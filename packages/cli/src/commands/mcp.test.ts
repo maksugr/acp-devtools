@@ -255,9 +255,9 @@ describe('MCP server — tools/call', () => {
         const { client, close } = await withClient();
         try {
             const res = await client.callTool({ name: 'list_agent_shortcuts', arguments: {} });
-            const body = parseJsonContent(
-                (res.content as Array<{ text?: unknown }>)[0]?.text,
-            ) as { agents: Array<{ shortName: string; displayName: string }> };
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                agents: Array<{ shortName: string; displayName: string }>;
+            };
             const names = body.agents.map((a) => a.shortName);
             expect(names).toContain('junie');
             expect(names).toContain('goose');

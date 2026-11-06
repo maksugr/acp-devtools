@@ -29,7 +29,13 @@ const mk = (overrides: Partial<CapturedMessage> & { seq: number }): CapturedMess
 describe('buildPerformanceInsights — hotspot', () => {
     it('flags the method that dominates total wall time (≥40%)', () => {
         const perMethod = [
-            stat({ method: 'session/prompt', count: 3, totalLatencyMs: 8000, latencies: [2000, 3000, 3000], p50: 3000 }),
+            stat({
+                method: 'session/prompt',
+                count: 3,
+                totalLatencyMs: 8000,
+                latencies: [2000, 3000, 3000],
+                p50: 3000,
+            }),
             stat({ method: 'fs/read', count: 10, totalLatencyMs: 200, latencies: [20], p50: 20 }),
         ];
         const insights = buildPerformanceInsights([], perMethod);
@@ -81,7 +87,16 @@ describe('buildPerformanceInsights — long tail', () => {
 describe('buildPerformanceInsights — busiest', () => {
     it('flags a method that dominates traffic by both absolute count and ratio', () => {
         const perMethod = [
-            stat({ method: 'fs/read_text_file', count: 120, sampleSize: 0, latencies: [], p50: null, p99: null, max: null, totalLatencyMs: null }),
+            stat({
+                method: 'fs/read_text_file',
+                count: 120,
+                sampleSize: 0,
+                latencies: [],
+                p50: null,
+                p99: null,
+                max: null,
+                totalLatencyMs: null,
+            }),
             stat({ method: 'initialize', count: 1 }),
         ];
         const insights = buildPerformanceInsights([], perMethod);
@@ -95,7 +110,17 @@ describe('buildPerformanceInsights — busiest', () => {
         // a useless BUSIEST insight. Threshold now requires both absolute
         // count ≥50 and ≥2.5× the next-busiest method.
         const perMethod = [
-            stat({ method: 'session/update', kind: 'notification', count: 20, sampleSize: 0, latencies: [], p50: null, p99: null, max: null, totalLatencyMs: null }),
+            stat({
+                method: 'session/update',
+                kind: 'notification',
+                count: 20,
+                sampleSize: 0,
+                latencies: [],
+                p50: null,
+                p99: null,
+                max: null,
+                totalLatencyMs: null,
+            }),
             stat({ method: 'session/prompt', count: 2 }),
         ];
         const insights = buildPerformanceInsights([], perMethod);
@@ -104,8 +129,26 @@ describe('buildPerformanceInsights — busiest', () => {
 
     it('does not flag busiest when it is only marginally bigger than the runner-up', () => {
         const perMethod = [
-            stat({ method: 'a', count: 60, sampleSize: 0, latencies: [], p50: null, p99: null, max: null, totalLatencyMs: null }),
-            stat({ method: 'b', count: 50, sampleSize: 0, latencies: [], p50: null, p99: null, max: null, totalLatencyMs: null }),
+            stat({
+                method: 'a',
+                count: 60,
+                sampleSize: 0,
+                latencies: [],
+                p50: null,
+                p99: null,
+                max: null,
+                totalLatencyMs: null,
+            }),
+            stat({
+                method: 'b',
+                count: 50,
+                sampleSize: 0,
+                latencies: [],
+                p50: null,
+                p99: null,
+                max: null,
+                totalLatencyMs: null,
+            }),
         ];
         const insights = buildPerformanceInsights([], perMethod);
         expect(insights.find((i) => i.kind === 'busiest')).toBeUndefined();
@@ -151,14 +194,44 @@ describe('buildPerformanceInsights — errors', () => {
     it('attributes error frames to their paired request method', () => {
         const messages: CapturedMessage[] = [
             mk({ seq: 1, method: 'session/load', rpcId: '1' }),
-            mk({ seq: 2, kind: 'error', rpcId: '1', direction: 'agent-to-editor', method: undefined }),
+            mk({
+                seq: 2,
+                kind: 'error',
+                rpcId: '1',
+                direction: 'agent-to-editor',
+                method: undefined,
+            }),
             mk({ seq: 3, method: 'session/prompt', rpcId: '2' }),
-            mk({ seq: 4, kind: 'response', rpcId: '2', direction: 'agent-to-editor', method: undefined }),
+            mk({
+                seq: 4,
+                kind: 'response',
+                rpcId: '2',
+                direction: 'agent-to-editor',
+                method: undefined,
+            }),
         ];
         const insights = buildPerformanceInsights(messages, []);
         const err = insights.find((i) => i.kind === 'errors');
         expect(err?.methods).toEqual(['session/load']);
         expect(err?.summary).toMatch(/1 method returned an error/);
+    });
+
+    it('attributes an error to the request from the other side when ids collide', () => {
+        const messages: CapturedMessage[] = [
+            mk({ seq: 1, method: 'session/prompt', rpcId: 3 }),
+            mk({ seq: 2, method: 'fs/read_text_file', rpcId: 3, direction: 'agent-to-editor' }),
+            // The editor answers the agent's read; the agent fails the prompt.
+            mk({ seq: 3, kind: 'response', rpcId: 3, method: undefined }),
+            mk({
+                seq: 4,
+                kind: 'error',
+                rpcId: 3,
+                direction: 'agent-to-editor',
+                method: undefined,
+            }),
+        ];
+        const err = buildPerformanceInsights(messages, []).find((i) => i.kind === 'errors');
+        expect(err?.methods).toEqual(['session/prompt']);
     });
 
     it('omits the errors insight when no kind=error frames exist', () => {
@@ -175,11 +248,23 @@ describe('buildPerformanceInsights — empty + ordering', () => {
     it('preserves hotspot → long-tail → outlier → busiest → errors ordering when all fire', () => {
         const messages: CapturedMessage[] = [
             mk({ seq: 1, method: 'session/load', rpcId: '1' }),
-            mk({ seq: 2, kind: 'error', rpcId: '1', direction: 'agent-to-editor', method: undefined }),
+            mk({
+                seq: 2,
+                kind: 'error',
+                rpcId: '1',
+                direction: 'agent-to-editor',
+                method: undefined,
+            }),
         ];
         const perMethod = [
             // HOTSPOT — dominates wall time.
-            stat({ method: 'session/prompt', count: 3, totalLatencyMs: 9000, latencies: [3000, 3000, 3000], p50: 3000 }),
+            stat({
+                method: 'session/prompt',
+                count: 3,
+                totalLatencyMs: 9000,
+                latencies: [3000, 3000, 3000],
+                p50: 3000,
+            }),
             // LONG TAIL — p99 ≫ p50.
             stat({
                 method: 'fs/read',

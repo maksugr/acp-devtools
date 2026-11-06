@@ -55,10 +55,7 @@ describe('sortPerMethod', () => {
     });
 
     it('does not mutate the input array', () => {
-        const rows: MethodStats[] = [
-            mk({ method: 'b', count: 2 }),
-            mk({ method: 'a', count: 1 }),
-        ];
+        const rows: MethodStats[] = [mk({ method: 'b', count: 2 }), mk({ method: 'a', count: 1 })];
         const snapshot = rows.map((r) => r.method);
         sortPerMethod(rows, 'count', 'desc');
         expect(rows.map((r) => r.method)).toEqual(snapshot);
@@ -85,9 +82,7 @@ beforeEach(() => {
 
 describe('PerformancePanel — visibility', () => {
     it('renders nothing when open=false', () => {
-        const { container } = render(
-            <PerformancePanel open={false} onClose={vi.fn()} />,
-        );
+        const { container } = render(<PerformancePanel open={false} onClose={vi.fn()} />);
         expect(container.firstChild).toBeNull();
     });
 
@@ -160,10 +155,7 @@ describe('PerformancePanel — table content', () => {
 describe('PerformancePanel — sortable headers', () => {
     it('clicking a column header toggles its sort indicator', () => {
         useMessagesStore.setState({
-            messages: [
-                msg(1, { method: 'a' }),
-                msg(2, { method: 'b' }),
-            ],
+            messages: [msg(1, { method: 'a' }), msg(2, { method: 'b' })],
         });
         render(<PerformancePanel open={true} onClose={vi.fn()} />);
         const methodHeader = screen.getByRole('columnheader', { name: /method/ });

@@ -18,12 +18,14 @@ beforeEach(() => {
     vi.clearAllMocks();
 });
 
-function renderWith(props: Partial<{
-    status: ConnectionStatus;
-    lastError: string | null;
-    url: string;
-    captureCount: number;
-}> = {}) {
+function renderWith(
+    props: Partial<{
+        status: ConnectionStatus;
+        lastError: string | null;
+        url: string;
+        captureCount: number;
+    }> = {},
+) {
     return render(
         <EmptyState
             status={props.status ?? 'idle'}
@@ -72,9 +74,7 @@ describe('EmptyState — capture count message', () => {
     });
     it('uses plural form for 2+ captures', () => {
         renderWith({ captureCount: 3 });
-        expect(
-            screen.getByText(/3 live captures discovered/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/3 live captures discovered/i)).toBeInTheDocument();
     });
 });
 
@@ -97,8 +97,6 @@ describe('EmptyState — embeds IdeSnippets', () => {
     it('renders the Zed snippet from IdeSnippets', async () => {
         renderWith();
         // Zed tab is selected by default; its JSON has the agent_server label
-        expect(
-            await screen.findByText(/Claude Code \(via ACP Devtools\)/),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/Claude Code \(via ACP Devtools\)/)).toBeInTheDocument();
     });
 });

@@ -73,9 +73,7 @@ beforeEach(() => {
 describe('SessionInfoPanel — visibility', () => {
     it('renders nothing when open=false', () => {
         useMessagesStore.setState({ session: sessionFixture(), messages: [initRequest] });
-        const { container } = render(
-            <SessionInfoPanel open={false} onClose={vi.fn()} />,
-        );
+        const { container } = render(<SessionInfoPanel open={false} onClose={vi.fn()} />);
         expect(container.firstChild).toBeNull();
     });
 

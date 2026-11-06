@@ -129,7 +129,17 @@ export function registerDiffCommand(program: Command): void {
 
             const st = createStyler(colorEnabled(process.stdout));
             process.stdout.write(
-                renderDiff(infoA, infoB, msgsA.length, msgsB.length, diff, meta, perf, Boolean(opts.full), st),
+                renderDiff(
+                    infoA,
+                    infoB,
+                    msgsA.length,
+                    msgsB.length,
+                    diff,
+                    meta,
+                    perf,
+                    Boolean(opts.full),
+                    st,
+                ),
             );
             writeRedactionNote();
         });
@@ -208,9 +218,15 @@ export function renderDiff(
     st: Styler = defaultStyler(),
 ): string {
     const lines: string[] = [];
-    lines.push(`${st.bold('diff')}  ${st.cyan(`#${infoA.id}`)}  ${st.dim('→')}  ${st.cyan(`#${infoB.id}`)}\n`);
-    lines.push(`  ${st.cyan(`A #${infoA.id}`)}  ${shortLabel(infoA)}  ${st.dim(`(${countA} msg${countA === 1 ? '' : 's'})`)}\n`);
-    lines.push(`  ${st.cyan(`B #${infoB.id}`)}  ${shortLabel(infoB)}  ${st.dim(`(${countB} msg${countB === 1 ? '' : 's'})`)}\n`);
+    lines.push(
+        `${st.bold('diff')}  ${st.cyan(`#${infoA.id}`)}  ${st.dim('→')}  ${st.cyan(`#${infoB.id}`)}\n`,
+    );
+    lines.push(
+        `  ${st.cyan(`A #${infoA.id}`)}  ${shortLabel(infoA)}  ${st.dim(`(${countA} msg${countA === 1 ? '' : 's'})`)}\n`,
+    );
+    lines.push(
+        `  ${st.cyan(`B #${infoB.id}`)}  ${shortLabel(infoB)}  ${st.dim(`(${countB} msg${countB === 1 ? '' : 's'})`)}\n`,
+    );
     lines.push('\n');
 
     lines.push(renderInfoSection(meta, st));
@@ -226,7 +242,9 @@ export function renderDiff(
     lines.push('\n');
 
     if (sum.changed === 0 && sum.added === 0 && sum.removed === 0 && !full) {
-        lines.push(st.green('sessions are identical') + st.dim(' (no field-level differences)') + '\n');
+        lines.push(
+            st.green('sessions are identical') + st.dim(' (no field-level differences)') + '\n',
+        );
         return lines.join('');
     }
 
@@ -304,7 +322,9 @@ export function renderPerfSection(perf: MethodStatsDelta[], st: Styler = default
     ];
     const body = perf.map((d) => {
         const method =
-            d.method.length > PERF_METHOD_MAX ? d.method.slice(0, PERF_METHOD_MAX - 1) + '…' : d.method;
+            d.method.length > PERF_METHOD_MAX
+                ? d.method.slice(0, PERF_METHOD_MAX - 1) + '…'
+                : d.method;
         return [
             method,
             colorKind(st, d.kind, d.kind === 'request' ? 'req' : 'ntf'),

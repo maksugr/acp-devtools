@@ -2,13 +2,13 @@
 
 Every UI control has a CLI equivalent — the inspector is one frontend among others, not a hard dependency. Run any command with `--help` for the colorized, grouped flag listing.
 
-| Group | Commands |
-|---|---|
-| **Capture** | `proxy`, `mock-agent`, `mock-editor` |
+| Group       | Commands                                                                 |
+| ----------- | ------------------------------------------------------------------------ |
+| **Capture** | `proxy`, `mock-agent`, `mock-editor`                                     |
 | **Inspect** | `list`, `inspect`, `search`, `stats`, `diff`, `session-info`, `validate` |
-| **View** | `ui`, `replay` |
-| **Manage** | `export`, `import`, `delete`, `backfill-metadata` |
-| **Setup** | `setup`, `agents`, `doctor`, `mcp` |
+| **View**    | `ui`, `replay`                                                           |
+| **Manage**  | `export`, `import`, `delete`, `backfill-metadata`                        |
+| **Setup**   | `setup`, `agents`, `doctor`, `mcp`                                       |
 
 The inspector and MCP server have their own docs: [UI guide](ui.md) ·
 [MCP server](mcp.md). Scenario-driven walkthroughs (headless debugging, A/B
@@ -16,8 +16,8 @@ two agents, mock-based CI) live in [recipes](recipes.md).
 
 ## Configuration
 
-| Env var | Default | Purpose |
-|---|---|---|
+| Env var             | Default           | Purpose                                                      |
+| ------------------- | ----------------- | ------------------------------------------------------------ |
 | `ACP_DEVTOOLS_HOME` | `~/.acp-devtools` | root dir for `captures.db`, `active/`, future per-host state |
 
 ---
@@ -38,17 +38,17 @@ acp-devtools proxy --save-to /tmp/session.db \
     npx -y @agentclientprotocol/claude-agent-acp
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--agent <name>` | — | preset for a known agent (`claude-code`, `codex`, `goose`, `opencode`, `junie`) |
-| `--log <mode>` | `none` | per-message log to stderr (`json`, `pretty`, `none`) |
-| `--cwd <dir>` | inherit | working directory for the agent process |
-| `--save-to <file>` | `~/.acp-devtools/captures.db` | shared captures SQLite |
-| `--no-save` | — | disable persistence entirely |
-| `--session-name <name>` | — | human label stored with the session |
-| `--ws-port <port>` | `0` | WebSocket port; `0` lets the OS pick an ephemeral one |
-| `--ws-host <host>` | `127.0.0.1` | WebSocket bind address |
-| `--no-ws` | — | disable the WebSocket server entirely |
+| Flag                    | Default                       | Meaning                                                                         |
+| ----------------------- | ----------------------------- | ------------------------------------------------------------------------------- |
+| `--agent <name>`        | —                             | preset for a known agent (`claude-code`, `codex`, `goose`, `opencode`, `junie`) |
+| `--log <mode>`          | `none`                        | per-message log to stderr (`json`, `pretty`, `none`)                            |
+| `--cwd <dir>`           | inherit                       | working directory for the agent process                                         |
+| `--save-to <file>`      | `~/.acp-devtools/captures.db` | shared captures SQLite                                                          |
+| `--no-save`             | —                             | disable persistence entirely                                                    |
+| `--session-name <name>` | —                             | human label stored with the session                                             |
+| `--ws-port <port>`      | `0`                           | WebSocket port; `0` lets the OS pick an ephemeral one                           |
+| `--ws-host <host>`      | `127.0.0.1`                   | WebSocket bind address                                                          |
+| `--no-ws`               | —                             | disable the WebSocket server entirely                                           |
 
 ## `replay [id]`
 
@@ -63,17 +63,17 @@ acp-devtools replay 5 --db /tmp/session.db --ws-port 3737    # session 5 in a cu
 acp-devtools replay --file /tmp/capture.json --ws-port 3737  # a JSON export
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--file <path>` | — | replay a JSON export instead of a stored session |
-| `--ws-port <port>` | `3737` | WebSocket port |
-| `--ws-host <host>` | `127.0.0.1` | WebSocket bind address |
+| Flag               | Default                       | Meaning                                          |
+| ------------------ | ----------------------------- | ------------------------------------------------ |
+| `--db <path>`      | `~/.acp-devtools/captures.db` | which database to read                           |
+| `--file <path>`    | —                             | replay a JSON export instead of a stored session |
+| `--ws-port <port>` | `3737`                        | WebSocket port                                   |
+| `--ws-host <host>` | `127.0.0.1`                   | WebSocket bind address                           |
 
 ## `list`
 
 Lists saved sessions in the database, newest first. Imported sessions are
-sorted by when they were *imported*, not by their original capture time.
+sorted by when they were _imported_, not by their original capture time.
 
 ```bash
 acp-devtools list                          # default db, 50 rows
@@ -82,14 +82,14 @@ acp-devtools list --client WebStorm        # filter by client name/version/platf
 acp-devtools list --limit 5 --json         # machine-readable
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--limit <n>` | `50` | maximum rows, counted AFTER filters — `--imported --limit 5` returns the 5 newest imported sessions |
-| `--imported` | — | only imported sessions (mutually exclusive with `--saved` — together they exit `2`) |
-| `--saved` | — | only non-imported (live-captured) sessions |
-| `--client <s>` | — | case-insensitive substring match on `client_name`/`client_version`/`client_platform` |
-| `--json` | — | emit JSON instead of an aligned table |
+| Flag           | Default                       | Meaning                                                                                             |
+| -------------- | ----------------------------- | --------------------------------------------------------------------------------------------------- |
+| `--db <path>`  | `~/.acp-devtools/captures.db` | which database to read                                                                              |
+| `--limit <n>`  | `50`                          | maximum rows, counted AFTER filters — `--imported --limit 5` returns the 5 newest imported sessions |
+| `--imported`   | —                             | only imported sessions (mutually exclusive with `--saved` — together they exit `2`)                 |
+| `--saved`      | —                             | only non-imported (live-captured) sessions                                                          |
+| `--client <s>` | —                             | case-insensitive substring match on `client_name`/`client_version`/`client_platform`                |
+| `--json`       | —                             | emit JSON instead of an aligned table                                                               |
 
 Sample output (colorized on a TTY — `#id` cyan, `saved` green / `imported`
 amber; plain when piped or under `NO_COLOR`):
@@ -127,19 +127,19 @@ acp-devtools inspect 23 --format jsonl | jq -r 'select(.method == "session/promp
 acp-devtools inspect 23 --format raw > rerun-input.jsonl
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--limit <n>` | `500` | max messages to print |
-| `--from-seq <n>` | — | start from this seq (inclusive) |
-| `--dir <codes>` | both | direction filter: `out`, `in`, `out,in` |
-| `--kind <codes>` | all | kind filter: comma-separated subset of `req,rsp,ntf,err,unk` |
-| `--method <pattern>` | — | substring match on method name (case-insensitive) |
-| `--grep <text>` | — | substring match on the raw frame (case-insensitive) |
-| `--paired` | — | only req/rsp/err — skip notifications |
-| `--no-preview` | — | omit the PREVIEW column (useful on narrow terminals or for grep) |
-| `--spec` | — | add a SPEC column showing schema-validation status (`✓` / `⚠N` / blank for skipped) |
-| `-f, --format <mode>` | `table` | `table`, `jsonl` (CapturedMessage per line), `raw` (just the wire frames) |
+| Flag                  | Default                       | Meaning                                                                             |
+| --------------------- | ----------------------------- | ----------------------------------------------------------------------------------- |
+| `--db <path>`         | `~/.acp-devtools/captures.db` | which database to read                                                              |
+| `--limit <n>`         | `500`                         | max messages to print                                                               |
+| `--from-seq <n>`      | —                             | start from this seq (inclusive)                                                     |
+| `--dir <codes>`       | both                          | direction filter: `out`, `in`, `out,in`                                             |
+| `--kind <codes>`      | all                           | kind filter: comma-separated subset of `req,rsp,ntf,err,unk`                        |
+| `--method <pattern>`  | —                             | substring match on method name (case-insensitive)                                   |
+| `--grep <text>`       | —                             | substring match on the raw frame (case-insensitive)                                 |
+| `--paired`            | —                             | only req/rsp/err — skip notifications                                               |
+| `--no-preview`        | —                             | omit the PREVIEW column (useful on narrow terminals or for grep)                    |
+| `--spec`              | —                             | add a SPEC column showing schema-validation status (`✓` / `⚠N` / blank for skipped) |
+| `-f, --format <mode>` | `table`                       | `table`, `jsonl` (CapturedMessage per line), `raw` (just the wire frames)           |
 
 Sample table output (colorized on a TTY):
 
@@ -177,14 +177,14 @@ acp-devtools search prompt --in-method            # match method names only
 acp-devtools search initialize --json | jq        # programmatic
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to search |
-| `--limit <n>` | `50` | maximum hits |
-| `--session <id>` | — | restrict to one session |
-| `--in-method` | — | match method names only |
-| `--in-payload` | — | match inside the frame body only |
-| `--json` | — | machine-readable JSON instead of a table |
+| Flag             | Default                       | Meaning                                  |
+| ---------------- | ----------------------------- | ---------------------------------------- |
+| `--db <path>`    | `~/.acp-devtools/captures.db` | which database to search                 |
+| `--limit <n>`    | `50`                          | maximum hits                             |
+| `--session <id>` | —                             | restrict to one session                  |
+| `--in-method`    | —                             | match method names only                  |
+| `--in-payload`   | —                             | match inside the frame body only         |
+| `--json`         | —                             | machine-readable JSON instead of a table |
 
 ```
 LOC      METHOD          MATCH
@@ -209,11 +209,11 @@ acp-devtools stats 23 --by-method
 acp-devtools stats 23 --json | jq '.latency.p99'
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--by-method` | — | append per-method table (method · count · p50 · p99 · total · ASCII latency distribution) |
-| `--json` | — | machine-readable JSON instead of human-readable text |
+| Flag          | Default                       | Meaning                                                                                   |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read                                                                    |
+| `--by-method` | —                             | append per-method table (method · count · p50 · p99 · total · ASCII latency distribution) |
+| `--json`      | —                             | machine-readable JSON instead of human-readable text                                      |
 
 Sample output (section labels and latency tones are colorized on a TTY; plain
 when piped or under `NO_COLOR`):
@@ -266,7 +266,7 @@ baseline (left), `b` is the new side (right):
    excluded as volatile.)
 2. **`PERF`** — per-method latency, A vs B, with the p99 delta.
 3. **`FRAMES`** — frame-level alignment via an LCS over `(direction, kind,
-   method)` (responses align by their paired request's method); matched frames
+method)` (responses align by their paired request's method); matched frames
    compared field-by-field on the payload, volatile `id` ignored.
 
 INFO and PERF are aggregates, so — unlike the frame layer — they stay
@@ -279,12 +279,12 @@ acp-devtools diff 23 41 --full          # show unchanged frames too
 acp-devtools diff 23 41 --json | jq '.metadata, .perf, .summary'
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--full` | — | print unchanged frames too (default collapses equal runs) |
-| `--json` | — | machine-readable JSON (`metadata` + `perf` + `summary` + `rows`) |
-| `--raw` | off (redacts) | keep auth headers and proxy tokens in printed values — use only when the output stays on YOUR machine |
+| Flag          | Default                       | Meaning                                                                                               |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read                                                                                |
+| `--full`      | —                             | print unchanged frames too (default collapses equal runs)                                             |
+| `--json`      | —                             | machine-readable JSON (`metadata` + `perf` + `summary` + `rows`)                                      |
+| `--raw`       | off (redacts)                 | keep auth headers and proxy tokens in printed values — use only when the output stays on YOUR machine |
 
 Auth headers and proxy tokens are redacted by default, before alignment —
 same rules as [`export`](#export-id). That kills two birds: nothing live
@@ -322,7 +322,7 @@ FRAMES
 ```
 
 Markers use set-membership, not code-diff vocabulary — these are two
-independent sessions, so a frame is *only in A* or *only in B*, never
+independent sessions, so a frame is _only in A_ or _only in B_, never
 "added"/"removed": `=` same · `≠` differs (each field change indented below,
 where `~`/`+`/`-` are genuine key edits within that one payload) · `◂` only in
 A · `▸` only in B. The inspector exposes the same three layers as Frames · Info
@@ -344,11 +344,11 @@ acp-devtools session-info 23
 acp-devtools session-info 23 --json | jq '.metadata.clientCapabilities'
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--json` | — | machine-readable JSON instead of human-readable text |
-| `--raw` | off (redacts) | keep auth headers and proxy tokens (the JetBrains `proxyConfig` gateway token prints as `<REDACTED>` by default) |
+| Flag          | Default                       | Meaning                                                                                                          |
+| ------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read                                                                                           |
+| `--json`      | —                             | machine-readable JSON instead of human-readable text                                                             |
+| `--raw`       | off (redacts)                 | keep auth headers and proxy tokens (the JetBrains `proxyConfig` gateway token prints as `<REDACTED>` by default) |
 
 Sample output for a WebStorm capture:
 
@@ -395,12 +395,12 @@ acp-devtools validate 23 --method session/prompt  # one method
 acp-devtools validate 23 --json                   # CI-friendly, exit 1 on any violation
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--limit <n>` | `200` | maximum violations to print |
-| `--method <pattern>` | — | only report messages whose method contains this substring |
-| `--json` | — | machine-readable JSON (CI / scripts) |
+| Flag                 | Default                       | Meaning                                                   |
+| -------------------- | ----------------------------- | --------------------------------------------------------- |
+| `--db <path>`        | `~/.acp-devtools/captures.db` | which database to read                                    |
+| `--limit <n>`        | `200`                         | maximum violations to print                               |
+| `--method <pattern>` | —                             | only report messages whose method contains this substring |
+| `--json`             | —                             | machine-readable JSON (CI / scripts)                      |
 
 Sample output for a corrupted session:
 
@@ -435,11 +435,11 @@ Serves the inspector UI from the bundle embedded in the CLI tarball. See the
 acp-devtools ui --port 3737
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--port` | `3737` | HTTP port |
-| `--host` | `127.0.0.1` | bind address |
-| `--no-open` | — | suppress the browser auto-open |
+| Flag                   | Default                       | Meaning                                   |
+| ---------------------- | ----------------------------- | ----------------------------------------- |
+| `--port`               | `3737`                        | HTTP port                                 |
+| `--host`               | `127.0.0.1`                   | bind address                              |
+| `--no-open`            | —                             | suppress the browser auto-open            |
 | `--captures-db <file>` | `~/.acp-devtools/captures.db` | DB for `/api/sessions` and `/replay/<id>` |
 
 ## `export [id]`
@@ -470,12 +470,12 @@ acp-devtools export 5 --db /tmp/session.db -o c.json # session 5 from a custom D
 acp-devtools export 21 --raw                         # keep all secrets (self-debug only)
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `-o, --output <file>` | stdout | write JSON to a file |
-| `--no-pretty` | — | compact one-line JSON (diff / grep friendly) |
-| `--raw` | off (redacts) | keep auth headers and proxy tokens — use only when the export stays on YOUR machine |
+| Flag                  | Default                       | Meaning                                                                             |
+| --------------------- | ----------------------------- | ----------------------------------------------------------------------------------- |
+| `--db <path>`         | `~/.acp-devtools/captures.db` | which database to read                                                              |
+| `-o, --output <file>` | stdout                        | write JSON to a file                                                                |
+| `--no-pretty`         | —                             | compact one-line JSON (diff / grep friendly)                                        |
+| `--raw`               | off (redacts)                 | keep auth headers and proxy tokens — use only when the export stays on YOUR machine |
 
 ## `import <file>`
 
@@ -492,10 +492,10 @@ id=$(acp-devtools import capture.json --quiet)
 acp-devtools list --json | jq ".[] | select(.id == $id)"
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to write to |
-| `--quiet` | — | suppress the stderr status line |
+| Flag          | Default                       | Meaning                         |
+| ------------- | ----------------------------- | ------------------------------- |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to write to      |
+| `--quiet`     | —                             | suppress the stderr status line |
 
 ## `delete <id…>`
 
@@ -539,21 +539,21 @@ To use as a real editor agent, point your `agent_servers` at it:
         "MockAgent": {
             "type": "custom",
             "command": "acp-devtools",
-            "args": ["mock-agent", "--session", "23"]
-        }
-    }
+            "args": ["mock-agent", "--session", "23"],
+        },
+    },
 }
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--session <id>` | latest | session id in `--db` |
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--script <file>` | — | JSON export; mutually exclusive with `--session` |
-| `--log <mode>` | `none` | echo every wire frame to stderr (`json`, `pretty`, `none`) |
-| `--realtime` | — | respect the recording's timestamps (good for demos; off for CI speed) |
-| `--save-to <file>` | — | persist the editor↔mock conversation to a SQLite DB |
-| `--session-name <name>` | — | label stored with the saved session |
+| Flag                    | Default                       | Meaning                                                               |
+| ----------------------- | ----------------------------- | --------------------------------------------------------------------- |
+| `--session <id>`        | latest                        | session id in `--db`                                                  |
+| `--db <path>`           | `~/.acp-devtools/captures.db` | which database to read                                                |
+| `--script <file>`       | —                             | JSON export; mutually exclusive with `--session`                      |
+| `--log <mode>`          | `none`                        | echo every wire frame to stderr (`json`, `pretty`, `none`)            |
+| `--realtime`            | —                             | respect the recording's timestamps (good for demos; off for CI speed) |
+| `--save-to <file>`      | —                             | persist the editor↔mock conversation to a SQLite DB                   |
+| `--session-name <name>` | —                             | label stored with the saved session                                   |
 
 Limitations (v1 record-replay only): strict in-order playback. If the real
 editor sends frames in a different order than the recording, the mock breaks.
@@ -584,16 +584,16 @@ acp-devtools mock-editor --session 23 \
     /path/to/your-agent-v2
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--session <id>` | latest | session id in `--db` |
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--script <file>` | — | JSON export; mutually exclusive with `--session` |
-| `--cwd <dir>` | inherit | working directory for the agent process |
-| `--log <mode>` | `none` | echo every wire frame to stderr (`json`, `pretty`, `none`) |
-| `--realtime` | — | respect the recording's timestamps (otherwise replay is instant) |
-| `--save-to <file>` | — | persist the mock↔agent conversation for later inspect / diff |
-| `--session-name <name>` | — | label stored with the saved session |
+| Flag                    | Default                       | Meaning                                                          |
+| ----------------------- | ----------------------------- | ---------------------------------------------------------------- |
+| `--session <id>`        | latest                        | session id in `--db`                                             |
+| `--db <path>`           | `~/.acp-devtools/captures.db` | which database to read                                           |
+| `--script <file>`       | —                             | JSON export; mutually exclusive with `--session`                 |
+| `--cwd <dir>`           | inherit                       | working directory for the agent process                          |
+| `--log <mode>`          | `none`                        | echo every wire frame to stderr (`json`, `pretty`, `none`)       |
+| `--realtime`            | —                             | respect the recording's timestamps (otherwise replay is instant) |
+| `--save-to <file>`      | —                             | persist the mock↔agent conversation for later inspect / diff     |
+| `--session-name <name>` | —                             | label stored with the saved session                              |
 
 The agent inherits the current environment; pass anything special via the shell
 (`FOO=bar acp-devtools mock-editor …`). Signals (SIGINT, SIGTERM) are forwarded
@@ -612,13 +612,13 @@ acp-devtools setup junie --editor jetbrains --write  # merge into ~/.jetbrains/a
 acp-devtools setup --editor zed -- npx -y @your-scope/your-acp   # custom agent
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--editor <name>` | — | required: `zed` or `jetbrains` |
-| `--name <label>` | derived | display name for the agent entry |
-| `--config-path <path>` | per-editor default | override the config file location |
-| `--write` | off | merge into the config file instead of printing |
-| `--no-color` | — | disable ANSI colour |
+| Flag                   | Default            | Meaning                                        |
+| ---------------------- | ------------------ | ---------------------------------------------- |
+| `--editor <name>`      | —                  | required: `zed` or `jetbrains`                 |
+| `--name <label>`       | derived            | display name for the agent entry               |
+| `--config-path <path>` | per-editor default | override the config file location              |
+| `--write`              | off                | merge into the config file instead of printing |
+| `--no-color`           | —                  | disable ANSI colour                            |
 
 Without `--write` it prints the block plus where to paste it; with `--write` it
 inserts only the `agent_servers.<name>` slot into the file (creating it if
@@ -677,10 +677,10 @@ acp-devtools mcp --db /tmp/session.db     # alternative database
 acp-devtools mcp --name acp-prod          # custom server name
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--name <name>` | `acp-devtools` | server name advertised in MCP handshake |
+| Flag            | Default                       | Meaning                                 |
+| --------------- | ----------------------------- | --------------------------------------- |
+| `--db <path>`   | `~/.acp-devtools/captures.db` | which database to read                  |
+| `--name <name>` | `acp-devtools`                | server name advertised in MCP handshake |
 
 ## `backfill-metadata [id]`
 
@@ -695,10 +695,10 @@ acp-devtools backfill-metadata 23          # single session
 acp-devtools backfill-metadata --json      # for scripts
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read/write |
-| `--json` | — | machine-readable JSON instead of text table |
+| Flag          | Default                       | Meaning                                     |
+| ------------- | ----------------------------- | ------------------------------------------- |
+| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read/write                |
+| `--json`      | —                             | machine-readable JSON instead of text table |
 
 When to run it: after `import`-ing JSON sessions from another machine (the proxy
 never observed those messages, so its live-detection path didn't fire), or

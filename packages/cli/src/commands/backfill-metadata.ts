@@ -65,9 +65,9 @@ export function backfillSession(db: SqliteDatabase, id: number): BackfillResult 
 }
 
 export function listSessionIds(db: SqliteDatabase): number[] {
-    const rows = db
-        .prepare(`SELECT id FROM sessions ORDER BY id ASC`)
-        .all() as Array<{ id: number }>;
+    const rows = db.prepare(`SELECT id FROM sessions ORDER BY id ASC`).all() as Array<{
+        id: number;
+    }>;
     return rows.map((r) => r.id);
 }
 
@@ -100,8 +100,7 @@ export function registerBackfillMetadataCommand(program: Command): void {
                 process.exit(1);
             }
 
-            const targetIds: number[] =
-                targetId !== null ? [targetId] : listSessionIds(db);
+            const targetIds: number[] = targetId !== null ? [targetId] : listSessionIds(db);
 
             const results: BackfillResult[] = [];
             for (const id of targetIds) results.push(backfillSession(db, id));

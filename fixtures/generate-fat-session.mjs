@@ -124,12 +124,17 @@ function reqInitialize() {
 
 function reqSessionNew() {
     const id = ++rpcId;
-    pushFrame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/new',
-        params: { workspaceUri: 'file:///Users/dev/project' },
-    }, 'session/new');
+    pushFrame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/new',
+            params: { workspaceUri: 'file:///Users/dev/project' },
+        },
+        'session/new',
+    );
     advanceSec(0.5, 2.5);
     pushFrame('agent-to-editor', 'response', {
         jsonrpc: '2.0',
@@ -139,56 +144,76 @@ function reqSessionNew() {
 }
 
 function notifAvailableCommands() {
-    pushFrame('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: {
-            sessionId,
-            update: {
-                sessionUpdate: 'available_commands_update',
-                availableCommands: [
-                    { name: 'debug', description: 'inspect state' },
-                    { name: 'compact', description: 'compact history' },
-                    { name: 'init', description: 'reinitialize project' },
-                    { name: 'review', description: 'review changes' },
-                ],
+    pushFrame(
+        'agent-to-editor',
+        'notification',
+        {
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+                sessionId,
+                update: {
+                    sessionUpdate: 'available_commands_update',
+                    availableCommands: [
+                        { name: 'debug', description: 'inspect state' },
+                        { name: 'compact', description: 'compact history' },
+                        { name: 'init', description: 'reinitialize project' },
+                        { name: 'review', description: 'review changes' },
+                    ],
+                },
             },
         },
-    }, 'session/update');
+        'session/update',
+    );
 }
 
 function reqSetMode(modeId) {
     const id = ++rpcId;
-    pushFrame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/set_mode',
-        params: { sessionId, modeId },
-    }, 'session/set_mode');
+    pushFrame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/set_mode',
+            params: { sessionId, modeId },
+        },
+        'session/set_mode',
+    );
     advanceMs(20, 80);
     pushFrame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: null });
 }
 
 function reqSetModel(modelId) {
     const id = ++rpcId;
-    pushFrame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/set_model',
-        params: { sessionId, modelId },
-    }, 'session/set_model');
+    pushFrame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/set_model',
+            params: { sessionId, modelId },
+        },
+        'session/set_model',
+    );
     advanceMs(20, 80);
     pushFrame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: null });
 }
 
 function reqSetConfigOption(type, value) {
     const id = ++rpcId;
-    pushFrame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/set_config_option',
-        params: { type, value },
-    }, 'session/set_config_option');
+    pushFrame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/set_config_option',
+            params: { type, value },
+        },
+        'session/set_config_option',
+    );
     advanceMs(2, 6);
     pushFrame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: null });
 }
@@ -196,60 +221,80 @@ function reqSetConfigOption(type, value) {
 function streamChunks(text, chunkSize = 24) {
     for (let i = 0; i < text.length; i += chunkSize) {
         advanceMs(15, 60);
-        pushFrame('agent-to-editor', 'notification', {
+        pushFrame(
+            'agent-to-editor',
+            'notification',
+            {
+                jsonrpc: '2.0',
+                method: 'session/update',
+                params: {
+                    sessionId,
+                    update: {
+                        sessionUpdate: 'agent_message_chunk',
+                        content: { text: text.slice(i, i + chunkSize) },
+                    },
+                },
+            },
+            'session/update',
+        );
+    }
+}
+
+function toolCallEdit(file, oldStr, newStr) {
+    pushFrame(
+        'agent-to-editor',
+        'notification',
+        {
             jsonrpc: '2.0',
             method: 'session/update',
             params: {
                 sessionId,
                 update: {
-                    sessionUpdate: 'agent_message_chunk',
-                    content: { text: text.slice(i, i + chunkSize) },
+                    sessionUpdate: 'tool_call',
+                    toolCallId: `tc-${++rpcId}`,
+                    name: 'Edit',
+                    params: { file_path: file, old_string: oldStr, new_string: newStr },
                 },
             },
-        }, 'session/update');
-    }
-}
-
-function toolCallEdit(file, oldStr, newStr) {
-    pushFrame('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: {
-            sessionId,
-            update: {
-                sessionUpdate: 'tool_call',
-                toolCallId: `tc-${++rpcId}`,
-                name: 'Edit',
-                params: { file_path: file, old_string: oldStr, new_string: newStr },
-            },
         },
-    }, 'session/update');
+        'session/update',
+    );
 }
 
 function toolCallBash(cmd) {
-    pushFrame('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: {
-            sessionId,
-            update: {
-                sessionUpdate: 'tool_call',
-                toolCallId: `tc-${++rpcId}`,
-                name: 'Bash',
-                params: { command: cmd },
+    pushFrame(
+        'agent-to-editor',
+        'notification',
+        {
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+                sessionId,
+                update: {
+                    sessionUpdate: 'tool_call',
+                    toolCallId: `tc-${++rpcId}`,
+                    name: 'Bash',
+                    params: { command: cmd },
+                },
             },
         },
-    }, 'session/update');
+        'session/update',
+    );
 }
 
 function fsRead(file) {
     const id = ++rpcId;
-    pushFrame('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'fs/read_text_file',
-        params: { sessionId, path: file },
-    }, 'fs/read_text_file');
+    pushFrame(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'fs/read_text_file',
+            params: { sessionId, path: file },
+        },
+        'fs/read_text_file',
+    );
     advanceMs(2, 28);
     pushFrame('editor-to-agent', 'response', {
         jsonrpc: '2.0',
@@ -260,16 +305,21 @@ function fsRead(file) {
 
 function reqSessionPrompt(text) {
     const id = ++rpcId;
-    pushFrame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: {
-            sessionId,
-            prompt: [{ type: 'text', text }],
-            _meta: { additionalRoots: ['file:///Users/dev/project'] },
+    pushFrame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: {
+                sessionId,
+                prompt: [{ type: 'text', text }],
+                _meta: { additionalRoots: ['file:///Users/dev/project'] },
+            },
         },
-    }, 'session/prompt');
+        'session/prompt',
+    );
     return id;
 }
 
@@ -323,16 +373,30 @@ function bigBurst({ prompts = 3, chunkLen = 200, fsReads = 8, edits = 2, withErr
         // Generate a chunky stream of randomly-sized lines.
         const text = Array.from({ length: between(3, 9) }, () => {
             const line = Array.from({ length: between(8, 14) }, () =>
-                pick(['the', 'parser', 'event', 'agent', 'request', 'value', 'method', 'session', 'state', 'callback']),
+                pick([
+                    'the',
+                    'parser',
+                    'event',
+                    'agent',
+                    'request',
+                    'value',
+                    'method',
+                    'session',
+                    'state',
+                    'callback',
+                ]),
             ).join(' ');
             return line + '.';
-        }).join('\n').slice(0, chunkLen);
+        })
+            .join('\n')
+            .slice(0, chunkLen);
         streamChunks(text, between(16, 40));
         for (let i = 0; i < fsReads; i++) fsRead(pick(FILE_POOL));
         for (let i = 0; i < edits; i++) {
             toolCallEdit(pick(FILE_POOL), `const v${i} = 'old'`, `const v${i} = 'new'`);
         }
-        if (p % 3 === 1) toolCallBash(pick(['npm test', 'git status', 'ls -la src/', 'cat package.json']));
+        if (p % 3 === 1)
+            toolCallBash(pick(['npm test', 'git status', 'ls -la src/', 'cat package.json']));
         advanceSec(0.3, 1.5);
         if (withError && p === Math.floor(prompts / 2)) {
             respPromptError(id, "tool 'Bash' is not available in this environment");
@@ -396,11 +460,14 @@ advanceDays(2.8, 3.2);
     );
     advanceMs(1500, 2500);
     // Massive multi-paragraph stream to stress chunk grouping (~80 chunks)
-    const longText = Array.from({ length: 30 }, (_, i) =>
-        `Paragraph ${i + 1}. ` +
-        Array.from({ length: 30 }, () =>
-            pick(['the', 'parser', 'event', 'agent', 'request', 'value', 'method', 'session']),
-        ).join(' ') + '.',
+    const longText = Array.from(
+        { length: 30 },
+        (_, i) =>
+            `Paragraph ${i + 1}. ` +
+            Array.from({ length: 30 }, () =>
+                pick(['the', 'parser', 'event', 'agent', 'request', 'value', 'method', 'session']),
+            ).join(' ') +
+            '.',
     ).join('\n\n');
     streamChunks(longText, 28);
     advanceMs(200, 600);
@@ -414,7 +481,10 @@ bigBurst({ prompts: 3, fsReads: 6, edits: 2 });
 // A few quick set_config_option toggles to populate the busiest insight
 advanceMin(2, 5);
 for (let i = 0; i < 60; i++) {
-    reqSetConfigOption(pick(['boolean', 'string']), pick([true, false, 'default', 'verbose', 'quiet']));
+    reqSetConfigOption(
+        pick(['boolean', 'string']),
+        pick([true, false, 'default', 'verbose', 'quiet']),
+    );
     advanceMs(150, 600);
 }
 

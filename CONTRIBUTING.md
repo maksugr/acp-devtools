@@ -23,8 +23,8 @@ Requires Node 22+. CI runs this exact sequence on macOS, Linux, and Windows
 npm test               # vitest run — full suite across core / cli / ui
 npm run lint           # eslint
 npm run typecheck      # tsc --noEmit on core + cli + ui
-npm run format         # prettier --write
-npm run precommit      # lint + typecheck + test (also the git hook)
+npm run format         # prettier --write . (CI fails on unformatted files)
+npm run precommit      # lint + format check + typecheck + test (also the git hook)
 ```
 
 ## Try it on fixtures
@@ -69,25 +69,27 @@ npm run dev:ui                 # → http://127.0.0.1:5173/  — pick a session
 1. Open `packages/core/src/agents/registry.ts`.
 2. Add an entry:
 
-   ```ts
-   'your-shortname': {
-       shortName: 'your-shortname',
-       displayName: 'Your Agent',
-       description: 'One-line description that shows up in `--agent` help',
-       command: 'npx',                       // or a binary name on PATH
-       args: ['-y', '@your-scope/your-acp'], // or ['acp']
-       // requiresExternalInstall: true,      // if it's a binary, not an npm pkg
-       // aliases: [['npx', '-y', 'old-name']], // for deprecated names
-   },
-   ```
+    ```ts
+    'your-shortname': {
+        shortName: 'your-shortname',
+        displayName: 'Your Agent',
+        description: 'One-line description that shows up in `--agent` help',
+        command: 'npx',                       // or a binary name on PATH
+        args: ['-y', '@your-scope/your-acp'], // or ['acp']
+        // requiresExternalInstall: true,      // if it's a binary, not an npm pkg
+        // aliases: [['npx', '-y', 'old-name']], // for deprecated names
+    },
+    ```
+
 3. Run `npm test`. The inspector turns an agent command into your `displayName`
    in the session picker; cover that in
    `packages/ui/src/lib/captureLabel.test.ts`:
 
-   ```ts
-   expect(shortAgentName('npx -y @your-scope/your-acp')).toBe('Your Agent');
-   ```
-4. Update the *Supported agents* table in the root `README.md`.
+    ```ts
+    expect(shortAgentName('npx -y @your-scope/your-acp')).toBe('Your Agent');
+    ```
+
+4. Update the _Supported agents_ table in the root `README.md`.
 5. Open a PR.
 
 ## Layout
@@ -156,11 +158,11 @@ on that commit is green. So **a PR that ships code carries its own release**:
 
 Checks on every PR:
 
-| Check           | Passes when                                                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ci-ok`         | lint, typecheck, tests, build and the packed-tarball smoke test pass on Linux / macOS / Windows × Node 22 / 24                                               |
+| Check           | Passes when                                                                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ci-ok`         | lint, typecheck, tests, build and the packed-tarball smoke test pass on Linux / macOS / Windows × Node 22 / 24                                                                 |
 | `release-check` | all version literals agree; shipped files (anything under `packages/` except tests) changed ⇒ version bumped above `main`, CHANGELOG section written, not yet on npm or tagged |
-| `ship-gate`     | a maintainer added the `ship` label; pushing commits that change the diff removes it again (updating the branch from `main` doesn't)                         |
+| `ship-gate`     | a maintainer added the `ship` label; pushing commits that change the diff removes it again (updating the branch from `main` doesn't)                                           |
 
 With all three green, GitHub auto-merges the PR (squash). The
 [Release workflow](.github/workflows/release.yml) then publishes to npm with
@@ -189,7 +191,7 @@ commit (genuine emergencies only): `SKIP_SIMPLE_GIT_HOOKS=1 git commit ...`.
 - ESM with explicit `.js` import extensions (NodeNext); `import type` for
   type-only imports.
 - Tests are colocated `*.test.ts`; ship a test in the same change as the code.
-- Comments only for non-obvious *why* — no narration of what the code does.
+- Comments only for non-obvious _why_ — no narration of what the code does.
 
 ## Security design rules
 

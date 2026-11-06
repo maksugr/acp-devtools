@@ -1,4 +1,24 @@
-import type { CapturedMessage } from './types.js';
+import type { CapturedMessage, MessageDirection } from './types.js';
+
+/**
+ * Correlation key for a JSON-RPC request or its reply. Ids are scoped per
+ * sender: the editor numbers its requests and the agent numbers its own, so
+ * `id: 2` can be a `session/prompt` from the editor *and* a
+ * `session/request_permission` from the agent at the same time. A reply
+ * travels the opposite way to its request, so both sides key on the
+ * request's direction plus the id. Returns `null` for frames that don't
+ * take part in request/reply correlation (notifications, id-less frames).
+ */
+export function rpcCorrelationKey(m: CapturedMessage): string | null {
+    if (m.rpcId === undefined || m.rpcId === null) return null;
+    let requestDirection: MessageDirection;
+    if (m.kind === 'request') requestDirection = m.direction;
+    else if (m.kind === 'response' || m.kind === 'error') {
+        requestDirection =
+            m.direction === 'editor-to-agent' ? 'agent-to-editor' : 'editor-to-agent';
+    } else return null;
+    return `${requestDirection}|${String(m.rpcId)}`;
+}
 
 export interface PairInfo {
     pairSeq: number;
@@ -8,7 +28,7 @@ export interface PairInfo {
 /**
  * Build a bidirectional `seq → paired seq + latency` index by walking the
  * messages in arrival order and matching responses/errors to their preceding
- * requests via `rpcId`. Both sides of a pair are written, so `pairs.get(req.seq)`
+ * requests via {@link rpcCorrelationKey} (direction + `rpcId`). Both sides of a pair are written, so `pairs.get(req.seq)`
  * and `pairs.get(resp.seq)` both return the same `latencyMs`.
  *
  * Sole authoritative pair index — CLI (`stats`, `inspect`, `validate`) and
@@ -19,8 +39,8 @@ export function buildPairIndex(messages: CapturedMessage[]): Map<number, PairInf
     const idToReq = new Map<string, CapturedMessage>();
     const out = new Map<number, PairInfo>();
     for (const m of messages) {
-        if (m.rpcId === undefined || m.rpcId === null) continue;
-        const key = String(m.rpcId);
+        const key = rpcCorrelationKey(m);
+        if (key === null) continue;
         if (m.kind === 'request') {
             idToReq.set(key, m);
         } else if (m.kind === 'response' || m.kind === 'error') {

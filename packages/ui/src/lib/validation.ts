@@ -1,8 +1,5 @@
 import type { CapturedMessage } from '@acp-devtools/core';
-import {
-    validateAcpMessage,
-    type ValidationResult,
-} from '@acp-devtools/core/acp/validate/browser';
+import { validateAcpMessage, type ValidationResult } from '@acp-devtools/core/acp/validate/browser';
 import { buildRequestIndex } from '../store/messagesStore';
 
 export type { ValidationResult } from '@acp-devtools/core/acp/validate/browser';
@@ -17,9 +14,7 @@ export type { ValidationResult } from '@acp-devtools/core/acp/validate/browser';
  * array reference — recomputing on every render of a 500-message timeline
  * costs a few ms but adds up.
  */
-export function buildValidationMap(
-    messages: CapturedMessage[],
-): Map<number, ValidationResult> {
+export function buildValidationMap(messages: CapturedMessage[]): Map<number, ValidationResult> {
     const responseToRequest = buildRequestIndex(messages);
     const seqToMethod = new Map<number, string>();
     for (const m of messages) {
@@ -28,8 +23,7 @@ export function buildValidationMap(
     const out = new Map<number, ValidationResult>();
     for (const m of messages) {
         const reqSeq = responseToRequest.get(m.seq);
-        const pairedMethod =
-            reqSeq !== undefined ? seqToMethod.get(reqSeq) : undefined;
+        const pairedMethod = reqSeq !== undefined ? seqToMethod.get(reqSeq) : undefined;
         const opts: Parameters<typeof validateAcpMessage>[1] = {};
         if (pairedMethod !== undefined) opts.pairedMethod = pairedMethod;
         out.set(m.seq, validateAcpMessage(m, opts));

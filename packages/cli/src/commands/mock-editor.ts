@@ -35,16 +35,22 @@ export function registerMockEditorCommand(program: Command): void {
                 'By default reads from the shared captures database (latest session); use --session for a specific id or --script for a JSON export from a teammate.',
         )
         .passThroughOptions()
-        .argument('<agent>', 'agent executable (e.g. `node fixtures/mock-agent.js` or the path to a real ACP agent)')
+        .argument(
+            '<agent>',
+            'agent executable (e.g. `node fixtures/mock-agent.js` or the path to a real ACP agent)',
+        )
         .argument('[agent-args...]', 'arguments forwarded to the agent')
         .option('--session <id>', 'session id from the captures database (default: latest)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
-        .option('--script <file>', 'load from a JSON export instead of the database (mutually exclusive with --session)')
+        .option(
+            '--script <file>',
+            'load from a JSON export instead of the database (mutually exclusive with --session)',
+        )
         .option('--cwd <dir>', 'working directory for the agent')
         .option('--log <mode>', 'echo every wire frame to stderr (json | pretty | none)', 'none')
         .option(
             '--realtime',
-            'respect the recording\'s timestamps when emitting frames (otherwise replay is instant)',
+            "respect the recording's timestamps when emitting frames (otherwise replay is instant)",
             false,
         )
         .option(

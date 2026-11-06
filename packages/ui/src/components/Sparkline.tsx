@@ -18,13 +18,7 @@ interface SparklineProps {
  * Returns null on empty input so callers can branch on
  * `values.length === 0` before placing this in a layout with fixed width.
  */
-export function Sparkline({
-    values,
-    width = 64,
-    height = 14,
-    className,
-    title,
-}: SparklineProps) {
+export function Sparkline({ values, width = 64, height = 14, className, title }: SparklineProps) {
     if (values.length === 0) return null;
     const max = values[values.length - 1] ?? 0;
     if (max === 0) return null;

@@ -70,15 +70,13 @@ describe('captureLabel', () => {
         expect(captureLabel(capture({ sessionDbId: 7, clientName: 'Zed' }))).toBe(
             '#7 · Zed · Claude Code',
         );
-        expect(
-            captureLabel(capture({ sessionDbId: 7, clientName: 'WebStorm 2026.1.2' })),
-        ).toBe('#7 · WebStorm 2026.1.2 · Claude Code');
+        expect(captureLabel(capture({ sessionDbId: 7, clientName: 'WebStorm 2026.1.2' }))).toBe(
+            '#7 · WebStorm 2026.1.2 · Claude Code',
+        );
     });
     it('sessionName overrides clientName-prefixed agent label', () => {
         expect(
-            captureLabel(
-                capture({ sessionDbId: 7, sessionName: 'demo', clientName: 'Zed' }),
-            ),
+            captureLabel(capture({ sessionDbId: 7, sessionName: 'demo', clientName: 'Zed' })),
         ).toBe('#7 · demo');
     });
 });

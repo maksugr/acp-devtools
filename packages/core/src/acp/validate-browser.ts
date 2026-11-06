@@ -6,7 +6,9 @@
 import schema from '@agentclientprotocol/sdk/schema/schema.json' with { type: 'json' };
 import { createAcpValidator } from './validate-factory.js';
 
-const validator = createAcpValidator(schema as { $defs?: Record<string, { 'x-method'?: unknown }> });
+const validator = createAcpValidator(
+    schema as { $defs?: Record<string, { 'x-method'?: unknown }> },
+);
 export const validateAcpMessage = validator.validateAcpMessage;
 export const knownAcpMethods = validator.knownAcpMethods;
 export type {

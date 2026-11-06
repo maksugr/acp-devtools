@@ -34,7 +34,10 @@ describe('asciiSparkline', () => {
     });
 
     it('compresses long input down to targetWidth', () => {
-        const out = asciiSparkline(Array.from({ length: 100 }, (_, i) => i + 1), 6);
+        const out = asciiSparkline(
+            Array.from({ length: 100 }, (_, i) => i + 1),
+            6,
+        );
         expect(out).toHaveLength(6);
     });
 

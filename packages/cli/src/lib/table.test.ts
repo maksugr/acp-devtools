@@ -37,7 +37,9 @@ describe('renderTable', () => {
         ]);
         const lines = out.trimEnd().split('\n');
         // Strip ANSI and confirm the columns still line up.
-        const stripped = lines.map((l) => l.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'), ''));
+        const stripped = lines.map((l) =>
+            l.replace(new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g'), ''),
+        );
         expect(stripped[1]).toBe('#1      5  alpha');
         expect(stripped[2]).toBe('#22  1280  beta');
     });

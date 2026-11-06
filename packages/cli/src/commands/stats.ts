@@ -34,7 +34,13 @@ export interface SessionStats {
     importedAt: number | null;
     total: number;
     direction: { editorToAgent: number; agentToEditor: number };
-    kind: { request: number; response: number; notification: number; error: number; unknown: number };
+    kind: {
+        request: number;
+        response: number;
+        notification: number;
+        error: number;
+        unknown: number;
+    };
     parseErrors: number;
     spec: { checked: number; valid: number; violations: number; affectedMethods: string[] };
     latency: {
@@ -58,7 +64,7 @@ export function registerStatsCommand(program: Command): void {
     program
         .command('stats')
         .description(
-            'Aggregate counts and latency percentiles for one saved session — the equivalent of the inspector\'s footer StatsBar.',
+            "Aggregate counts and latency percentiles for one saved session — the equivalent of the inspector's footer StatsBar.",
         )
         .argument('<id>', 'session id (see `acp-devtools list`)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
@@ -244,7 +250,8 @@ function renderStats(s: Styler, stats: SessionStats, byMethod: boolean): string 
     lines.push(`${colorKind(s, 'response', 'RSP')}    ${stats.kind.response}\n`);
     lines.push(`${colorKind(s, 'notification', 'NTF')}    ${stats.kind.notification}\n`);
     lines.push(`${colorKind(s, 'error', 'ERR')}    ${stats.kind.error}\n`);
-    if (stats.kind.unknown > 0) lines.push(`${colorKind(s, 'unknown', 'UNK')}    ${stats.kind.unknown}\n`);
+    if (stats.kind.unknown > 0)
+        lines.push(`${colorKind(s, 'unknown', 'UNK')}    ${stats.kind.unknown}\n`);
     if (stats.parseErrors > 0) lines.push(`${s.red('PARSE')}  ${stats.parseErrors}\n`);
     lines.push('\n');
 
@@ -258,7 +265,9 @@ function renderStats(s: Styler, stats: SessionStats, byMethod: boolean): string 
             lines.push(
                 `${stats.spec.checked} checked · ${s.red(`${stats.spec.violations} violation${plural}`)} in ${stats.spec.affectedMethods.length} method${mPlural} (${stats.spec.affectedMethods.join(', ')})\n`,
             );
-            lines.push(s.dim(`run \`acp-devtools validate ${stats.sessionId}\` for details`) + '\n');
+            lines.push(
+                s.dim(`run \`acp-devtools validate ${stats.sessionId}\` for details`) + '\n',
+            );
         }
         lines.push('\n');
     }
@@ -269,7 +278,9 @@ function renderStats(s: Styler, stats: SessionStats, byMethod: boolean): string 
     } else {
         lines.push(
             heading(s, 'LATENCY') +
-                s.dim(` (response pairs · ${l.sampleSize} sample${l.sampleSize === 1 ? '' : 's'})`) +
+                s.dim(
+                    ` (response pairs · ${l.sampleSize} sample${l.sampleSize === 1 ? '' : 's'})`,
+                ) +
                 '\n',
         );
         lines.push(`p50    ${colorLatency(s, l.p50!, formatLatency(l.p50!))}\n`);
@@ -308,7 +319,10 @@ const INSIGHT_LABEL: Record<PerformanceInsight['kind'], string> = {
     errors: 'ERRORS   ',
 };
 
-const INSIGHT_COLOR: Record<PerformanceInsight['kind'], keyof Pick<Styler, 'red' | 'yellow' | 'magenta' | 'cyan'>> = {
+const INSIGHT_COLOR: Record<
+    PerformanceInsight['kind'],
+    keyof Pick<Styler, 'red' | 'yellow' | 'magenta' | 'cyan'>
+> = {
     hotspot: 'red',
     'long-tail': 'yellow',
     outlier: 'magenta',

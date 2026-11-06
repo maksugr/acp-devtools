@@ -77,9 +77,10 @@ export function PlaygroundEntry({ initialUrl = null }: PlaygroundEntryProps) {
                     Drop an exported session
                 </h2>
                 <p className="mt-2 font-sans text-sm leading-relaxed text-ink-secondary">
-                    The playground renders ACP session exports client-side. Nothing leaves
-                    your browser. Generate exports with <code className="font-mono">acp-devtools export &lt;id&gt;</code>{' '}
-                    — auth headers and proxy tokens are redacted by default.
+                    The playground renders ACP session exports client-side. Nothing leaves your
+                    browser. Generate exports with{' '}
+                    <code className="font-mono">acp-devtools export &lt;id&gt;</code> — auth headers
+                    and proxy tokens are redacted by default.
                 </p>
 
                 <div
@@ -150,15 +151,11 @@ export function PlaygroundEntry({ initialUrl = null }: PlaygroundEntryProps) {
                     </button>
                 </form>
                 <p className="mt-2 font-mono text-[10px] leading-relaxed text-ink-dim">
-                    URL allowlist: {PLAYGROUND_URL_ALLOWLIST.join(', ')}. Gists are public —
-                    don't use this for anything you wouldn't post on Twitter.
+                    URL allowlist: {PLAYGROUND_URL_ALLOWLIST.join(', ')}. Gists are public — don't
+                    use this for anything you wouldn't post on Twitter.
                 </p>
 
-                {error && (
-                    <p className="mt-3 font-mono text-[11px] text-accent-error">
-                        {error}
-                    </p>
-                )}
+                {error && <p className="mt-3 font-mono text-[11px] text-accent-error">{error}</p>}
             </div>
         </div>
     );

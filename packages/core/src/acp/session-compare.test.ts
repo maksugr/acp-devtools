@@ -100,14 +100,8 @@ describe('buildMethodStatsDiff', () => {
     it('computes per-method latency deltas and joins by method', () => {
         // prompt(seq 1) is timestamped base+1000 by the mk helper, so the
         // response timestamps below give 1000ms (A) and 3000ms (B) latency.
-        const a = [
-            prompt(1, 1),
-            response(2, 1, 1_700_000_000_000 + 2000),
-        ];
-        const b = [
-            prompt(1, 1),
-            response(2, 1, 1_700_000_000_000 + 4000),
-        ];
+        const a = [prompt(1, 1), response(2, 1, 1_700_000_000_000 + 2000)];
+        const b = [prompt(1, 1), response(2, 1, 1_700_000_000_000 + 4000)];
         const deltas = buildMethodStatsDiff(a, b);
         const promptDelta = deltas.find((d) => d.method === 'session/prompt');
         expect(promptDelta).toBeDefined();

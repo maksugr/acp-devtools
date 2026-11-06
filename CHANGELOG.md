@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] — 2026-11-06
+
+### Fixed
+
+- **Requests and responses pair up per direction.** JSON-RPC ids are scoped
+  per sender, so an editor `session/prompt` and an agent
+  `session/request_permission` can both be `id: 2`. Pairing used the id alone:
+  the prompt lost its latency, the permission request got the prompt's, and the
+  reply could be validated against the wrong method's schema (false
+  `⚠ SPEC` violations). Fixed everywhere replies are correlated — `stats`,
+  `inspect`, `validate`, `diff`, the MCP tools, the timeline's latency
+  annotations, the perf dashboard and its error insight.
+- **`mock-agent` / `mock-editor` answer with the right id** when the other
+  side's reply to one of our requests reuses an id the other side also used
+  for its own request.
+
 ## [0.6.1] — 2026-11-06
 
 ### Security
@@ -169,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`acp-devtools export`** redacts auth headers and proxy tokens by default.
   A summary lands on stderr: `redacted N field(s) across M message(s) —
-  re-run with --raw to keep them`. Both the parsed `payload` and the
+re-run with --raw to keep them`. Both the parsed `payload` and the
   re-serialized `raw` are rewritten, so the secret can't leak via either
   field.
 - **UI "Download as JSON"** likewise redacts unconditionally (the UI has no
@@ -218,7 +234,8 @@ performance dashboard, multi-session diff, mock-agent / mock-editor for CI,
 read-only MCP server, JSON export / import. See `packages/cli/README.md` and
 the root `README.md` for the full feature inventory.
 
-[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/maksugr/acp-devtools/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/maksugr/acp-devtools/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/maksugr/acp-devtools/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/maksugr/acp-devtools/compare/v0.4.0...v0.5.0

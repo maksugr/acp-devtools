@@ -171,7 +171,6 @@ export function registerInspectCommand(program: Command): void {
         });
 }
 
-
 interface InspectFilter {
     directions: Set<CapturedMessage['direction']> | null;
     kinds: Set<CapturedMessage['kind']> | null;
@@ -252,7 +251,11 @@ const KIND_LABEL: Record<CapturedMessage['kind'], string> = {
     unknown: 'UNK',
 };
 
-function toTableRow(m: CapturedMessage, pair: PairInfo | undefined, specCell: string = ''): TableRow {
+function toTableRow(
+    m: CapturedMessage,
+    pair: PairInfo | undefined,
+    specCell: string = '',
+): TableRow {
     let paired = '—';
     let latency = '—';
     let latencyMs: number | null = null;

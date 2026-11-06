@@ -103,7 +103,9 @@ describe('loadPlaybackScript', () => {
     });
 
     it('rejects an invalid --session value as a usage error (exit-2 class)', () => {
-        expect(() => loadPlaybackScript({ db: dbPath, session: 'abc' })).toThrow(PlaybackUsageError);
+        expect(() => loadPlaybackScript({ db: dbPath, session: 'abc' })).toThrow(
+            PlaybackUsageError,
+        );
         expect(() => loadPlaybackScript({ db: dbPath, session: '0' })).toThrow(/invalid --session/);
     });
 

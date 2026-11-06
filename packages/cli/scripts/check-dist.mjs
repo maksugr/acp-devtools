@@ -9,10 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const cliRoot = join(__dirname, '..');
 
-const REQUIRED = [
-    'dist/index.js',
-    'dist/ui/index.html',
-];
+const REQUIRED = ['dist/index.js', 'dist/ui/index.html'];
 
 const missing = [];
 for (const rel of REQUIRED) {

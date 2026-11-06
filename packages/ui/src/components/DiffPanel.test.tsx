@@ -106,7 +106,10 @@ describe('DiffPanel', () => {
     });
 
     it('does not offer B’s pick as an A option (no self-compare)', () => {
-        mockedMessages.mockResolvedValue({ session: recordB, messages: [req('initialize', { v: 1 })] });
+        mockedMessages.mockResolvedValue({
+            session: recordB,
+            messages: [req('initialize', { v: 1 })],
+        });
         render(<DiffPanel open onClose={() => {}} />);
         openB();
         fireEvent.click(screen.getByTitle(/^session #2 ·/));

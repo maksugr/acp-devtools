@@ -1,10 +1,6 @@
 import { existsSync } from 'node:fs';
 import type { Command } from 'commander';
-import {
-    defaultCapturesDbPath,
-    deleteSession,
-    listSessionsSummary,
-} from '@acp-devtools/core';
+import { defaultCapturesDbPath, deleteSession, listSessionsSummary } from '@acp-devtools/core';
 
 interface DeleteCommandOptions {
     db: string;
@@ -57,7 +53,11 @@ export function registerDeleteCommand(program: Command): void {
         });
 }
 
-function labelFor(s: { name: string | null; client_name: string | null; agent_command: string | null } | undefined): string {
+function labelFor(
+    s:
+        | { name: string | null; client_name: string | null; agent_command: string | null }
+        | undefined,
+): string {
     if (!s) return '';
     if (s.name) return s.name;
     if (s.client_name && s.agent_command) return `${s.client_name} · ${s.agent_command}`;

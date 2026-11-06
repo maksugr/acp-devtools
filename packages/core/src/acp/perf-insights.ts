@@ -1,5 +1,5 @@
 import type { CapturedMessage } from './types.js';
-import type { MethodStats } from './method-stats.js';
+import { rpcCorrelationKey, type MethodStats } from './method-stats.js';
 
 export type InsightKind = 'hotspot' | 'long-tail' | 'outlier' | 'busiest' | 'errors';
 
@@ -67,10 +67,7 @@ export function buildPerformanceInsights(
     const config = { ...DEFAULTS, ...cfg };
     const out: PerformanceInsight[] = [];
 
-    const totalWallTime = perMethod.reduce(
-        (acc, m) => acc + (m.totalLatencyMs ?? 0),
-        0,
-    );
+    const totalWallTime = perMethod.reduce((acc, m) => acc + (m.totalLatencyMs ?? 0), 0);
 
     // HOTSPOT — single method consuming the largest share of measured wall time.
     if (totalWallTime > 0) {
@@ -178,14 +175,14 @@ export function buildPerformanceInsights(
 }
 
 function collectErrorMethods(messages: CapturedMessage[]): string[] {
-    const requestMethods = new Map<string, string>(); // rpcId → method
+    const requestMethods = new Map<string, string>(); // correlation key → method
     const errored = new Set<string>();
     for (const m of messages) {
-        const id = m.rpcId === undefined || m.rpcId === null ? null : String(m.rpcId);
-        if (m.kind === 'request' && m.method && id !== null) {
-            requestMethods.set(id, m.method);
-        } else if (m.kind === 'error' && id !== null) {
-            const method = requestMethods.get(id);
+        const key = rpcCorrelationKey(m);
+        if (m.kind === 'request' && m.method && key !== null) {
+            requestMethods.set(key, m.method);
+        } else if (m.kind === 'error' && key !== null) {
+            const method = requestMethods.get(key);
             if (method) errored.add(method);
         }
     }

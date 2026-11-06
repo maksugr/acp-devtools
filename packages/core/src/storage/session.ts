@@ -110,9 +110,7 @@ function rowToMessage(row: MessageRow): CapturedMessage {
         direction: row.direction as CapturedMessage['direction'],
         kind: row.kind as CapturedMessage['kind'],
         raw: row.raw,
-        payload: row.payload_json
-            ? (JSON.parse(row.payload_json) as JsonRpcMessage)
-            : null,
+        payload: row.payload_json ? (JSON.parse(row.payload_json) as JsonRpcMessage) : null,
     };
     if (row.method !== null) msg.method = row.method;
     if (row.rpc_id !== null) msg.rpcId = parseRpcId(row.rpc_id);
@@ -187,17 +185,17 @@ export class Session {
     }
 
     static load(db: SqliteDatabase, sessionId: number): Session {
-        const row = db
-            .prepare(`${SESSION_SELECT} WHERE id = ?`)
-            .get(sessionId) as SessionRow | undefined;
+        const row = db.prepare(`${SESSION_SELECT} WHERE id = ?`).get(sessionId) as
+            | SessionRow
+            | undefined;
         if (!row) throw new Error(`session ${sessionId} not found`);
         return new Session(db, rowToInfo(row));
     }
 
     static latest(db: SqliteDatabase): Session {
-        const row = db
-            .prepare(`${SESSION_SELECT} ORDER BY id DESC LIMIT 1`)
-            .get() as SessionRow | undefined;
+        const row = db.prepare(`${SESSION_SELECT} ORDER BY id DESC LIMIT 1`).get() as
+            | SessionRow
+            | undefined;
         if (!row) throw new Error('database has no sessions');
         return new Session(db, rowToInfo(row));
     }
@@ -208,9 +206,7 @@ export class Session {
      * overwrite — the latest title wins.
      */
     setClientName(name: string): void {
-        this.db
-            .prepare(`UPDATE sessions SET client_name = ? WHERE id = ?`)
-            .run(name, this.info.id);
+        this.db.prepare(`UPDATE sessions SET client_name = ? WHERE id = ?`).run(name, this.info.id);
         this.info = { ...this.info, clientName: name };
     }
 

@@ -57,11 +57,7 @@ describe('SessionPicker — closed state', () => {
 
     it('shows "?ws override" when overrideUrl is set', () => {
         render(
-            <SessionPicker
-                onSelect={() => {}}
-                activeUrl={null}
-                overrideUrl="ws://override:9999"
-            />,
+            <SessionPicker onSelect={() => {}} activeUrl={null} overrideUrl="ws://override:9999" />,
         );
         expect(screen.getByText('?ws override')).toBeInTheDocument();
     });
@@ -160,18 +156,12 @@ describe('SessionPicker — dropdown', () => {
         });
         render(<SessionPicker onSelect={() => {}} activeUrl={null} overrideUrl={null} />);
         fireEvent.click(screen.getByRole('button', { name: /pick capture/i }));
-        expect(
-            screen.getByText(/all saved sessions are currently live/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/all saved sessions are currently live/i)).toBeInTheDocument();
     });
 
     it('renders the override-warning footer when overrideUrl is set and panel open', () => {
         render(
-            <SessionPicker
-                onSelect={() => {}}
-                activeUrl={null}
-                overrideUrl="ws://override:9999"
-            />,
+            <SessionPicker onSelect={() => {}} activeUrl={null} overrideUrl="ws://override:9999" />,
         );
         fireEvent.click(screen.getByRole('button', { name: /\?ws override/i }));
         expect(screen.getByText(/discovery selection ignored/i)).toBeInTheDocument();

@@ -70,7 +70,9 @@ describe('ReplayControls — play / pause', () => {
     it('clicking restart at end-of-stream rewinds the playhead to the start', () => {
         seed([1, 2, 3]);
         // playhead at the last seq → atEnd → Replay button.
-        act(() => useMessagesStore.setState({ playback: { playhead: 3, playing: false, speed: 1 } }));
+        act(() =>
+            useMessagesStore.setState({ playback: { playhead: 3, playing: false, speed: 1 } }),
+        );
         render(<ReplayControls />);
         const restartBtn = screen.getByTitle(/^restart playback$/);
         fireEvent.click(restartBtn);
@@ -93,7 +95,9 @@ describe('ReplayControls — manual scrub', () => {
     it('changing the slider moves the playhead and pauses playback', () => {
         seed([1, 2, 3, 4, 5]);
         // Start playing first
-        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }));
+        act(() =>
+            useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }),
+        );
         render(<ReplayControls />);
         const slider = screen.getByRole('slider');
         fireEvent.change(slider, { target: { value: '3' } });
@@ -104,7 +108,9 @@ describe('ReplayControls — manual scrub', () => {
 
     it('scrubbing to the max value parks the playhead at the end', () => {
         seed([1, 2, 3]);
-        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: false, speed: 1 } }));
+        act(() =>
+            useMessagesStore.setState({ playback: { playhead: 1, playing: false, speed: 1 } }),
+        );
         render(<ReplayControls />);
         const slider = screen.getByRole('slider');
         fireEvent.change(slider, { target: { value: '3' } }); // 3 = maxSeq
@@ -118,7 +124,9 @@ describe('ReplayControls — auto-advance ticker', () => {
     it('advances the playhead to the next seq when playing', async () => {
         vi.useFakeTimers();
         seed([1, 2, 3]);
-        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }));
+        act(() =>
+            useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }),
+        );
         render(<ReplayControls />);
         // Per the ticker formula: delta = ts(seq2)-ts(seq1) = 200ms / speed=1 → 200ms
         await act(async () => {
@@ -130,7 +138,9 @@ describe('ReplayControls — auto-advance ticker', () => {
     it('stops auto-playing when the end is reached', async () => {
         vi.useFakeTimers();
         seed([1, 2]);
-        act(() => useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }));
+        act(() =>
+            useMessagesStore.setState({ playback: { playhead: 1, playing: true, speed: 1 } }),
+        );
         render(<ReplayControls />);
         await act(async () => {
             await vi.advanceTimersByTimeAsync(500);

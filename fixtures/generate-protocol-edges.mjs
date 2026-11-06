@@ -66,16 +66,21 @@ function advance(min, max) {
 // Verifies SessionInfoPanel + extractSessionMetadata handle a session
 // that never got a clean InitializeResponse (no clientInfo / no
 // agentCapabilities to report).
-pushParsed('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: 1,
-    method: 'initialize',
-    params: {
-        protocolVersion: 1,
-        clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
-        clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+pushParsed(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+            protocolVersion: 1,
+            clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
+            clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+        },
     },
-}, 'initialize');
+    'initialize',
+);
 advance(80, 200);
 pushParsed('agent-to-editor', 'error', {
     jsonrpc: '2.0',
@@ -92,12 +97,17 @@ advance(2_000, 3_000);
 // `buildPairIndex` should not crash; the timeline rect stays at zero
 // width (endTs == startTs). Common in real life when an agent hangs
 // before the request times out client-side.
-pushParsed('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: 2,
-    method: 'session/new',
-    params: {},
-}, 'session/new');
+pushParsed(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'session/new',
+        params: {},
+    },
+    'session/new',
+);
 advance(500, 1000);
 
 // ── 3. Malformed JSON frame from the agent (real parse error) ──────────
@@ -140,12 +150,17 @@ advance(300, 600);
 // ── 7. A clean session/new request — but the response uses a different `id` ─
 // Spec violation in form, but parses fine. Pair index should not match
 // these as a pair.
-pushParsed('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: 3,
-    method: 'session/new',
-    params: {},
-}, 'session/new');
+pushParsed(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: 3,
+        method: 'session/new',
+        params: {},
+    },
+    'session/new',
+);
 advance(60, 120);
 pushParsed('agent-to-editor', 'response', {
     jsonrpc: '2.0',
@@ -155,11 +170,16 @@ pushParsed('agent-to-editor', 'response', {
 advance(700, 1100);
 
 // ── 8. A notification with missing `params` (envelope OK, content empty) ─
-pushParsed('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    // params missing entirely
-}, 'session/update');
+pushParsed(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        // params missing entirely
+    },
+    'session/update',
+);
 advance(200, 400);
 
 // ── 9. Empty-string raw (zero-byte frame slipped through) ──────────────
@@ -167,18 +187,31 @@ pushRaw('editor-to-agent', '', 'Unexpected end of JSON input');
 advance(500, 800);
 
 // ── 10. A clean back-and-forth to anchor expectations ──────────────────
-pushParsed('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: 4,
-    method: 'session/prompt',
-    params: { sessionId, prompt: [{ type: 'text', text: 'one that works' }] },
-}, 'session/prompt');
+pushParsed(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: 4,
+        method: 'session/prompt',
+        params: { sessionId, prompt: [{ type: 'text', text: 'one that works' }] },
+    },
+    'session/prompt',
+);
 advance(900, 1400);
-pushParsed('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: 'OK.' } } },
-}, 'session/update');
+pushParsed(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: { sessionUpdate: 'agent_message_chunk', content: { text: 'OK.' } },
+        },
+    },
+    'session/update',
+);
 advance(200, 400);
 pushParsed('agent-to-editor', 'response', {
     jsonrpc: '2.0',
@@ -208,12 +241,12 @@ if (OUT_PATH) {
     const parseErrs = messages.filter((m) => m.parseError).length;
     const orphans = messages.filter(
         (m) =>
-            (m.kind === 'request' && !messages.some(
-                (r) => r.rpcId === m.rpcId && r.kind !== 'request' && r.seq > m.seq,
-            )) ||
-            (m.kind === 'response' && !messages.some(
-                (r) => r.rpcId === m.rpcId && r.kind === 'request',
-            )),
+            (m.kind === 'request' &&
+                !messages.some(
+                    (r) => r.rpcId === m.rpcId && r.kind !== 'request' && r.seq > m.seq,
+                )) ||
+            (m.kind === 'response' &&
+                !messages.some((r) => r.rpcId === m.rpcId && r.kind === 'request')),
     ).length;
     process.stderr.write(
         `wrote ${messages.length} messages (${parseErrs} parseError frames, ~${orphans} orphans) → ${OUT_PATH}\n`,

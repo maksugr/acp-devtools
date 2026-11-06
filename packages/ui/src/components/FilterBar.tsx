@@ -1,10 +1,6 @@
 import type { CapturedMessage } from '@acp-devtools/core';
 import { cn } from '../lib/cn';
-import {
-    ALL_DIRECTIONS,
-    ALL_KINDS,
-    useMessagesStore,
-} from '../store/messagesStore';
+import { ALL_DIRECTIONS, ALL_KINDS, useMessagesStore } from '../store/messagesStore';
 
 export function FilterBar() {
     const filters = useMessagesStore((s) => s.filters);
@@ -86,7 +82,12 @@ function DirectionChip({
             className={cn(
                 'inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-semibold tracking-widest transition-colors',
                 active
-                    ? cn(colorClass, isOut ? 'border-accent-out/50 bg-accent-out/10' : 'border-accent-in/50 bg-accent-in/10')
+                    ? cn(
+                          colorClass,
+                          isOut
+                              ? 'border-accent-out/50 bg-accent-out/10'
+                              : 'border-accent-in/50 bg-accent-in/10',
+                      )
                     : 'border-line text-ink-muted hover:border-line-strong hover:text-ink-secondary',
             )}
         >
@@ -105,10 +106,22 @@ function KindChip({
     onClick: () => void;
 }) {
     const tone: Record<CapturedMessage['kind'], { color: string; border: string; bg: string }> = {
-        request: { color: 'text-accent-out', border: 'border-accent-out/50', bg: 'bg-accent-out/10' },
+        request: {
+            color: 'text-accent-out',
+            border: 'border-accent-out/50',
+            bg: 'bg-accent-out/10',
+        },
         response: { color: 'text-accent-in', border: 'border-accent-in/50', bg: 'bg-accent-in/10' },
-        notification: { color: 'text-accent-note', border: 'border-accent-note/50', bg: 'bg-accent-note/10' },
-        error: { color: 'text-accent-error', border: 'border-accent-error/50', bg: 'bg-accent-error/10' },
+        notification: {
+            color: 'text-accent-note',
+            border: 'border-accent-note/50',
+            bg: 'bg-accent-note/10',
+        },
+        error: {
+            color: 'text-accent-error',
+            border: 'border-accent-error/50',
+            bg: 'bg-accent-error/10',
+        },
         unknown: { color: 'text-ink-muted', border: 'border-line', bg: 'bg-surface-row' },
     };
     const t = tone[kind];

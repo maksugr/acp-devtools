@@ -16,9 +16,7 @@ describe('summarizeValidation — advisories', () => {
                         valid: true,
                         errors: [],
                         schemaName: 'InitializeResponse',
-                        advisories: [
-                            { path: 'agentInfo', kind: 'soon-required', message: 'x' },
-                        ],
+                        advisories: [{ path: 'agentInfo', kind: 'soon-required', message: 'x' }],
                     },
                 ],
                 [2, { valid: true, errors: [], schemaName: 'InitializeRequest' }],

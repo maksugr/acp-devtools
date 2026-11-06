@@ -174,6 +174,52 @@ describe('PlaybackEngine — mock-agent role', () => {
         }
     });
 
+    it("keeps the editor's request id when the editor's reply to us reuses it", () => {
+        // Ids are per-sender: the editor's prompt and our permission request
+        // are both id 2 in the script. The editor's *response* to our request
+        // must not overwrite the prompt's mapping.
+        const script: CapturedMessage[] = [
+            mk(1, { kind: 'request', method: 'session/prompt', rpcId: 2 }),
+            mk(2, {
+                direction: 'agent-to-editor',
+                kind: 'request',
+                method: 'session/request_permission',
+                rpcId: 2,
+                raw: '{"jsonrpc":"2.0","id":2,"method":"session/request_permission","params":{}}',
+                payload: {
+                    jsonrpc: '2.0',
+                    id: 2,
+                    method: 'session/request_permission',
+                    params: {},
+                },
+            }),
+            mk(3, {
+                kind: 'response',
+                method: undefined,
+                rpcId: 2,
+                raw: '{"jsonrpc":"2.0","id":2,"result":{}}',
+                payload: { jsonrpc: '2.0', id: 2, result: {} },
+            }),
+            mk(4, {
+                direction: 'agent-to-editor',
+                kind: 'response',
+                method: undefined,
+                rpcId: 2,
+                raw: '{"jsonrpc":"2.0","id":2,"result":{"stopReason":"end_turn"}}',
+                payload: { jsonrpc: '2.0', id: 2, result: { stopReason: 'end_turn' } },
+            }),
+        ];
+        const e = new PlaybackEngine(script, 'agent');
+        e.next(); // wait for the prompt
+        e.onIncoming('{"jsonrpc":"2.0","id":7,"method":"session/prompt"}');
+        expect(e.next().kind).toBe('emit'); // our permission request, id 2 verbatim
+        e.next(); // wait for the editor's answer
+        e.onIncoming('{"jsonrpc":"2.0","id":2,"result":{}}');
+        const step = e.next();
+        expect(step.kind).toBe('emit');
+        if (step.kind === 'emit') expect(JSON.parse(step.line).id).toBe(7);
+    });
+
     it('emits notifications without waiting (they have no id to map)', () => {
         const e = build();
         e.next(); // wait

@@ -83,9 +83,7 @@ export function DetailPanel({
                         <button
                             type="button"
                             onClick={
-                                onJumpToPaired
-                                    ? () => onJumpToPaired(pairedRequest.seq)
-                                    : undefined
+                                onJumpToPaired ? () => onJumpToPaired(pairedRequest.seq) : undefined
                             }
                             className="inline-flex items-baseline gap-1 transition-colors hover:text-ink-primary"
                             title="jump to paired message"
@@ -141,11 +139,7 @@ export function DetailPanel({
 
 function SpecView({ validation }: { validation: ValidationResult | undefined }) {
     if (!validation) {
-        return (
-            <div className="font-mono text-[11px] text-ink-muted">
-                no validation result yet
-            </div>
-        );
+        return <div className="font-mono text-[11px] text-ink-muted">no validation result yet</div>;
     }
     if (validation.skipped) {
         const explainer: Record<NonNullable<ValidationResult['skipped']>, string> = {
@@ -214,11 +208,7 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
     );
 }
 
-function AdvisoryBlock({
-    advisories,
-}: {
-    advisories: ValidationResult['advisories'];
-}) {
+function AdvisoryBlock({ advisories }: { advisories: ValidationResult['advisories'] }) {
     if (!advisories || advisories.length === 0) return null;
     return (
         <div className="space-y-1.5">
@@ -272,13 +262,7 @@ function TreeView({
         );
     }
 
-    return (
-        <JsonTree
-            value={message.payload}
-            defaultExpanded
-            {...(getSpec ? { getSpec } : {})}
-        />
-    );
+    return <JsonTree value={message.payload} defaultExpanded {...(getSpec ? { getSpec } : {})} />;
 }
 
 function RawView({ raw }: { raw: string }) {

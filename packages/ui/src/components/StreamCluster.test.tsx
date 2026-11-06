@@ -19,11 +19,7 @@ function chunk(seq: number, text: string, ts: number): CapturedMessage {
     };
 }
 
-const messages = [
-    chunk(1, 'Hello ', 1000),
-    chunk(2, 'there ', 1200),
-    chunk(3, 'world', 1800),
-];
+const messages = [chunk(1, 'Hello ', 1000), chunk(2, 'there ', 1200), chunk(3, 'world', 1800)];
 
 function renderCluster(overrides: Partial<React.ComponentProps<typeof StreamCluster>> = {}) {
     const onSelect = vi.fn();

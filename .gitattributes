@@ -1,0 +1,8 @@
+# Check out LF on every OS, Windows included, so Prettier's `endOfLine: lf`
+# and CI's `format:check` see the same bytes everywhere.
+* text=auto eol=lf
+
+*.png binary
+*.webp binary
+*.db binary
+*.mp4 binary

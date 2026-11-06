@@ -50,11 +50,7 @@ describe('DetailPanel — header fields', () => {
         const response = msg({ kind: 'response' });
         const pairedReq = msg({ seq: 5, method: 'session/prompt' });
         render(
-            <DetailPanel
-                message={response}
-                pairedRequest={pairedReq}
-                onJumpToPaired={onJump}
-            />,
+            <DetailPanel message={response} pairedRequest={pairedReq} onJumpToPaired={onJump} />,
         );
         const link = screen.getByRole('button', { name: /seq 5/ });
         fireEvent.click(link);

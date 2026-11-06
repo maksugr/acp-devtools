@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 import type * as Core from '@acp-devtools/core';
 import type { buildProgram as BuildProgram } from './program.js';
-import {
-    formatNativeBindingMessage,
-    isNativeBindingError,
-} from './lib/native-error.js';
+import { formatNativeBindingMessage, isNativeBindingError } from './lib/native-error.js';
 
 const KNOWN_SUBCOMMANDS = new Set([
     'proxy',
@@ -89,9 +86,7 @@ function reportFatal(err: unknown, prefix = 'acp-devtools'): never {
         );
         process.exit(1);
     }
-    process.stderr.write(
-        `${prefix}: ${err instanceof Error ? err.message : String(err)}\n`,
-    );
+    process.stderr.write(`${prefix}: ${err instanceof Error ? err.message : String(err)}\n`);
     process.exit(1);
 }
 
@@ -108,19 +103,11 @@ async function main(): Promise<void> {
         reportFatal(err, 'acp-devtools: failed to start');
     }
 
-    const expanded = expandArgv(
-        process.argv.slice(2),
-        core.DEFAULT_AGENT,
-        core.isAgentShortcut,
-    );
+    const expanded = expandArgv(process.argv.slice(2), core.DEFAULT_AGENT, core.isAgentShortcut);
 
     const program = buildProgram();
     try {
-        await program.parseAsync([
-            process.argv[0]!,
-            process.argv[1]!,
-            ...expanded,
-        ]);
+        await program.parseAsync([process.argv[0]!, process.argv[1]!, ...expanded]);
     } catch (err) {
         reportFatal(err);
     }

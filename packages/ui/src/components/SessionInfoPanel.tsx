@@ -1,5 +1,8 @@
 import { useEffect, useMemo } from 'react';
-import { extractSessionMetadata, type SessionMetadata } from '@acp-devtools/core/acp/session-metadata';
+import {
+    extractSessionMetadata,
+    type SessionMetadata,
+} from '@acp-devtools/core/acp/session-metadata';
 import { useMessagesStore } from '../store/messagesStore';
 import { sessionHeader } from '../lib/captureLabel';
 import { formatDateTime } from '../lib/format';
@@ -99,12 +102,7 @@ function Body({
                 <Row label="Session" value={primary} />
                 <Row
                     label="Client"
-                    value={
-                        meta.client.title ||
-                        meta.client.name ||
-                        session.clientName ||
-                        '—'
-                    }
+                    value={meta.client.title || meta.client.name || session.clientName || '—'}
                     secondary={
                         meta.client.version
                             ? `v${meta.client.version}${meta.client.platform ? ` · ${meta.client.platform}` : ''}`
@@ -129,7 +127,10 @@ function Body({
 
             <Section title="Client capabilities">
                 <CapRow label="fs.readTextFile" enabled={meta.clientCapabilities.fsReadTextFile} />
-                <CapRow label="fs.writeTextFile" enabled={meta.clientCapabilities.fsWriteTextFile} />
+                <CapRow
+                    label="fs.writeTextFile"
+                    enabled={meta.clientCapabilities.fsWriteTextFile}
+                />
                 <CapRow label="terminal" enabled={meta.clientCapabilities.terminal} />
                 <CapRow label="auth.terminal" enabled={meta.clientCapabilities.authTerminal} />
                 <CapRow label="auth.gateway" enabled={meta.clientCapabilities.authGateway} />
@@ -252,9 +253,7 @@ function Row({
                 title={wrap ? undefined : value}
             >
                 {value}
-                {secondary && (
-                    <span className="ml-2 text-[10px] text-ink-muted">{secondary}</span>
-                )}
+                {secondary && <span className="ml-2 text-[10px] text-ink-muted">{secondary}</span>}
             </span>
         </div>
     );

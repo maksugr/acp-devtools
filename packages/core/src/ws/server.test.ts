@@ -29,17 +29,14 @@ const messageFixture = (seq: number): CapturedMessage => ({
  * Open a client and start buffering events immediately so that no message sent
  * before the consumer calls `waitFor` is lost.
  */
-async function connect(
-    url: string,
-): Promise<{
+async function connect(url: string): Promise<{
     ws: WebSocket;
     events: WsEvent[];
     waitFor: (count: number, timeoutMs?: number) => Promise<WsEvent[]>;
 }> {
     const ws = new WebSocket(url);
     const events: WsEvent[] = [];
-    const waiters: Array<{ count: number; resolve: () => void; reject: (err: Error) => void }> =
-        [];
+    const waiters: Array<{ count: number; resolve: () => void; reject: (err: Error) => void }> = [];
 
     ws.on('message', (data) => {
         events.push(JSON.parse(data.toString()) as WsEvent);

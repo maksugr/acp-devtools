@@ -54,16 +54,25 @@ function frame(direction, kind, payload, method) {
 // ── 1. A clean preamble so the session metadata extracts properly ──────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'initialize',
-        params: {
-            protocolVersion: 1,
-            clientInfo: { name: 'JetBrains.WebStorm', title: 'WebStorm 2026.1.2', version: '2026.1.2' },
-            clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'initialize',
+            params: {
+                protocolVersion: 1,
+                clientInfo: {
+                    name: 'JetBrains.WebStorm',
+                    title: 'WebStorm 2026.1.2',
+                    version: '2026.1.2',
+                },
+                clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+            },
         },
-    }, 'initialize');
+        'initialize',
+    );
     frame('agent-to-editor', 'response', {
         jsonrpc: '2.0',
         id,
@@ -81,15 +90,20 @@ advance(500);
 // schema marks `protocolVersion` as required on InitializeRequest.
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'initialize',
-        params: {
-            // protocolVersion intentionally missing
-            clientInfo: { name: 'JetBrains.WebStorm', title: 'WebStorm 2026.1.2' },
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'initialize',
+            params: {
+                // protocolVersion intentionally missing
+                clientInfo: { name: 'JetBrains.WebStorm', title: 'WebStorm 2026.1.2' },
+            },
         },
-    }, 'initialize');
+        'initialize',
+    );
     frame('agent-to-editor', 'response', {
         jsonrpc: '2.0',
         id,
@@ -101,15 +115,20 @@ advance(800);
 // ── 3. Violation: `session/prompt` missing `prompt` array ──────────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: {
-            sessionId,
-            // `prompt` missing — required by spec
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: {
+                sessionId,
+                // `prompt` missing — required by spec
+            },
         },
-    }, 'session/prompt');
+        'session/prompt',
+    );
     frame('agent-to-editor', 'response', {
         jsonrpc: '2.0',
         id,
@@ -121,15 +140,20 @@ advance(700);
 // ── 4. Violation: prompt block with wrong `type` (not in enum) ─────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: {
-            sessionId,
-            prompt: [{ type: 'video', src: 'rtmp://nope' }],
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: {
+                sessionId,
+                prompt: [{ type: 'video', src: 'rtmp://nope' }],
+            },
         },
-    }, 'session/prompt');
+        'session/prompt',
+    );
     frame('agent-to-editor', 'response', {
         jsonrpc: '2.0',
         id,
@@ -139,30 +163,40 @@ advance(700);
 advance(600);
 
 // ── 5. Violation: notification carries an `id` field (forbidden) ───────
-frame('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    id: 99, // notifications must NOT have an id per JSON-RPC 2.0
-    method: 'session/update',
-    params: {
-        sessionId,
-        update: {
-            sessionUpdate: 'agent_message_chunk',
-            content: { text: 'this notif has an id, which it should not' },
+frame(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        id: 99, // notifications must NOT have an id per JSON-RPC 2.0
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: {
+                sessionUpdate: 'agent_message_chunk',
+                content: { text: 'this notif has an id, which it should not' },
+            },
         },
     },
-}, 'session/update');
+    'session/update',
+);
 advance(300);
 
 // ── 6. Violation: `session/set_mode` missing `modeId` ──────────────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/set_mode',
-        params: { sessionId },
-        // modeId missing
-    }, 'session/set_mode');
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/set_mode',
+            params: { sessionId },
+            // modeId missing
+        },
+        'session/set_mode',
+    );
     frame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: null });
 }
 advance(400);
@@ -170,12 +204,17 @@ advance(400);
 // ── 7. Violation: response missing both `result` and `error` ───────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/set_model',
-        params: { sessionId, modelId: 'sonnet-4-5' },
-    }, 'session/set_model');
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/set_model',
+            params: { sessionId, modelId: 'sonnet-4-5' },
+        },
+        'session/set_model',
+    );
     frame('agent-to-editor', 'response', {
         jsonrpc: '2.0',
         id,
@@ -187,12 +226,17 @@ advance(400);
 // ── 8. Violation: error with `code` as string (must be number) ─────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: { sessionId, prompt: [{ type: 'text', text: 'will fail' }] },
-    }, 'session/prompt');
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: { sessionId, prompt: [{ type: 'text', text: 'will fail' }] },
+        },
+        'session/prompt',
+    );
     frame('agent-to-editor', 'error', {
         jsonrpc: '2.0',
         id,
@@ -202,26 +246,36 @@ advance(400);
 advance(400);
 
 // ── 9. Violation: session/update with unknown sessionUpdate kind ───────
-frame('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: {
-        sessionId,
-        update: { sessionUpdate: 'time_travel', when: 'next-tuesday' },
+frame(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: { sessionUpdate: 'time_travel', when: 'next-tuesday' },
+        },
     },
-}, 'session/update');
+    'session/update',
+);
 advance(300);
 
 // ── 10. Violation: set_config_option with type+value mismatch ──────────
 // type='boolean' should be paired with value: boolean.
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/set_config_option',
-        params: { type: 'boolean', value: 'not actually a boolean' },
-    }, 'session/set_config_option');
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/set_config_option',
+            params: { type: 'boolean', value: 'not actually a boolean' },
+        },
+        'session/set_config_option',
+    );
     frame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: null });
 }
 advance(400);
@@ -229,12 +283,17 @@ advance(400);
 // ── 11. Violation: fs/read_text_file response missing `content` ────────
 {
     const id = ++rpcId;
-    frame('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'fs/read_text_file',
-        params: { sessionId, path: 'src/main.ts' },
-    }, 'fs/read_text_file');
+    frame(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'fs/read_text_file',
+            params: { sessionId, path: 'src/main.ts' },
+        },
+        'fs/read_text_file',
+    );
     frame('editor-to-agent', 'response', {
         jsonrpc: '2.0',
         id,
@@ -244,30 +303,40 @@ advance(400);
 advance(400);
 
 // ── 12. Violation: tool_call notification missing `name` ───────────────
-frame('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: {
-        sessionId,
-        update: {
-            sessionUpdate: 'tool_call',
-            toolCallId: 'tc-no-name',
-            // name missing
-            params: { command: 'echo broken' },
+frame(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: {
+                sessionUpdate: 'tool_call',
+                toolCallId: 'tc-no-name',
+                // name missing
+                params: { command: 'echo broken' },
+            },
         },
     },
-}, 'session/update');
+    'session/update',
+);
 advance(300);
 
 // ── 13. Violation: completely unknown method ───────────────────────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/teleport',
-        params: { sessionId, destination: 'mars' },
-    }, 'session/teleport');
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/teleport',
+            params: { sessionId, destination: 'mars' },
+        },
+        'session/teleport',
+    );
     frame('agent-to-editor', 'error', {
         jsonrpc: '2.0',
         id,
@@ -279,12 +348,17 @@ advance(400);
 // ── 14. Violation: missing `jsonrpc` envelope field ────────────────────
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        // jsonrpc: '2.0' intentionally missing
-        id,
-        method: 'session/set_mode',
-        params: { sessionId, modeId: 'coding' },
-    }, 'session/set_mode');
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            // jsonrpc: '2.0' intentionally missing
+            id,
+            method: 'session/set_mode',
+            params: { sessionId, modeId: 'coding' },
+        },
+        'session/set_mode',
+    );
     frame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: null });
 }
 advance(400);
@@ -292,24 +366,38 @@ advance(400);
 // ── 15. A few CLEAN frames at the end so partial sessions still parse ──
 {
     const id = ++rpcId;
-    frame('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: { sessionId, prompt: [{ type: 'text', text: 'this one is fine' }] },
-    }, 'session/prompt');
-    frame('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: {
-            sessionId,
-            update: {
-                sessionUpdate: 'agent_message_chunk',
-                content: { text: 'OK' },
+    frame(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: { sessionId, prompt: [{ type: 'text', text: 'this one is fine' }] },
+        },
+        'session/prompt',
+    );
+    frame(
+        'agent-to-editor',
+        'notification',
+        {
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+                sessionId,
+                update: {
+                    sessionUpdate: 'agent_message_chunk',
+                    content: { text: 'OK' },
+                },
             },
         },
-    }, 'session/update');
-    frame('agent-to-editor', 'response', { jsonrpc: '2.0', id, result: { stopReason: 'end_turn' } });
+        'session/update',
+    );
+    frame('agent-to-editor', 'response', {
+        jsonrpc: '2.0',
+        id,
+        result: { stopReason: 'end_turn' },
+    });
 }
 
 const endedAt = ts;

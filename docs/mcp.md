@@ -34,21 +34,21 @@ database schemas match.
 
 ## Tools
 
-| Tool | Returns |
-|---|---|
-| `list_sessions` | newest-first list of saved sessions with structured metadata |
-| `find_sessions_by_client` | sessions whose client name/version/platform matches a substring |
-| `get_session_metadata` | client/agent info, capabilities, runtime mode/model |
-| `get_latency_stats` | per-method count + p50/p99/max latency + session-wide percentiles + auto-detected insights |
-| `get_session_summary` | one-call digest: metadata + totals + latency + per-method + insights |
-| `get_session_messages` | paginated message slice, filterable by kind/method/direction |
-| `get_message` | single message by `(session_id, seq)` |
-| `get_paired` | request↔response pair partner + latency |
-| `search_messages` | substring search across raw frames |
-| `find_spec_violations` | every frame that fails the ACP schema, plus `advisories` for valid frames missing a soon-required field |
-| `diff_sessions` | align two sessions; added / removed frames + field-level payload changes |
-| `list_agent_shortcuts` | the built-in agent shortcuts (`agent` values for `generate_editor_config`); same data as the CLI `acp-devtools agents` |
-| `generate_editor_config` | Zed/JetBrains config block to run an agent through the proxy, absolute path filled in (returns the text, the agent applies it) |
+| Tool                      | Returns                                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `list_sessions`           | newest-first list of saved sessions with structured metadata                                                                   |
+| `find_sessions_by_client` | sessions whose client name/version/platform matches a substring                                                                |
+| `get_session_metadata`    | client/agent info, capabilities, runtime mode/model                                                                            |
+| `get_latency_stats`       | per-method count + p50/p99/max latency + session-wide percentiles + auto-detected insights                                     |
+| `get_session_summary`     | one-call digest: metadata + totals + latency + per-method + insights                                                           |
+| `get_session_messages`    | paginated message slice, filterable by kind/method/direction                                                                   |
+| `get_message`             | single message by `(session_id, seq)`                                                                                          |
+| `get_paired`              | request↔response pair partner + latency                                                                                        |
+| `search_messages`         | substring search across raw frames                                                                                             |
+| `find_spec_violations`    | every frame that fails the ACP schema, plus `advisories` for valid frames missing a soon-required field                        |
+| `diff_sessions`           | align two sessions; added / removed frames + field-level payload changes                                                       |
+| `list_agent_shortcuts`    | the built-in agent shortcuts (`agent` values for `generate_editor_config`); same data as the CLI `acp-devtools agents`         |
+| `generate_editor_config`  | Zed/JetBrains config block to run an agent through the proxy, absolute path filled in (returns the text, the agent applies it) |
 
 Start with `get_session_summary` when you don't yet know what's wrong — it
 bundles metadata, totals, latency, and insights in one round-trip. Drill in with
@@ -68,14 +68,14 @@ bundles metadata, totals, latency, and insights in one round-trip. Drill in with
 
 Six tools touch frame contents or derived views; **all six redact unconditionally**. There is no opt-out flag because the LLM consuming the tool cannot judge whether the user wants to share a `proxy_key` with the model — that decision belongs to the human, exercised through `acp-devtools export <id> --raw` on the CLI when the export stays on their machine.
 
-| Tool | Redacted surface |
-|---|---|
-| `get_message` | `message.payload` and `message.raw` |
-| `get_session_messages` | each `messages[]` entry's payload and raw |
-| `search_messages` | matches `raw` (the original bytes) so a token-fragment query still finds its frame, but returns the redacted `raw` so the LLM can't quote the live secret |
-| `get_session_metadata` | `metadata.extensions.jetbrainsProxyConfig.proxies[*].proxy.headers.*` |
-| `get_session_summary` | same metadata layer + the embedded view |
-| `diff_sessions` | both sides redacted before alignment — `JsonChange.a/b` carry `<REDACTED>` for any auth field, so a rotated token shows as equal rather than as a value change |
+| Tool                   | Redacted surface                                                                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_message`          | `message.payload` and `message.raw`                                                                                                                            |
+| `get_session_messages` | each `messages[]` entry's payload and raw                                                                                                                      |
+| `search_messages`      | matches `raw` (the original bytes) so a token-fragment query still finds its frame, but returns the redacted `raw` so the LLM can't quote the live secret      |
+| `get_session_metadata` | `metadata.extensions.jetbrainsProxyConfig.proxies[*].proxy.headers.*`                                                                                          |
+| `get_session_summary`  | same metadata layer + the embedded view                                                                                                                        |
+| `diff_sessions`        | both sides redacted before alignment — `JsonChange.a/b` carry `<REDACTED>` for any auth field, so a rotated token shows as equal rather than as a value change |
 
 Replaced values appear as `"<REDACTED>"`. Allowlist of header names: `Authorization`, `Proxy-Authorization`, `Proxy-Authentication`, `X-Api-Key`, `X-Api-Token`, `X-Auth-Token`, `api-key`, `api_key`, `proxy_key`, `Cookie`, `Set-Cookie`. Plus every string-valued field inside a `headers` block under any `proxyConfig` subtree, to catch future JetBrains fields; every `value` in a `headers` / `env` list of `{ name, value }` pairs (MCP server headers and env in `session/new` / `session/load`) and every value of an `env` map (terminal auth in `initialize`); and any `{ name, value }` pair whose name is on the allowlist.
 
@@ -89,7 +89,7 @@ acp-devtools mcp --db /tmp/session.db     # alternative database
 acp-devtools mcp --name acp-prod          # custom server name
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--db <path>` | `~/.acp-devtools/captures.db` | which database to read |
-| `--name <name>` | `acp-devtools` | server name advertised in the MCP handshake |
+| Flag            | Default                       | Meaning                                     |
+| --------------- | ----------------------------- | ------------------------------------------- |
+| `--db <path>`   | `~/.acp-devtools/captures.db` | which database to read                      |
+| `--name <name>` | `acp-devtools`                | server name advertised in the MCP handshake |

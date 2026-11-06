@@ -29,18 +29,12 @@ describe('isNativeBindingError', () => {
 
     it('matches Cannot find module *.node', () => {
         expect(
-            isNativeBindingError(
-                new Error(
-                    "Cannot find module '.../better_sqlite3.node'",
-                ),
-            ),
+            isNativeBindingError(new Error("Cannot find module '.../better_sqlite3.node'")),
         ).toBe(true);
     });
 
     it('does not match unrelated errors', () => {
-        expect(isNativeBindingError(new Error('ENOENT: no such file'))).toBe(
-            false,
-        );
+        expect(isNativeBindingError(new Error('ENOENT: no such file'))).toBe(false);
         expect(isNativeBindingError(new Error('foo bar'))).toBe(false);
         expect(isNativeBindingError(null)).toBe(false);
         expect(isNativeBindingError(undefined)).toBe(false);
@@ -51,8 +45,7 @@ describe('detectInstallSource', () => {
     it('detects Homebrew on Apple silicon', () => {
         expect(
             detectInstallSource({
-                binaryPath:
-                    '/opt/homebrew/Cellar/acp-devtools/0.2.0/libexec/bin/acp-devtools',
+                binaryPath: '/opt/homebrew/Cellar/acp-devtools/0.2.0/libexec/bin/acp-devtools',
             }),
         ).toBe('homebrew');
     });
@@ -60,8 +53,7 @@ describe('detectInstallSource', () => {
     it('detects Homebrew on Intel mac', () => {
         expect(
             detectInstallSource({
-                binaryPath:
-                    '/usr/local/Cellar/acp-devtools/0.2.0/libexec/bin/acp-devtools',
+                binaryPath: '/usr/local/Cellar/acp-devtools/0.2.0/libexec/bin/acp-devtools',
             }),
         ).toBe('homebrew');
     });
@@ -78,8 +70,7 @@ describe('detectInstallSource', () => {
     it('detects npm -g on Linux/macOS', () => {
         expect(
             detectInstallSource({
-                binaryPath:
-                    '/usr/local/lib/node_modules/acp-devtools/dist/index.js',
+                binaryPath: '/usr/local/lib/node_modules/acp-devtools/dist/index.js',
             }),
         ).toBe('npm-global');
     });
@@ -118,8 +109,7 @@ describe('detectInstallSource', () => {
 describe('formatNativeBindingMessage', () => {
     it('includes brew remediation when source is homebrew', () => {
         const msg = formatNativeBindingMessage(new Error('bindings file'), {
-            binaryPath:
-                '/opt/homebrew/Cellar/acp-devtools/0.2.0/libexec/bin/acp-devtools',
+            binaryPath: '/opt/homebrew/Cellar/acp-devtools/0.2.0/libexec/bin/acp-devtools',
         });
         expect(msg).toContain('brew --prefix acp-devtools');
         expect(msg).toContain('npm rebuild');
@@ -145,10 +135,9 @@ describe('formatNativeBindingMessage', () => {
     });
 
     it('includes the underlying error and runtime info', () => {
-        const msg = formatNativeBindingMessage(
-            new Error('Could not locate the bindings file'),
-            { binaryPath: '' },
-        );
+        const msg = formatNativeBindingMessage(new Error('Could not locate the bindings file'), {
+            binaryPath: '',
+        });
         expect(msg).toContain('Underlying error: Could not locate the bindings file');
         expect(msg).toContain(`Node: ${process.version}`);
         expect(msg).toContain('platform:');

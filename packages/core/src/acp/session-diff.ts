@@ -207,7 +207,11 @@ function diffPayloads(a: CapturedMessage, b: CapturedMessage, max: number): Json
  * Field-level diff of two arbitrary JSON values, reusing the same recursive
  * walker as payload diffing. Used by `session-compare` for metadata diffs.
  */
-export function diffJson(a: unknown, b: unknown, maxChanges: number = DEFAULT_MAX_CHANGES): JsonChange[] {
+export function diffJson(
+    a: unknown,
+    b: unknown,
+    maxChanges: number = DEFAULT_MAX_CHANGES,
+): JsonChange[] {
     const out: JsonChange[] = [];
     deepDiff(a, b, '', out, maxChanges);
     return out;

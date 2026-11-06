@@ -2,11 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { connect, disconnect } from './api/websocket';
 import { startDiscoveryPolling } from './api/discovery';
 import { bindSystemThemeListener } from './store/themeStore';
-import {
-    buildRequestIndex,
-    selectMessage,
-    useMessagesStore,
-} from './store/messagesStore';
+import { buildRequestIndex, selectMessage, useMessagesStore } from './store/messagesStore';
 import { buildValidationMap } from './lib/validation';
 import { useDiscoveryStore } from './store/discoveryStore';
 import { captureLabel, sessionHeader } from './lib/captureLabel';
@@ -53,7 +49,10 @@ export function App() {
     // Re-apply theme when the OS preference changes (only effective in `system` mode).
     useEffect(() => bindSystemThemeListener(), []);
 
-    const [toast, setToast] = useState<{ message: string; tone: 'info' | 'success' | 'warn' } | null>(null);
+    const [toast, setToast] = useState<{
+        message: string;
+        tone: 'info' | 'success' | 'warn';
+    } | null>(null);
     const prevUrls = useRef<Set<string>>(new Set());
 
     // Hydrate everything (filters, selected seq, detail tab, playhead,
@@ -350,8 +349,7 @@ export function App() {
     // In playground mode there is no backend → the file-drop entry replaces
     // both the tutorial and the connecting state.
     const showPlayground = PLAYGROUND && hasNoData;
-    const showTutorial =
-        !PLAYGROUND && hasNoData && wsUrl === null && captures.length === 0;
+    const showTutorial = !PLAYGROUND && hasNoData && wsUrl === null && captures.length === 0;
     const showConnecting = !PLAYGROUND && hasNoData && !showTutorial;
 
     return (
@@ -392,11 +390,7 @@ export function App() {
                         captureCount={captures.length}
                     />
                 ) : showConnecting ? (
-                    <ConnectingState
-                        status={status}
-                        url={displayUrl}
-                        lastError={lastError}
-                    />
+                    <ConnectingState status={status} url={displayUrl} lastError={lastError} />
                 ) : (
                     <SplitPane
                         storageKey="acp.split.leftPx"
@@ -422,9 +416,7 @@ export function App() {
                                           return v ? { validation: v } : {};
                                       })()
                                     : {})}
-                                onJumpToPaired={(seq) =>
-                                    useMessagesStore.getState().select(seq)
-                                }
+                                onJumpToPaired={(seq) => useMessagesStore.getState().select(seq)}
                             />
                         }
                     />

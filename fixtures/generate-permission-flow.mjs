@@ -45,20 +45,25 @@ function advance(min, max) {
 // Preamble — Claude Code style client with capabilities.
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'initialize',
-        params: {
-            protocolVersion: 1,
-            clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
-            clientCapabilities: {
-                fs: { readTextFile: true, writeTextFile: true },
-                terminal: true,
-                auth: { terminal: true },
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'initialize',
+            params: {
+                protocolVersion: 1,
+                clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
+                clientCapabilities: {
+                    fs: { readTextFile: true, writeTextFile: true },
+                    terminal: true,
+                    auth: { terminal: true },
+                },
             },
         },
-    }, 'initialize');
+        'initialize',
+    );
     advance(60, 140);
     push('agent-to-editor', 'response', {
         jsonrpc: '2.0',
@@ -75,34 +80,55 @@ advance(300, 600);
 
 // User asks to refactor a file.
 const promptId = ++rpcId;
-push('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: promptId,
-    method: 'session/prompt',
-    params: {
-        sessionId,
-        prompt: [{ type: 'text', text: 'refactor src/main.ts and add error handling' }],
+push(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: promptId,
+        method: 'session/prompt',
+        params: {
+            sessionId,
+            prompt: [{ type: 'text', text: 'refactor src/main.ts and add error handling' }],
+        },
     },
-}, 'session/prompt');
+    'session/prompt',
+);
 advance(800, 1400);
 
 // Agent streams a thinking response.
-push('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: 'Reading the file first.' } } },
-}, 'session/update');
+push(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: {
+                sessionUpdate: 'agent_message_chunk',
+                content: { text: 'Reading the file first.' },
+            },
+        },
+    },
+    'session/update',
+);
 advance(100, 250);
 
 // Agent → editor: read the file (request from AGENT side — fills the agent-req lane).
 function agentReads(path, content) {
     const id = ++rpcId;
-    push('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'fs/read_text_file',
-        params: { sessionId, path },
-    }, 'fs/read_text_file');
+    push(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'fs/read_text_file',
+            params: { sessionId, path },
+        },
+        'fs/read_text_file',
+    );
     advance(8, 22);
     push('editor-to-agent', 'response', {
         jsonrpc: '2.0',
@@ -116,29 +142,45 @@ advance(180, 400);
 agentReads('src/parser.ts', 'export function parse(args) {\n    return args.split(",");\n}\n');
 advance(200, 500);
 
-push('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: ' Now I need permission to write the new version.' } } },
-}, 'session/update');
+push(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: {
+                sessionUpdate: 'agent_message_chunk',
+                content: { text: ' Now I need permission to write the new version.' },
+            },
+        },
+    },
+    'session/update',
+);
 advance(100, 200);
 
 // Agent → editor: request_permission (this is the canonical agent→editor case).
 function permissionFlow(toolName, toolParams, approved) {
     const id = ++rpcId;
-    push('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/request_permission',
-        params: {
-            sessionId,
-            toolCall: {
-                toolCallId: `tc-${id}`,
-                name: toolName,
-                params: toolParams,
+    push(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/request_permission',
+            params: {
+                sessionId,
+                toolCall: {
+                    toolCallId: `tc-${id}`,
+                    name: toolName,
+                    params: toolParams,
+                },
             },
         },
-    }, 'session/request_permission');
+        'session/request_permission',
+    );
     advance(1_500, 4_500); // user thinking
     push('editor-to-agent', 'response', {
         jsonrpc: '2.0',
@@ -148,49 +190,77 @@ function permissionFlow(toolName, toolParams, approved) {
 }
 
 // First permission — approved.
-permissionFlow('Edit', {
-    file_path: 'src/main.ts',
-    old_string: 'parse(args);',
-    new_string: 'try { parse(args); } catch (e) { console.error(e); }',
-}, true);
+permissionFlow(
+    'Edit',
+    {
+        file_path: 'src/main.ts',
+        old_string: 'parse(args);',
+        new_string: 'try { parse(args); } catch (e) { console.error(e); }',
+    },
+    true,
+);
 advance(200, 500);
 
 // Agent writes the file (agent-initiated write).
 function agentWrites(path, content) {
     const id = ++rpcId;
-    push('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'fs/write_text_file',
-        params: { sessionId, path, content },
-    }, 'fs/write_text_file');
+    push(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'fs/write_text_file',
+            params: { sessionId, path, content },
+        },
+        'fs/write_text_file',
+    );
     advance(20, 60);
     push('editor-to-agent', 'response', { jsonrpc: '2.0', id, result: null });
 }
 
-agentWrites('src/main.ts', 'export function main(args) {\n    try { parse(args); } catch (e) { console.error(e); }\n}\n');
+agentWrites(
+    'src/main.ts',
+    'export function main(args) {\n    try { parse(args); } catch (e) { console.error(e); }\n}\n',
+);
 advance(300, 700);
 
 // Second permission — DENIED. Common when user is cautious.
 permissionFlow('Bash', { command: 'rm -rf node_modules && npm install' }, false);
 advance(400, 800);
 
-push('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: ' OK, skipping that. Done.' } } },
-}, 'session/update');
+push(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: {
+                sessionUpdate: 'agent_message_chunk',
+                content: { text: ' OK, skipping that. Done.' },
+            },
+        },
+    },
+    'session/update',
+);
 advance(200, 400);
 
 // Agent → editor: terminal/create (another agent-initiated capability).
 {
     const id = ++rpcId;
-    push('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'terminal/create',
-        params: { sessionId, command: 'echo hi', cwd: '/Users/dev/project' },
-    }, 'terminal/create');
+    push(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'terminal/create',
+            params: { sessionId, command: 'echo hi', cwd: '/Users/dev/project' },
+        },
+        'terminal/create',
+    );
     advance(50, 120);
     push('editor-to-agent', 'response', {
         jsonrpc: '2.0',

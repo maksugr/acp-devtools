@@ -12,7 +12,7 @@ along; frame numbers below match it one-to-one.
 
 Every session has the same skeleton: a handshake, a session setup, then a
 loop of prompt turns. Everything else — file reads, permission dialogs,
-terminals — happens *inside* a turn.
+terminals — happens _inside_ a turn.
 
 ```
 ┌─ handshake ──────────────────────────────────────────────────┐
@@ -43,7 +43,8 @@ terminals — happens *inside* a turn.
 
 `→ OUT` is editor→agent, `← IN` is agent→editor — same labels as the
 inspector timeline. KIND is the JSON-RPC frame type: `REQ` expects a
-response, `RSP` answers it (paired by JSON-RPC `id`), `NTF` is
+response, `RSP` answers it (paired by JSON-RPC `id` — each side numbers its
+own requests, so the reply travels the opposite way to its request), `NTF` is
 fire-and-forget. The inspector adds three more: `STR` for a collapsed run of
 streaming chunks, `ERR` for an error response, `UNK` for a line that isn't
 valid JSON-RPC (the last two are covered in
@@ -99,13 +100,13 @@ methods it accepts:
         "promptCapabilities": { "image": true, "embeddedContext": true },
         "mcpCapabilities": { "http": true, "sse": true }
     },
-    "authMethods": [ { "id": "claude-ai-login", "name": "Claude Subscription", "…": "…" } ]
+    "authMethods": [{ "id": "claude-ai-login", "name": "Claude Subscription", "…": "…" }]
 }
 ```
 
 `protocolVersion` is a negotiation: the editor sends the
 latest version it supports, and the agent must echo it back if compatible —
-otherwise it answers with the latest version *it* supports, and an editor
+otherwise it answers with the latest version _it_ supports, and an editor
 that can't speak that version is expected to close the connection.
 Capabilities are contracts for the rest of the session: an agent may only
 call `fs/read_text_file` because the editor declared `fs` here —
@@ -168,7 +169,11 @@ walks through the fix.
     "params": {
         "cwd": "/Users/Roman.Ponomarev/acp-devtools",
         "mcpServers": [],
-        "_meta": { "additionalRoots": ["/Users/Roman.Ponomarev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents"] }
+        "_meta": {
+            "additionalRoots": [
+                "/Users/Roman.Ponomarev/Library/Caches/JetBrains/WebStorm2026.1/aia/agents"
+            ]
+        }
     }
 }
 ```
@@ -188,15 +193,39 @@ on) plus the agent's modes and config options:
     "modes": {
         "currentModeId": "default",
         "availableModes": [
-            { "id": "auto", "name": "Auto", "description": "Use a model classifier to approve/deny permission prompts" },
-            { "id": "default", "name": "Default", "description": "Standard behavior, prompts for dangerous operations" },
-            { "id": "acceptEdits", "name": "Accept Edits", "description": "Auto-accept file edit operations" },
-            { "id": "plan", "name": "Plan Mode", "description": "Planning mode, no actual tool execution" },
-            { "id": "dontAsk", "name": "Don't Ask", "description": "Don't prompt for permissions, deny if not pre-approved" },
-            { "id": "bypassPermissions", "name": "Bypass Permissions", "description": "Bypass all permission checks" }
+            {
+                "id": "auto",
+                "name": "Auto",
+                "description": "Use a model classifier to approve/deny permission prompts"
+            },
+            {
+                "id": "default",
+                "name": "Default",
+                "description": "Standard behavior, prompts for dangerous operations"
+            },
+            {
+                "id": "acceptEdits",
+                "name": "Accept Edits",
+                "description": "Auto-accept file edit operations"
+            },
+            {
+                "id": "plan",
+                "name": "Plan Mode",
+                "description": "Planning mode, no actual tool execution"
+            },
+            {
+                "id": "dontAsk",
+                "name": "Don't Ask",
+                "description": "Don't prompt for permissions, deny if not pre-approved"
+            },
+            {
+                "id": "bypassPermissions",
+                "name": "Bypass Permissions",
+                "description": "Bypass all permission checks"
+            }
         ]
     },
-    "configOptions": [ { "id": "mode" }, { "id": "model" }, { "id": "effort" } ]
+    "configOptions": [{ "id": "mode" }, { "id": "model" }, { "id": "effort" }]
 }
 ```
 
@@ -221,7 +250,11 @@ slash-command list (agent behavior, not a spec requirement):
     "sessionUpdate": "available_commands_update",
     "availableCommands": [
         { "name": "verify", "description": "Verify that a code change…", "input": null },
-        { "name": "debug", "description": "Enable debug logging…", "input": { "hint": "[issue description]" } }
+        {
+            "name": "debug",
+            "description": "Enable debug logging…",
+            "input": { "hint": "[issue description]" }
+        }
     ]
 }
 ```
@@ -242,15 +275,16 @@ visible in every capture:
   `session/set_mode` + `session/set_model` pair instead). Each round-trips in
   single-digit milliseconds:
 
-  ```json
-  {
-      "method": "session/set_config_option",
-      "params": { "sessionId": "0aa7d828-…", "configId": "mode", "value": "default" }
-  }
-  ```
+    ```json
+    {
+        "method": "session/set_config_option",
+        "params": { "sessionId": "0aa7d828-…", "configId": "mode", "value": "default" }
+    }
+    ```
 
-  The other two set `model` and `effort` — the three config options from the
-  `session/new` response, re-asserted verbatim.
+    The other two set `model` and `effort` — the three config options from the
+    `session/new` response, re-asserted verbatim.
+
 - Zed sends none of this — `initialize`, `session/new`, then straight to
   prompts.
 
@@ -274,7 +308,7 @@ are allowed), keyed to the session:
     "method": "session/prompt",
     "params": {
         "sessionId": "0aa7d828-…",
-        "prompt": [ { "type": "text", "text": "hi" } ],
+        "prompt": [{ "type": "text", "text": "hi" }],
         "_meta": { "additionalRoots": ["…"] }
     }
 }
@@ -288,19 +322,19 @@ that went silent.
 
 The schema defines eleven `session/update` variants:
 
-| `sessionUpdate` | What it carries |
-|---|---|
-| `agent_message_chunk` | the answer, token by token — the inspector collapses runs into one `STR` row |
-| `agent_thought_chunk` | internal reasoning stream, same shape |
-| `user_message_chunk` | the user's message streamed back (history replay on `session/load`) |
-| `tool_call` | a tool call started |
-| `tool_call_update` | tool-call status change: `pending` → `in_progress` → `completed` / `failed` |
-| `plan` | the agent's task plan for multi-step work |
-| `available_commands_update` | slash-command list ready or changed |
-| `current_mode_update` | session mode switched |
-| `config_option_update` | session config options changed |
-| `session_info_update` | session metadata changed (title, …) |
-| `usage_update` | token-usage counter (marked UNSTABLE in the spec) |
+| `sessionUpdate`             | What it carries                                                              |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `agent_message_chunk`       | the answer, token by token — the inspector collapses runs into one `STR` row |
+| `agent_thought_chunk`       | internal reasoning stream, same shape                                        |
+| `user_message_chunk`        | the user's message streamed back (history replay on `session/load`)          |
+| `tool_call`                 | a tool call started                                                          |
+| `tool_call_update`          | tool-call status change: `pending` → `in_progress` → `completed` / `failed`  |
+| `plan`                      | the agent's task plan for multi-step work                                    |
+| `available_commands_update` | slash-command list ready or changed                                          |
+| `current_mode_update`       | session mode switched                                                        |
+| `config_option_update`      | session config options changed                                               |
+| `session_info_update`       | session metadata changed (title, …)                                          |
+| `usage_update`              | token-usage counter (marked UNSTABLE in the spec)                            |
 
 Three spec rules make these frames less confusing than they look:
 
@@ -312,10 +346,10 @@ Three spec rules make these frames less confusing than they look:
 - **`plan` always carries the whole plan.** The spec requires the full entry
   list in every update — near-identical plans repeating through a turn are
   correct behavior, not duplication.
-- **`current_mode_update` arrives for *any* mode change — including the
+- **`current_mode_update` arrives for _any_ mode change — including the
   editor's own.** WebStorm's `session/set_config_option ▸ mode` gets a
   `current_mode_update` echoing the same mode before the response lands
-  (frames #11-#13 in the overview). One *without* a nearby editor request is
+  (frames #11-#13 in the overview). One _without_ a nearby editor request is
   the agent switching modes on its own.
 
 Here's the patch rule on the wire — frames #60-#66 of the playground sample.
@@ -347,7 +381,7 @@ then #61 fills it in with a `tool_call_update` carrying the same
         "file_path": "/Users/Roman.Ponomarev/acp-devtools/NOTES.md",
         "content": "ACP Devtools captures every JSON-RPC frame…"
     },
-    "content": [ { "type": "diff", "path": "…/NOTES.md", "oldText": null, "newText": "…" } ],
+    "content": [{ "type": "diff", "path": "…/NOTES.md", "oldText": null, "newText": "…" }],
     "_meta": { "claudeCode": { "toolName": "Write" } }
 }
 ```
@@ -362,13 +396,13 @@ wire — and after the human clicks Allow, #66 closes the call with
 
 The turn ends with a response whose `stopReason` says why:
 
-| `stopReason` | Meaning |
-|---|---|
-| `end_turn` | finished normally |
-| `max_tokens` | hit the token ceiling |
-| `max_turn_requests` | hit the per-turn request ceiling |
-| `refusal` | agent refused to continue — the prompt won't be part of the next turn's context |
-| `cancelled` | the editor sent `session/cancel` (see below) |
+| `stopReason`        | Meaning                                                                         |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `end_turn`          | finished normally                                                               |
+| `max_tokens`        | hit the token ceiling                                                           |
+| `max_turn_requests` | hit the per-turn request ceiling                                                |
+| `refusal`           | agent refused to continue — the prompt won't be part of the next turn's context |
+| `cancelled`         | the editor sent `session/cancel` (see below)                                    |
 
 Agents that report usage attach it to the same response — the turn from
 the overview ended with
@@ -376,7 +410,7 @@ the overview ended with
 
 ## 5. Mid-turn callbacks — the agent asks the editor
 
-During a turn the arrow flips: the agent sends *requests* to the editor for
+During a turn the arrow flips: the agent sends _requests_ to the editor for
 anything it can't do alone — `fs/read_text_file`, `fs/write_text_file`,
 `session/request_permission`, `terminal/create` … `terminal/wait_for_exit`.
 Here's a complete turn from the permission-flow demo fixture
@@ -400,7 +434,7 @@ SEQ  TIME          DIR  KIND  METHOD                      RPC  PAIR  LATENCY
 
 Read the latencies by who answers: `fs/*` and `terminal/*` are answered by
 the editor process (14-58ms here — file IO), while
-`session/request_permission` is answered by a *human* clicking a dialog
+`session/request_permission` is answered by a _human_ clicking a dialog
 (4.05s). Permission latency is reaction time, not a performance problem —
 the playground sample has the live equivalent at frame #62, where approving
 the `Write NOTES.md` call from section 4 took the human 4.80s. In
@@ -417,7 +451,7 @@ Three more wire facts worth knowing when reading this section of a capture:
 - **Permission options are typed.** The request carries `options` with a
   `kind` each — `allow_once`, `allow_always`, `reject_once`,
   `reject_always` — and the response is `{"outcome": "selected",
-  "optionId": …}` or `{"outcome": "cancelled"}`. An `allow_always` pick is
+"optionId": …}` or `{"outcome": "cancelled"}`. An `allow_always` pick is
   why a capture can show one permission dialog followed by ten unprompted
   writes.
 - **Terminals have a five-step lifecycle** — `terminal/create` returns an
@@ -456,13 +490,13 @@ is an agent bug worth reporting.
 
 ## What broken looks like
 
-| Timeline symptom | Likely cause |
-|---|---|
-| `UNK` row, parse error in the detail panel | the agent wrote a log line to stdout — stdout *is* the wire; logs belong on stderr |
-| a `REQ` that never gets its `RSP` | agent hung or crashed mid-turn — check the frames just before the silence, then the agent's stderr |
-| session is 2-4 frames, then nothing | agent died right after the handshake — auth failure or missing binary (`acp-devtools doctor`) |
-| `ERR` rows | error responses — codes below |
-| red `⚠ SPEC N` badge | the frame violates the ACP schema — `acp-devtools validate <id>` lists every violation |
+| Timeline symptom                           | Likely cause                                                                                       |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `UNK` row, parse error in the detail panel | the agent wrote a log line to stdout — stdout _is_ the wire; logs belong on stderr                 |
+| a `REQ` that never gets its `RSP`          | agent hung or crashed mid-turn — check the frames just before the silence, then the agent's stderr |
+| session is 2-4 frames, then nothing        | agent died right after the handshake — auth failure or missing binary (`acp-devtools doctor`)      |
+| `ERR` rows                                 | error responses — codes below                                                                      |
+| red `⚠ SPEC N` badge                       | the frame violates the ACP schema — `acp-devtools validate <id>` lists every violation             |
 
 Quirk or violation? The spec draws the line precisely: custom data belongs
 in `_meta` (allowed on every type, from requests down to content blocks),
@@ -476,17 +510,17 @@ are dropped silently by design.
 
 Error codes the schema defines:
 
-| Code | Meaning |
-|---|---|
-| `-32700` | parse error — invalid JSON on the wire |
-| `-32600` | invalid request |
+| Code     | Meaning                                                                  |
+| -------- | ------------------------------------------------------------------------ |
+| `-32700` | parse error — invalid JSON on the wire                                   |
+| `-32600` | invalid request                                                          |
 | `-32601` | method not found — one side called something the other doesn't implement |
-| `-32602` | invalid params |
-| `-32603` | internal error |
-| `-32800` | request cancelled |
-| `-32000` | authentication required |
-| `-32002` | resource not found |
-| `-32042` | URL elicitation required |
+| `-32602` | invalid params                                                           |
+| `-32603` | internal error                                                           |
+| `-32800` | request cancelled                                                        |
+| `-32000` | authentication required                                                  |
+| `-32002` | resource not found                                                       |
+| `-32042` | URL elicitation required                                                 |
 
 ## Reading the numbers
 
@@ -494,7 +528,7 @@ Three rules keep latency stats honest:
 
 1. **`session/prompt` latency = turn duration.** A `HOTSPOT` insight on
    `session/prompt` in `acp-devtools stats` is the expected shape of almost
-   every session — the interesting question is what *inside* the turn took
+   every session — the interesting question is what _inside_ the turn took
    the time.
 2. **Split callbacks by who answers.** `fs/*` and `terminal/*` measure the
    editor; `session/request_permission` measures the human. Only

@@ -42,7 +42,10 @@ export function parseUrlState(search: string): UrlState {
 
     const dir = p.get('dir');
     if (dir !== null) {
-        const codes = dir.split(',').map((c) => c.trim()).filter(Boolean);
+        const codes = dir
+            .split(',')
+            .map((c) => c.trim())
+            .filter(Boolean);
         const dirs = codes
             .map((c) => DIR_FROM_CODE[c])
             .filter((v): v is CapturedMessage['direction'] => v !== undefined);
@@ -51,7 +54,10 @@ export function parseUrlState(search: string): UrlState {
 
     const kind = p.get('kind');
     if (kind !== null) {
-        const codes = kind.split(',').map((c) => c.trim()).filter(Boolean);
+        const codes = kind
+            .split(',')
+            .map((c) => c.trim())
+            .filter(Boolean);
         const kinds = codes
             .map((c) => KIND_FROM_CODE[c])
             .filter((v): v is CapturedMessage['kind'] => v !== undefined);
@@ -67,13 +73,10 @@ export function parseUrlState(search: string): UrlState {
 
     const tabRaw = p.get('tab');
     const detailTab =
-        tabRaw !== null && (VALID_TABS as string[]).includes(tabRaw)
-            ? (tabRaw as DetailTab)
-            : null;
+        tabRaw !== null && (VALID_TABS as string[]).includes(tabRaw) ? (tabRaw as DetailTab) : null;
 
     const playRaw = p.get('play');
-    const playhead =
-        playRaw !== null && /^\d+$/.test(playRaw) ? Number(playRaw) : null;
+    const playhead = playRaw !== null && /^\d+$/.test(playRaw) ? Number(playRaw) : null;
 
     const captureUrl = p.get('ws');
 

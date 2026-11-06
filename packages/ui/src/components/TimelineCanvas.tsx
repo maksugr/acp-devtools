@@ -129,10 +129,7 @@ export function buildProjection(
     let pxCursor = 0;
     const segments: Segment[] = [];
     for (const seg of rawSegments) {
-        const width =
-            seg.kind === 'gap'
-                ? GAP_PX_WIDTH
-                : (seg.tEnd - seg.tStart) * pxPerActiveMs;
+        const width = seg.kind === 'gap' ? GAP_PX_WIDTH : (seg.tEnd - seg.tStart) * pxPerActiveMs;
         segments.push({
             ...seg,
             pxStart: pxCursor,
@@ -147,9 +144,8 @@ export function buildProjection(
         }
         for (const seg of segments) {
             if (ts >= seg.tStart && ts <= seg.tEnd) {
-                const within = seg.tEnd > seg.tStart
-                    ? (ts - seg.tStart) / (seg.tEnd - seg.tStart)
-                    : 0;
+                const within =
+                    seg.tEnd > seg.tStart ? (ts - seg.tStart) / (seg.tEnd - seg.tStart) : 0;
                 const localPx = seg.pxStart + within * (seg.pxEnd - seg.pxStart);
                 return PADDING_LEFT + localPx - pan;
             }
@@ -204,14 +200,7 @@ export function TimelineCanvas({
 
     const projection = useMemo<Projection>(() => {
         const usableWidth = Math.max(50, size.width - PADDING_LEFT - PADDING_RIGHT);
-        return buildProjection(
-            layout.events,
-            layout.startTs,
-            layout.endTs,
-            usableWidth,
-            zoom,
-            pan,
-        );
+        return buildProjection(layout.events, layout.startTs, layout.endTs, usableWidth, zoom, pan);
     }, [layout, size.width, zoom, pan]);
 
     const renderEvents = useMemo<RenderEvent[]>(() => {
@@ -342,7 +331,11 @@ export function TimelineCanvas({
                 ref={canvasRef}
                 className={cn(
                     'block h-full w-full',
-                    dragRef.current ? 'cursor-grabbing' : hovered ? 'cursor-pointer' : 'cursor-grab',
+                    dragRef.current
+                        ? 'cursor-grabbing'
+                        : hovered
+                          ? 'cursor-pointer'
+                          : 'cursor-grab',
                 )}
                 onMouseMove={onMouseMove}
                 onMouseDown={onMouseDown}
@@ -449,8 +442,7 @@ function drawTimeAxis(
     const sessionStart = projection.segments[0]?.tStart ?? 0;
     for (const seg of projection.segments) {
         if (seg.kind !== 'active') continue;
-        const firstTick =
-            Math.ceil((seg.tStart - sessionStart) / stepMs) * stepMs + sessionStart;
+        const firstTick = Math.ceil((seg.tStart - sessionStart) / stepMs) * stepMs + sessionStart;
         for (let t = firstTick; t <= seg.tEnd; t += stepMs) {
             const x = projection.tsToX(t);
             if (x < PADDING_LEFT || x > size.width - PADDING_RIGHT) continue;

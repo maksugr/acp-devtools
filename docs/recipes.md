@@ -94,7 +94,7 @@ identical**, so the handful of `≠` / `▸` / `◂` rows are exactly what chang
 - **Before/after an upgrade.** Capture the same actions before and after bumping
   the agent or editor; diff the handshake and capability negotiation.
 
-It is **not** a "pick any two sessions and compare" browser. Two *different*
+It is **not** a "pick any two sessions and compare" browser. Two _different_
 conversations naturally diverge — different prompts mean different tool calls and
 frame counts, so you'll get mostly `+`/`-` noise. Feed it controlled pairs and
 it's sharp; feed it unrelated sessions and it'll tell you they're unrelated.
@@ -176,7 +176,7 @@ build and check the result. Every step is exit-code-driven:
   run: echo "SID=$(acp-devtools list --db run.db --limit 1 --json | jq '.[0].id')" >> "$GITHUB_ENV"
 
 - name: Fail on any ACP spec violation
-  run: acp-devtools validate "$SID" --db run.db --json   # exit 1 when non-conformant
+  run: acp-devtools validate "$SID" --db run.db --json # exit 1 when non-conformant
 
 - name: Fail on a latency regression (p99 budget 5s)
   run: acp-devtools stats "$SID" --db run.db --json | jq -e '.latency.p99 < 5000'

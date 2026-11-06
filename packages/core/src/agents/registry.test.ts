@@ -69,7 +69,7 @@ describe('listAgents', () => {
             'opencode',
         ]);
     });
-    it('returns a copy that doesn\'t mutate the registry', () => {
+    it("returns a copy that doesn't mutate the registry", () => {
         const first = listAgents();
         first.pop();
         const second = listAgents();
@@ -110,9 +110,9 @@ describe('detectAgentShortcut', () => {
     it('matches junie, including the absolute-path launch JetBrains uses', () => {
         expect(detectAgentShortcut('junie --acp=true')?.shortName).toBe('junie');
         expect(detectAgentShortcut('junie --acp=true')?.displayName).toBe('Junie');
-        expect(
-            detectAgentShortcut('/Users/dev/.local/bin/junie --acp=true')?.displayName,
-        ).toBe('Junie');
+        expect(detectAgentShortcut('/Users/dev/.local/bin/junie --acp=true')?.displayName).toBe(
+            'Junie',
+        );
     });
     it('returns null for unknown commands', () => {
         expect(detectAgentShortcut('node my-custom-agent.js')).toBeNull();

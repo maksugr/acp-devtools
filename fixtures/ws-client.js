@@ -46,7 +46,12 @@ function listActiveCaptures() {
         if (!name.endsWith('.json')) continue;
         try {
             const parsed = JSON.parse(readFileSync(join(activeDir(), name), 'utf8'));
-            if (parsed && parsed.version === 1 && typeof parsed.pid === 'number' && isAlive(parsed.pid)) {
+            if (
+                parsed &&
+                parsed.version === 1 &&
+                typeof parsed.pid === 'number' &&
+                isAlive(parsed.pid)
+            ) {
                 out.push(parsed);
             }
         } catch {
