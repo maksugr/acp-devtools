@@ -12,7 +12,7 @@ export default defineConfig({
         // because jsdom just layers DOM globals on top of node.
         environment: 'jsdom',
         setupFiles: ['./vitest.setup.ts'],
-        include: ['packages/*/src/**/*.test.{ts,tsx}'],
+        include: ['packages/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
         coverage: {
             reporter: ['text', 'html'],
             include: ['packages/*/src/**/*.ts'],

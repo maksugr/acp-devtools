@@ -32,6 +32,9 @@ jobs:
 
             - run: npm run typecheck
 
+            - name: Version consistency
+              run: node scripts/check-release.mjs
+
             - run: npm test
 
             - run: npm run build:full
@@ -72,3 +75,19 @@ jobs:
                   node -e "const D = require('better-sqlite3'); const db = new D(':memory:'); db.exec('CREATE TABLE t (x)'); db.close(); console.log('better-sqlite3 OK');"
                   & "./node_modules/.bin/acp-devtools.cmd" --version
                   & "./node_modules/.bin/acp-devtools.cmd" doctor
+
+    # Single required status check for the matrix above: branch rules can
+    # require `ci-ok` instead of listing every OS × Node combination, and
+    # adding a matrix entry doesn't need a settings change.
+    ci-ok:
+        name: ci-ok
+        if: always()
+        needs: [ci]
+        runs-on: ubuntu-latest
+        steps:
+            - name: All matrix jobs passed
+              env:
+                  RESULT: ${{ needs.ci.result }}
+              run: |
+                  echo "matrix result: $RESULT"
+                  test "$RESULT" = "success"
