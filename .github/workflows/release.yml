@@ -38,16 +38,19 @@ jobs:
         env:
             SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   ref: ${{ env.SHA }}
                   fetch-depth: 0
 
-            - uses: actions/setup-node@v4
+            - uses: actions/setup-node@v7
               with:
                   node-version: '24'
                   registry-url: 'https://registry.npmjs.org'
-                  cache: 'npm'
+                  # This job holds the npm publish (OIDC) and tap credentials;
+                  # don't restore a dependency cache another run could have
+                  # written. setup-node ≥ 5 caches by default, so opt out.
+                  package-manager-cache: false
 
             # Trusted publishing needs npm ≥ 11.5.1.
             - run: npm install -g npm@^11.5.1
