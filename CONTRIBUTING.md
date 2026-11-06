@@ -158,18 +158,18 @@ on that commit is green. So **a PR that ships code carries its own release**:
 
 Checks on every PR:
 
-| Check           | Passes when                                                                                                                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ci-ok`         | lint, typecheck, tests, build and the packed-tarball smoke test pass on Linux / macOS / Windows × Node 22 / 24; the Homebrew formula installs and passes `brew test` on macOS against a tarball packed from the PR |
-| `release-check` | all version literals agree; shipped files (anything under `packages/` except tests) changed ⇒ version bumped above `main`, CHANGELOG section written, not yet on npm or tagged                                     |
-| `ship-gate`     | a maintainer added the `ship` label; pushing commits that change the diff removes it again (updating the branch from `main` doesn't)                                                                               |
+| Check           | Passes when                                                                                                                                                                                                                                  |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci-ok`         | lint, typecheck, tests, build and the packed-tarball smoke test pass on Linux / macOS / Windows × Node 22 / 24; the Homebrew formula installs and passes `brew test` and `brew audit --strict` on macOS against a tarball packed from the PR |
+| `release-check` | all version literals agree; shipped files (anything under `packages/` except tests) changed ⇒ version bumped above `main`, CHANGELOG section written, not yet on npm or tagged                                                               |
+| `ship-gate`     | a maintainer added the `ship` label; pushing commits that change the diff removes it again (updating the branch from `main` doesn't)                                                                                                         |
 
 With all three green, GitHub auto-merges the PR (squash). The
 [Release workflow](.github/workflows/release.yml) then publishes to npm with
 provenance (trusted publishing — no token in the repo), tags `vX.Y.Z`, creates
 the GitHub Release from the CHANGELOG section and bumps the Homebrew formula in
 [maksugr/homebrew-tap](https://github.com/maksugr/homebrew-tap) — only after
-the updated formula installs and passes `brew test` on macOS
+the updated formula installs and passes `brew test` and `brew audit --strict` on macOS
 ([`scripts/homebrew/test-formula.sh`](scripts/homebrew/test-formula.sh)). Each step
 skips itself when already done, so re-running a failed release finishes it.
 
