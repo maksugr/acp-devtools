@@ -68,7 +68,7 @@ only) merges shipped-file changes without publishing.
 Merge flow: PR → CI (`ci-ok`, `release-check`) → maintainer adds `ship`
 (`ship-gate`) → GitHub auto-merges (squash) → Release publishes to npm, tags,
 creates the GitHub Release, bumps the Homebrew tap once the new formula passes
-`brew install` + `brew test` on macOS. New commits that change the
+`brew install`, `brew test` and `brew audit --strict` on macOS. New commits that change the
 diff revoke `ship`.
 
 ## Issues

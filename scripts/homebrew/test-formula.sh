@@ -7,9 +7,9 @@
 # With a tarball, the formula's `url` and `sha256` are first pointed at that
 # file, so CI can test the formula against the code in a PR (or the exact
 # bytes a release just published). Without one, the formula is installed as
-# written. Runs `brew install` and the formula's `test do` block (which runs
-# `acp-devtools doctor`, i.e. loads the native better-sqlite3 binding);
-# `brew audit` findings are reported but don't fail the run.
+# written. Runs `brew install`, the formula's `test do` block (which runs
+# `acp-devtools doctor`, i.e. loads the native better-sqlite3 binding) and
+# `brew audit --strict`; any of them failing fails the run.
 set -euo pipefail
 
 FORMULA=${1:?usage: test-formula.sh <formula.rb> [<tarball.tgz>]}
@@ -47,6 +47,4 @@ echo "::endgroup::"
 brew install --formula "$TAP/acp-devtools"
 brew test "$TAP/acp-devtools"
 
-if ! brew audit --strict --formula "$TAP/acp-devtools"; then
-    echo "::warning::brew audit reported findings for the acp-devtools formula (not blocking)."
-fi
+brew audit --strict --formula "$TAP/acp-devtools"
