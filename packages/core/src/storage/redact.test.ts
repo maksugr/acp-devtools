@@ -180,6 +180,151 @@ describe('redactMessage', () => {
     });
 });
 
+describe('redactMessage — ACP name/value credential lists', () => {
+    // Spec shapes: McpServerHttp.headers is HttpHeader[], McpServerStdio.env is
+    // EnvVariable[] — both `{ name, value }` lists, not header maps.
+    const sessionNew = () => ({
+        jsonrpc: '2.0' as const,
+        id: 7,
+        method: 'session/new',
+        params: {
+            cwd: '/repo',
+            mcpServers: [
+                {
+                    type: 'http',
+                    name: 'github',
+                    url: 'https://api.githubcopilot.com/mcp/',
+                    headers: [
+                        { name: 'Authorization', value: 'Bearer ghp_header_secret' },
+                        { name: 'X-MCP-Toolsets', value: 'repos,issues' },
+                    ],
+                },
+                {
+                    name: 'postgres',
+                    command: 'npx',
+                    args: ['-y', 'pg-mcp'],
+                    env: [
+                        { name: 'GITHUB_TOKEN', value: 'ghp_env_secret' },
+                        { name: 'DATABASE_URL', value: 'postgres://u:pw_secret@db/app' },
+                    ],
+                },
+            ],
+        },
+    });
+
+    it('masks every header and env value of MCP servers in session/new, keeping names', () => {
+        const payload = sessionNew();
+        const msg = baseMsg({
+            seq: 7,
+            rpcId: 7,
+            method: 'session/new',
+            payload,
+            raw: JSON.stringify(payload),
+        });
+
+        const { redacted, count } = redactMessage(msg);
+
+        expect(count).toBe(4);
+        for (const secret of ['ghp_header_secret', 'repos,issues', 'ghp_env_secret', 'pw_secret']) {
+            expect(redacted.raw).not.toContain(secret);
+            expect(JSON.stringify(redacted.payload)).not.toContain(secret);
+        }
+        const [http, stdio] = (redacted.payload as ReturnType<typeof sessionNew>).params.mcpServers;
+        expect(http.headers).toEqual([
+            { name: 'Authorization', value: REDACTED_PLACEHOLDER },
+            { name: 'X-MCP-Toolsets', value: REDACTED_PLACEHOLDER },
+        ]);
+        expect(stdio.env).toEqual([
+            { name: 'GITHUB_TOKEN', value: REDACTED_PLACEHOLDER },
+            { name: 'DATABASE_URL', value: REDACTED_PLACEHOLDER },
+        ]);
+        expect(http.url).toBe('https://api.githubcopilot.com/mcp/');
+        expect(stdio.args).toEqual(['-y', 'pg-mcp']);
+    });
+
+    it('masks terminal-auth env maps in the initialize response', () => {
+        const payload = {
+            jsonrpc: '2.0' as const,
+            id: 0,
+            result: {
+                protocolVersion: 1,
+                authMethods: [
+                    {
+                        type: 'terminal',
+                        id: 'login',
+                        name: 'Log in',
+                        args: ['--login'],
+                        env: { ACME_API_KEY: 'sk-terminal-secret', ACME_REGION: 'eu' },
+                    },
+                ],
+            },
+        };
+        const msg = baseMsg({
+            direction: 'agent-to-editor',
+            kind: 'response',
+            method: undefined,
+            rpcId: 0,
+            payload,
+            raw: JSON.stringify(payload),
+        });
+
+        const { redacted, count } = redactMessage(msg);
+
+        expect(count).toBe(2);
+        expect(redacted.raw).not.toContain('sk-terminal-secret');
+        expect((redacted.payload as typeof payload).result.authMethods[0].env).toEqual({
+            ACME_API_KEY: REDACTED_PLACEHOLDER,
+            ACME_REGION: REDACTED_PLACEHOLDER,
+        });
+    });
+
+    it('masks a sensitive-named { name, value } pair anywhere in the tree', () => {
+        const payload = {
+            jsonrpc: '2.0' as const,
+            id: 8,
+            method: 'x',
+            params: { _meta: { extra: [{ name: 'X-Api-Key', value: 'k-anywhere', note: 'n' }] } },
+        };
+        const msg = baseMsg({ seq: 8, rpcId: 8, payload, raw: JSON.stringify(payload) });
+
+        const { redacted, count } = redactMessage(msg);
+
+        expect(count).toBe(1);
+        expect((redacted.payload as typeof payload).params._meta.extra[0]).toEqual({
+            name: 'X-Api-Key',
+            value: REDACTED_PLACEHOLDER,
+            note: 'n',
+        });
+    });
+
+    it('leaves non-credential { name, value } pairs alone', () => {
+        const payload = {
+            jsonrpc: '2.0' as const,
+            id: 9,
+            method: 'session/update',
+            params: { options: [{ name: 'mode', value: 'ask' }] },
+        };
+        const msg = baseMsg({ seq: 9, rpcId: 9, payload, raw: JSON.stringify(payload) });
+
+        const { redacted, count } = redactMessage(msg);
+
+        expect(count).toBe(0);
+        expect(redacted).toBe(msg);
+    });
+
+    it('is idempotent: re-redacting an already redacted frame counts nothing', () => {
+        const payload = sessionNew();
+        const first = redactMessage(
+            baseMsg({ seq: 7, rpcId: 7, payload, raw: JSON.stringify(payload) }),
+        ).redacted;
+
+        const { redacted, count } = redactMessage(first);
+
+        expect(count).toBe(0);
+        expect(redacted.raw).toBe(first.raw);
+    });
+});
+
 describe('redactSessionExport', () => {
     const buildExport = (messages: CapturedMessage[]): SessionExport => ({
         version: 1,

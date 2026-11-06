@@ -214,6 +214,7 @@ themselves live here so they're the first thing a contributor sees:
    would quote the live token back to the user.
 
 The single source of truth for what counts as "sensitive" lives in
-`packages/core/src/storage/redact.ts` (`SENSITIVE_HEADER_NAMES` +
-`proxyConfig` subtree rule). When you discover a new auth-bearing field
+`packages/core/src/storage/redact.ts` (`SENSITIVE_HEADER_NAMES`, the
+`proxyConfig` subtree rule, and `CREDENTIAL_LIST_KEYS` for the spec's
+`{ name, value }` header / env lists). When you discover a new auth-bearing field
 that should be masked, add it there once and every channel inherits.

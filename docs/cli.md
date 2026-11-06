@@ -453,7 +453,8 @@ carry `_meta.proxyConfig.proxies[].proxy.headers.proxy_key` (JetBrains AI
 gateway token) on every `initialize`; without redaction those would land in
 every shared export. Standard HTTP auth headers (`Authorization`,
 `Proxy-Authorization`, `X-Api-Key`, `X-Api-Token`, `Cookie`) are also masked
-anywhere they appear. A short summary goes to stderr: `redacted N field(s)
+anywhere they appear, and so is every MCP server header and env value that
+`session/new` / `session/load` carries as `{ name, value }` pairs. A short summary goes to stderr: `redacted N field(s)
 across M message(s) — re-run with --raw to keep them`.
 
 What the default does NOT redact: file contents loaded via

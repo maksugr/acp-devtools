@@ -77,7 +77,7 @@ Six tools touch frame contents or derived views; **all six redact unconditionall
 | `get_session_summary` | same metadata layer + the embedded view |
 | `diff_sessions` | both sides redacted before alignment — `JsonChange.a/b` carry `<REDACTED>` for any auth field, so a rotated token shows as equal rather than as a value change |
 
-Replaced values appear as `"<REDACTED>"`. Allowlist of header names: `Authorization`, `Proxy-Authorization`, `Proxy-Authentication`, `X-Api-Key`, `X-Api-Token`, `X-Auth-Token`, `api-key`, `api_key`, `proxy_key`, `Cookie`, `Set-Cookie`. Plus every string-valued field inside a `headers` block under any `proxyConfig` subtree, to catch future JetBrains fields.
+Replaced values appear as `"<REDACTED>"`. Allowlist of header names: `Authorization`, `Proxy-Authorization`, `Proxy-Authentication`, `X-Api-Key`, `X-Api-Token`, `X-Auth-Token`, `api-key`, `api_key`, `proxy_key`, `Cookie`, `Set-Cookie`. Plus every string-valued field inside a `headers` block under any `proxyConfig` subtree, to catch future JetBrains fields; every `value` in a `headers` / `env` list of `{ name, value }` pairs (MCP server headers and env in `session/new` / `session/load`) and every value of an `env` map (terminal auth in `initialize`); and any `{ name, value }` pair whose name is on the allowlist.
 
 What is **not** redacted: file contents loaded via `fs/read_text_file`, prompts you typed, and agent responses — those are user content and only the human can judge what's shareable. If a session contains source code or data you don't want the LLM to see, drop the session before connecting MCP rather than relying on tool-level masking.
 
