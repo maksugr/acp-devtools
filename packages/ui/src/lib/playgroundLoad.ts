@@ -5,9 +5,7 @@ export const PLAYGROUND_URL_ALLOWLIST: ReadonlyArray<string> = [
     'gist.githubusercontent.com',
 ];
 
-export type LoadResult =
-    | { ok: true; export: SessionExport }
-    | { ok: false; error: string };
+export type LoadResult = { ok: true; export: SessionExport } | { ok: false; error: string };
 
 export function parseExportSource(text: string): LoadResult {
     try {
@@ -40,7 +38,10 @@ export async function fetchPlaygroundExport(url: string): Promise<LoadResult> {
     try {
         response = await fetch(url, { redirect: 'follow' });
     } catch (err) {
-        return { ok: false, error: `fetch failed: ${err instanceof Error ? err.message : String(err)}` };
+        return {
+            ok: false,
+            error: `fetch failed: ${err instanceof Error ? err.message : String(err)}`,
+        };
     }
     if (!response.ok) {
         return { ok: false, error: `HTTP ${response.status} ${response.statusText}` };

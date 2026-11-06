@@ -1,9 +1,6 @@
 import { cn } from '../lib/cn';
 import { reconnect } from '../api/websocket';
-import {
-    type ConnectionStatus,
-    useMessagesStore,
-} from '../store/messagesStore';
+import { type ConnectionStatus, useMessagesStore } from '../store/messagesStore';
 import { formatAge, formatDateTime } from '../lib/format';
 import { sessionHeader } from '../lib/captureLabel';
 import { useNow } from '../lib/useNow';
@@ -89,18 +86,14 @@ export function TopBar({
                         const frozenEndTs =
                             session.endedAt !== null
                                 ? session.endedAt
-                                : lastEventTs ?? session.startedAt;
+                                : (lastEventTs ?? session.startedAt);
                         const durationLabel = frozen
                             ? formatAge(session.startedAt, frozenEndTs)
                             : formatAge(session.startedAt, now);
                         const idleMs = lastEventTs !== null ? now - lastEventTs : null;
                         const showIdle = !frozen && idleMs !== null && idleMs > 5000;
                         const startedFriendly = formatDateTime(session.startedAt, now);
-                        const modeLabel = isImported
-                            ? 'IMPORTED'
-                            : isReplay
-                              ? 'REPLAY'
-                              : 'SESSION';
+                        const modeLabel = isImported ? 'IMPORTED' : isReplay ? 'REPLAY' : 'SESSION';
                         const modeTitle = isImported
                             ? 'session loaded from a JSON file on disk — not connected to any proxy'
                             : isReplay
@@ -213,9 +206,7 @@ export function TopBar({
                             diff
                         </button>
                     )}
-                    <SessionActionsMenu
-                        {...(onImportResult ? { onImportResult } : {})}
-                    />
+                    <SessionActionsMenu {...(onImportResult ? { onImportResult } : {})} />
                 </div>
                 <div className="flex items-center gap-1.5">
                     <ThemeToggle />
@@ -274,7 +265,9 @@ function ConnectionPill({
         closed: 'text-ink-secondary bg-surface-row border-line',
         error: 'text-accent-error bg-accent-error/10 border-accent-error/40',
     };
-    const openDot = isReplay ? 'bg-accent-note animate-pulse-soft' : 'bg-accent-out animate-pulse-soft';
+    const openDot = isReplay
+        ? 'bg-accent-note animate-pulse-soft'
+        : 'bg-accent-out animate-pulse-soft';
     const dotClass =
         status === 'open'
             ? openDot

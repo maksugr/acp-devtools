@@ -122,10 +122,7 @@ describe('listSessionsSummary', () => {
         // Sort key is COALESCE(imported_at, started_at) DESC — the imported
         // row's imported_at (~Date.now()) towers over the live session's
         // started_at=1000, so the import comes first.
-        expect(out.map((r) => r.imported_at)).toEqual([
-            expect.any(Number),
-            null,
-        ]);
+        expect(out.map((r) => r.imported_at)).toEqual([expect.any(Number), null]);
     });
 
     it('sorts imports by imported_at, not by their original started_at', () => {
@@ -222,7 +219,11 @@ describe('insertImportedSession', () => {
             },
             [
                 mockMessage(1),
-                mockMessage(2, { direction: 'agent-to-editor', kind: 'response', method: undefined }),
+                mockMessage(2, {
+                    direction: 'agent-to-editor',
+                    kind: 'response',
+                    method: undefined,
+                }),
             ],
             { tool: { name: 't', version: '1' } },
         );
@@ -291,7 +292,12 @@ describe('findSessionsByClient', () => {
         // setMetadataFrom with platform populates client_platform.
         a.setMetadataFrom({
             protocolVersion: 1,
-            client: { name: 'JetBrains.WebStorm', title: null, version: null, platform: 'intellij' },
+            client: {
+                name: 'JetBrains.WebStorm',
+                title: null,
+                version: null,
+                platform: 'intellij',
+            },
             agent: { name: null, version: null, authMethods: 0 },
             clientCapabilities: {
                 fsReadTextFile: false,

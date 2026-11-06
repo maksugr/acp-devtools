@@ -6,9 +6,7 @@
 import schema from '@agentclientprotocol/sdk/schema/schema.json' with { type: 'json' };
 import { createSpecDecoder } from './spec-decoder-factory.js';
 
-const decoder = createSpecDecoder(
-    schema as { $defs?: Record<string, { 'x-method'?: unknown }> },
-);
+const decoder = createSpecDecoder(schema as { $defs?: Record<string, { 'x-method'?: unknown }> });
 export const resolveSpecForMessage = decoder.resolveForMessage;
 export const knownAcpSpecMethods = decoder.knownMethods;
 export type {

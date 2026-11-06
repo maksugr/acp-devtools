@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-    buildPerMethodStats,
-    type MethodStats,
-} from '@acp-devtools/core/acp/method-stats';
+import { buildPerMethodStats, type MethodStats } from '@acp-devtools/core/acp/method-stats';
 import {
     buildPerformanceInsights,
     type InsightKind,
@@ -164,23 +161,59 @@ export function PerformancePanel({ open, onClose, onNavigateToSeq }: Performance
                                 </colgroup>
                                 <thead className="sticky top-0 z-10 bg-surface-base">
                                     <tr className="border-b border-line text-left font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                                        <Th sk="method" current={sortKey} dir={sortDir} onSort={setSort(setSortKey, setSortDir, sortDir)} className="!pl-5">
+                                        <Th
+                                            sk="method"
+                                            current={sortKey}
+                                            dir={sortDir}
+                                            onSort={setSort(setSortKey, setSortDir, sortDir)}
+                                            className="!pl-5"
+                                        >
                                             method
                                         </Th>
                                         <th className="px-3 py-2">kind</th>
-                                        <Th sk="count" current={sortKey} dir={sortDir} onSort={setSort(setSortKey, setSortDir, sortDir)} align="right">
+                                        <Th
+                                            sk="count"
+                                            current={sortKey}
+                                            dir={sortDir}
+                                            onSort={setSort(setSortKey, setSortDir, sortDir)}
+                                            align="right"
+                                        >
                                             count
                                         </Th>
-                                        <Th sk="p50" current={sortKey} dir={sortDir} onSort={setSort(setSortKey, setSortDir, sortDir)} align="right">
+                                        <Th
+                                            sk="p50"
+                                            current={sortKey}
+                                            dir={sortDir}
+                                            onSort={setSort(setSortKey, setSortDir, sortDir)}
+                                            align="right"
+                                        >
                                             p50
                                         </Th>
-                                        <Th sk="p99" current={sortKey} dir={sortDir} onSort={setSort(setSortKey, setSortDir, sortDir)} align="right">
+                                        <Th
+                                            sk="p99"
+                                            current={sortKey}
+                                            dir={sortDir}
+                                            onSort={setSort(setSortKey, setSortDir, sortDir)}
+                                            align="right"
+                                        >
                                             p99
                                         </Th>
-                                        <Th sk="max" current={sortKey} dir={sortDir} onSort={setSort(setSortKey, setSortDir, sortDir)} align="right">
+                                        <Th
+                                            sk="max"
+                                            current={sortKey}
+                                            dir={sortDir}
+                                            onSort={setSort(setSortKey, setSortDir, sortDir)}
+                                            align="right"
+                                        >
                                             max
                                         </Th>
-                                        <Th sk="total" current={sortKey} dir={sortDir} onSort={setSort(setSortKey, setSortDir, sortDir)} align="right">
+                                        <Th
+                                            sk="total"
+                                            current={sortKey}
+                                            dir={sortDir}
+                                            onSort={setSort(setSortKey, setSortDir, sortDir)}
+                                            align="right"
+                                        >
                                             total
                                         </Th>
                                         <th className="py-2 pl-3 pr-5 text-right">dist</th>
@@ -192,14 +225,21 @@ export function PerformancePanel({ open, onClose, onNavigateToSeq }: Performance
                                             key={`${row.kind}:${row.method}`}
                                             className="border-b border-line/40 transition-colors hover:bg-surface-rowHover/50"
                                         >
-                                            <td className="truncate py-1.5 pl-5 pr-3 text-ink-primary" title={row.method}>
+                                            <td
+                                                className="truncate py-1.5 pl-5 pr-3 text-ink-primary"
+                                                title={row.method}
+                                            >
                                                 {row.method}
                                             </td>
                                             <td className="px-3 py-1.5 text-ink-muted">
                                                 <KindBadge kind={row.kind} />
                                             </td>
                                             <td className="px-3 py-1.5 text-right text-ink-primary">
-                                                <CountCell count={row.count} max={maxCount} kind={row.kind} />
+                                                <CountCell
+                                                    count={row.count}
+                                                    max={maxCount}
+                                                    kind={row.kind}
+                                                />
                                             </td>
                                             <td className="px-3 py-1.5 text-right text-ink-secondary">
                                                 {row.p50 !== null ? formatLatency(row.p50) : '—'}
@@ -211,7 +251,9 @@ export function PerformancePanel({ open, onClose, onNavigateToSeq }: Performance
                                                 {row.max !== null ? formatLatency(row.max) : '—'}
                                             </td>
                                             <td className="px-3 py-1.5 text-right text-ink-secondary">
-                                                {row.totalLatencyMs !== null ? formatLatency(row.totalLatencyMs) : '—'}
+                                                {row.totalLatencyMs !== null
+                                                    ? formatLatency(row.totalLatencyMs)
+                                                    : '—'}
                                             </td>
                                             <td className="py-1.5 pl-3 pr-5 text-right">
                                                 {row.latencies.length > 0 ? (
@@ -379,11 +421,7 @@ function CountCell({
     );
 }
 
-function setSort(
-    setKey: (k: SortKey) => void,
-    setDir: (d: SortDir) => void,
-    currentDir: SortDir,
-) {
+function setSort(setKey: (k: SortKey) => void, setDir: (d: SortDir) => void, currentDir: SortDir) {
     return (k: SortKey, isCurrent: boolean) => {
         if (isCurrent) {
             setDir(currentDir === 'asc' ? 'desc' : 'asc');
@@ -426,7 +464,9 @@ function Th({
             aria-sort={isCurrent ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
         >
             <span>{children}</span>
-            {isCurrent && <span className="ml-1 text-accent-warn">{dir === 'asc' ? '↑' : '↓'}</span>}
+            {isCurrent && (
+                <span className="ml-1 text-accent-warn">{dir === 'asc' ? '↑' : '↓'}</span>
+            )}
         </th>
     );
 }
@@ -458,11 +498,7 @@ function summarize(rows: MethodStats[]): {
     return { methods: rows.length, requests, notifications, samples };
 }
 
-export function sortPerMethod(
-    rows: MethodStats[],
-    key: SortKey,
-    dir: SortDir,
-): MethodStats[] {
+export function sortPerMethod(rows: MethodStats[], key: SortKey, dir: SortDir): MethodStats[] {
     const mul = dir === 'asc' ? 1 : -1;
     const out = [...rows];
     out.sort((a, b) => {

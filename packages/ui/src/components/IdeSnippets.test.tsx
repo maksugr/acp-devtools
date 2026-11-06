@@ -37,9 +37,7 @@ describe('IdeSnippets — initial rendering', () => {
             arch: 'arm64',
         });
         render(<IdeSnippets />);
-        expect(
-            await screen.findByText(/Claude Code \(via ACP Devtools\)/),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/Claude Code \(via ACP Devtools\)/)).toBeInTheDocument();
         // JetBrains-specific text isn't visible yet
         expect(screen.queryByText(/Settings \(Cmd\+,\)/)).toBeNull();
     });

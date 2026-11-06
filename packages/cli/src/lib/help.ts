@@ -93,12 +93,7 @@ const EXAMPLES: Record<string, string[]> = {
         '# Pick a port and stay headless',
         'acp-devtools ui --port 4000 --no-open',
     ],
-    list: [
-        'acp-devtools list',
-        '',
-        '# Machine-readable JSON',
-        'acp-devtools list --json',
-    ],
+    list: ['acp-devtools list', '', '# Machine-readable JSON', 'acp-devtools list --json'],
     inspect: [
         'acp-devtools inspect 12',
         '',
@@ -131,7 +126,10 @@ const EXAMPLES: Record<string, string[]> = {
     ],
     agents: ['acp-devtools agents', '', '# Machine-readable', 'acp-devtools agents --json'],
     doctor: ['acp-devtools doctor'],
-    mcp: ['# Read-only MCP server over stdio (wire into .claude/mcp_servers.json)', 'acp-devtools mcp'],
+    mcp: [
+        '# Read-only MCP server over stdio (wire into .claude/mcp_servers.json)',
+        'acp-devtools mcp',
+    ],
     'backfill-metadata': [
         'acp-devtools backfill-metadata',
         '',
@@ -167,7 +165,13 @@ function wrapText(text: string, width: number): string[] {
 // terminal width and hangs continuation lines under the description column.
 // `coloredTerm` carries ANSI codes; `term` is its plain text, used for padding
 // so the maths ignores invisible escapes.
-function row(term: string, coloredTerm: string, description: string, termWidth: number, width: number): string {
+function row(
+    term: string,
+    coloredTerm: string,
+    description: string,
+    termWidth: number,
+    width: number,
+): string {
     const descColumn = INDENT.length + termWidth + GAP;
     const wrapped = wrapText(description, width - descColumn);
     const pad = ' '.repeat(termWidth - term.length + GAP);
@@ -196,7 +200,9 @@ function renderExamples(lines: string[], s: Styler): string[] {
 export function formatRootHelp(cmd: Command, helper: Help, s: Styler, width: number): string {
     const out: string[] = [''];
 
-    out.push(INDENT + s.bold(s.cyan('acp') + s.dim('.devtools')) + '  ' + s.dim(`v${cmd.version()}`));
+    out.push(
+        INDENT + s.bold(s.cyan('acp') + s.dim('.devtools')) + '  ' + s.dim(`v${cmd.version()}`),
+    );
     out.push(INDENT + s.dim(cmd.description()));
     out.push('');
 
@@ -226,7 +232,9 @@ export function formatRootHelp(cmd: Command, helper: Help, s: Styler, width: num
     if (rest.length > 0) {
         out.push(heading(s, 'More'));
         for (const c of rest) {
-            out.push(row(c.name(), s.green(c.name()), helper.subcommandDescription(c), termWidth, width));
+            out.push(
+                row(c.name(), s.green(c.name()), helper.subcommandDescription(c), termWidth, width),
+            );
         }
         out.push('');
     }
@@ -237,7 +245,9 @@ export function formatRootHelp(cmd: Command, helper: Help, s: Styler, width: num
         const optWidth = Math.max(...options.map((o) => helper.optionTerm(o).length));
         for (const o of options) {
             const term = helper.optionTerm(o);
-            out.push(row(term, s.cyan(term), tidyHome(helper.optionDescription(o)), optWidth, width));
+            out.push(
+                row(term, s.cyan(term), tidyHome(helper.optionDescription(o)), optWidth, width),
+            );
         }
         out.push('');
     }
@@ -246,7 +256,11 @@ export function formatRootHelp(cmd: Command, helper: Help, s: Styler, width: num
     out.push(...renderExamples(ROOT_EXAMPLES, s));
     out.push('');
 
-    out.push(s.dim('Run ') + s.green('acp-devtools <command> --help') + s.dim(' for details on a command.'));
+    out.push(
+        s.dim('Run ') +
+            s.green('acp-devtools <command> --help') +
+            s.dim(' for details on a command.'),
+    );
     out.push('');
 
     return out.join('\n');

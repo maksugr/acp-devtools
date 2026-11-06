@@ -44,16 +44,25 @@ function advance(ms) {
 // Clean preamble.
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'initialize',
-        params: {
-            protocolVersion: 1,
-            clientInfo: { name: 'JetBrains.WebStorm', title: 'WebStorm 2026.1.2', version: '2026.1.2' },
-            clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'initialize',
+            params: {
+                protocolVersion: 1,
+                clientInfo: {
+                    name: 'JetBrains.WebStorm',
+                    title: 'WebStorm 2026.1.2',
+                    version: '2026.1.2',
+                },
+                clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+            },
         },
-    }, 'initialize');
+        'initialize',
+    );
     push('agent-to-editor', 'response', {
         jsonrpc: '2.0',
         id,
@@ -70,12 +79,17 @@ advance(500);
 // Error 1 — JSON-RPC -32603 Internal error.
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/new',
-        params: {},
-    }, 'session/new');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/new',
+            params: {},
+        },
+        'session/new',
+    );
     advance(2_300);
     push('agent-to-editor', 'error', {
         jsonrpc: '2.0',
@@ -88,12 +102,17 @@ advance(800);
 // Error 2 — authentication failure (custom code 1001).
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'authenticate',
-        params: { method: 'oauth' },
-    }, 'authenticate');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'authenticate',
+            params: { method: 'oauth' },
+        },
+        'authenticate',
+    );
     advance(600);
     push('agent-to-editor', 'error', {
         jsonrpc: '2.0',
@@ -110,20 +129,33 @@ advance(1200);
 // Error 3 — timeout on a long prompt.
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: { sessionId, prompt: [{ type: 'text', text: 'do something heavy' }] },
-    }, 'session/prompt');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: { sessionId, prompt: [{ type: 'text', text: 'do something heavy' }] },
+        },
+        'session/prompt',
+    );
     // 30s of "trying"
     advance(28_000);
     // A few chunks before giving up.
-    push('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: 'Hmm...' } } },
-    }, 'session/update');
+    push(
+        'agent-to-editor',
+        'notification',
+        {
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+                sessionId,
+                update: { sessionUpdate: 'agent_message_chunk', content: { text: 'Hmm...' } },
+            },
+        },
+        'session/update',
+    );
     advance(2_000);
     push('agent-to-editor', 'error', {
         jsonrpc: '2.0',
@@ -140,12 +172,17 @@ advance(500);
 // Error 4 — fs/write_text_file rejected by client (capability disabled).
 {
     const id = ++rpcId;
-    push('agent-to-editor', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'fs/write_text_file',
-        params: { sessionId, path: '/etc/passwd', content: 'oops' },
-    }, 'fs/write_text_file');
+    push(
+        'agent-to-editor',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'fs/write_text_file',
+            params: { sessionId, path: '/etc/passwd', content: 'oops' },
+        },
+        'fs/write_text_file',
+    );
     advance(100);
     push('editor-to-agent', 'error', {
         jsonrpc: '2.0',
@@ -160,17 +197,26 @@ advance(800);
 // to error out on malformed extensions. Synthetic for coverage.
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/cancel',
-        params: { sessionId: 'nope-not-a-uuid' },
-    }, 'session/cancel');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/cancel',
+            params: { sessionId: 'nope-not-a-uuid' },
+        },
+        'session/cancel',
+    );
     advance(150);
     push('agent-to-editor', 'error', {
         jsonrpc: '2.0',
         id,
-        error: { code: -32602, message: 'invalid params: sessionId must be a UUID', data: { path: 'params/sessionId' } },
+        error: {
+            code: -32602,
+            message: 'invalid params: sessionId must be a UUID',
+            data: { path: 'params/sessionId' },
+        },
     });
 }
 advance(900);
@@ -180,18 +226,31 @@ advance(900);
 // data to compare against).
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: { sessionId, prompt: [{ type: 'text', text: 'one that works' }] },
-    }, 'session/prompt');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: { sessionId, prompt: [{ type: 'text', text: 'one that works' }] },
+        },
+        'session/prompt',
+    );
     advance(900);
-    push('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: 'Done.' } } },
-    }, 'session/update');
+    push(
+        'agent-to-editor',
+        'notification',
+        {
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+                sessionId,
+                update: { sessionUpdate: 'agent_message_chunk', content: { text: 'Done.' } },
+            },
+        },
+        'session/update',
+    );
     advance(200);
     push('agent-to-editor', 'response', {
         jsonrpc: '2.0',
@@ -204,12 +263,17 @@ advance(700);
 // Error 6 — rate limit (custom 429-style).
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: { sessionId, prompt: [{ type: 'text', text: 'another one' }] },
-    }, 'session/prompt');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: { sessionId, prompt: [{ type: 'text', text: 'another one' }] },
+        },
+        'session/prompt',
+    );
     advance(200);
     push('agent-to-editor', 'error', {
         jsonrpc: '2.0',
@@ -226,12 +290,17 @@ advance(400);
 // Error 7 — same prompt method, fails twice in a row.
 for (let i = 0; i < 3; i++) {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/load',
-        params: { sessionId: 'no-such-session' },
-    }, 'session/load');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/load',
+            params: { sessionId: 'no-such-session' },
+        },
+        'session/load',
+    );
     advance(80 + i * 30);
     push('agent-to-editor', 'error', {
         jsonrpc: '2.0',

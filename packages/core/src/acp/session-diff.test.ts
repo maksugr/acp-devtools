@@ -40,10 +40,7 @@ const req = (
     });
 };
 
-const resp = (
-    result: unknown,
-    overrides: Partial<CapturedMessage> = {},
-): CapturedMessage => {
+const resp = (result: unknown, overrides: Partial<CapturedMessage> = {}): CapturedMessage => {
     const payload: JsonRpcMessage = {
         jsonrpc: '2.0',
         id: overrides.rpcId ?? overrides.seq ?? ++seqCounter,
@@ -176,10 +173,33 @@ describe('buildSessionDiff', () => {
     });
 
     it('diffs parse-failed frames by raw bytes', () => {
-        const a = [mk({ seq: 1, kind: 'unknown', method: undefined, payload: null, raw: 'broken-A', parseError: 'x' })];
-        const b = [mk({ seq: 1, kind: 'unknown', method: undefined, payload: null, raw: 'broken-B', parseError: 'x' })];
+        const a = [
+            mk({
+                seq: 1,
+                kind: 'unknown',
+                method: undefined,
+                payload: null,
+                raw: 'broken-A',
+                parseError: 'x',
+            }),
+        ];
+        const b = [
+            mk({
+                seq: 1,
+                kind: 'unknown',
+                method: undefined,
+                payload: null,
+                raw: 'broken-B',
+                parseError: 'x',
+            }),
+        ];
         const row = buildSessionDiff(a, b).rows[0]!;
         expect(row.op).toBe('changed');
-        expect(row.changes).toContainEqual({ path: 'raw', kind: 'change', a: 'broken-A', b: 'broken-B' });
+        expect(row.changes).toContainEqual({
+            path: 'raw',
+            kind: 'change',
+            a: 'broken-A',
+            b: 'broken-B',
+        });
     });
 });

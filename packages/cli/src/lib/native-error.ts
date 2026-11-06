@@ -33,10 +33,7 @@ const BINDING_PATTERNS = [
 
 export function isNativeBindingError(err: unknown): boolean {
     if (!err) return false;
-    const msg =
-        err instanceof Error
-            ? `${err.message}\n${err.stack ?? ''}`
-            : String(err);
+    const msg = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err);
     return BINDING_PATTERNS.some((re) => re.test(msg));
 }
 
@@ -72,13 +69,9 @@ export function detectInstallSource(ctx: InstallContext): InstallSource {
     return 'unknown';
 }
 
-export function formatNativeBindingMessage(
-    err: unknown,
-    ctx: InstallContext,
-): string {
+export function formatNativeBindingMessage(err: unknown, ctx: InstallContext): string {
     const source = detectInstallSource(ctx);
-    const detail =
-        err instanceof Error ? err.message : String(err ?? 'unknown error');
+    const detail = err instanceof Error ? err.message : String(err ?? 'unknown error');
 
     const lines: string[] = [
         'acp-devtools: native module `better-sqlite3` failed to load.',

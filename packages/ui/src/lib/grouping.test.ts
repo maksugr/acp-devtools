@@ -76,11 +76,7 @@ describe('groupTimeline', () => {
             chunk('s', 'C'),
             chunk('s', 'D'),
         ]);
-        expect(out.map((e) => e.type)).toEqual([
-            'stream-cluster',
-            'message',
-            'stream-cluster',
-        ]);
+        expect(out.map((e) => e.type)).toEqual(['stream-cluster', 'message', 'stream-cluster']);
     });
 
     it('breaks a cluster on a different sessionId', () => {

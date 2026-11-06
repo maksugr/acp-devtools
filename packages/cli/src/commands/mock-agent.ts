@@ -33,11 +33,14 @@ export function registerMockAgentCommand(program: Command): void {
         )
         .option('--session <id>', 'session id from the captures database (default: latest)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
-        .option('--script <file>', 'load from a JSON export instead of the database (mutually exclusive with --session)')
+        .option(
+            '--script <file>',
+            'load from a JSON export instead of the database (mutually exclusive with --session)',
+        )
         .option('--log <mode>', 'echo every wire frame to stderr (json | pretty | none)', 'none')
         .option(
             '--realtime',
-            'respect the recording\'s timestamps when emitting frames (otherwise replay is instant)',
+            "respect the recording's timestamps when emitting frames (otherwise replay is instant)",
             false,
         )
         .option(

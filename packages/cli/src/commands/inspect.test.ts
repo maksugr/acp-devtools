@@ -32,7 +32,13 @@ describe('buildPairIndex', () => {
     it('matches a request with its response and sets latency on both seqs', () => {
         const msgs = [
             mkMsg(1, { kind: 'request', method: 'initialize', rpcId: 'r1', timestamp: 1000 }),
-            mkMsg(2, { kind: 'response', method: undefined, rpcId: 'r1', timestamp: 1500, direction: 'agent-to-editor' }),
+            mkMsg(2, {
+                kind: 'response',
+                method: undefined,
+                rpcId: 'r1',
+                timestamp: 1500,
+                direction: 'agent-to-editor',
+            }),
         ];
         const idx = buildPairIndex(msgs);
         expect(idx.get(1)).toEqual({ pairSeq: 2, latencyMs: 500 });
@@ -52,7 +58,12 @@ describe('buildPairIndex', () => {
     it('clamps a negative latency to zero (clock skew safety)', () => {
         const msgs = [
             mkMsg(1, { kind: 'request', rpcId: 'a', timestamp: 5000 }),
-            mkMsg(2, { kind: 'response', rpcId: 'a', timestamp: 4000, direction: 'agent-to-editor' }),
+            mkMsg(2, {
+                kind: 'response',
+                rpcId: 'a',
+                timestamp: 4000,
+                direction: 'agent-to-editor',
+            }),
         ];
         expect(buildPairIndex(msgs).get(1)?.latencyMs).toBe(0);
     });
@@ -66,7 +77,12 @@ describe('buildPairIndex', () => {
         const msgs = [
             mkMsg(1, { kind: 'request', rpcId: 'r', timestamp: 1000 }),
             mkMsg(2, { kind: 'request', rpcId: 'r', timestamp: 2000 }),
-            mkMsg(3, { kind: 'response', rpcId: 'r', timestamp: 2300, direction: 'agent-to-editor' }),
+            mkMsg(3, {
+                kind: 'response',
+                rpcId: 'r',
+                timestamp: 2300,
+                direction: 'agent-to-editor',
+            }),
         ];
         const idx = buildPairIndex(msgs);
         // The second request is the one paired — matches UI's buildRequestIndex.

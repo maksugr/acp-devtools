@@ -68,7 +68,13 @@ describe('SessionExport', () => {
     });
 
     it('rejects unsupported version', () => {
-        const json = JSON.stringify({ version: 999, exportedAt: 0, tool: TOOL, session: {}, messages: [] });
+        const json = JSON.stringify({
+            version: 999,
+            exportedAt: 0,
+            tool: TOOL,
+            session: {},
+            messages: [],
+        });
         expect(() => parseExport(json)).toThrow(ExportParseError);
         expect(() => parseExport(json)).toThrow(/version 999/);
     });

@@ -124,8 +124,9 @@ export function IdeSnippets() {
                     <p className="mt-2 font-sans text-[11px] leading-relaxed text-ink-secondary">
                         Open Zed, paste into <span className="font-mono">settings.json</span>{' '}
                         (Cmd+,), pick the new agent in the right-side panel, send a prompt. The CLI
-                        auto-proxies <span className="font-mono">@zed-industries/claude-code-acp</span>{' '}
-                        when launched with no args.
+                        auto-proxies{' '}
+                        <span className="font-mono">@zed-industries/claude-code-acp</span> when
+                        launched with no args.
                     </p>
                     <PathHint isPlaceholder={isPlaceholder} />
                 </div>
@@ -143,14 +144,14 @@ export function IdeSnippets() {
                         <Field label="Command" value={resolvedPath} />
                     </div>
                     <p className="mt-3 font-sans text-[11px] leading-relaxed text-ink-secondary">
-                        JetBrains IDEs require an absolute <span className="font-mono">command</span>.
-                        See <span className="font-mono">examples/jetbrains-config.md</span> if the
+                        JetBrains IDEs require an absolute{' '}
+                        <span className="font-mono">command</span>. See{' '}
+                        <span className="font-mono">examples/jetbrains-config.md</span> if the
                         agent-servers page is not where the search suggests.
                     </p>
                     <PathHint isPlaceholder={isPlaceholder} />
                 </div>
             )}
-
         </div>
     );
 }
@@ -176,7 +177,8 @@ function PathHint({ isPlaceholder }: PathHintProps) {
     // Subtle reassurance line — confirms what was auto-resolved.
     return (
         <p className="mt-3 font-mono text-[10px] uppercase tracking-widest text-ink-dim">
-            path auto-resolved · verify with <span className="text-ink-secondary">which acp-devtools</span>
+            path auto-resolved · verify with{' '}
+            <span className="text-ink-secondary">which acp-devtools</span>
         </p>
     );
 }

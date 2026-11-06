@@ -59,13 +59,11 @@ export function JsonTree({
           ? value.length
           : 0;
 
-    const shouldDefaultExpand =
-        defaultExpanded ?? (depth < 2 && childCount <= COLLAPSE_THRESHOLD);
+    const shouldDefaultExpand = defaultExpanded ?? (depth < 2 && childCount <= COLLAPSE_THRESHOLD);
     const [open, setOpen] = useState<boolean>(shouldDefaultExpand);
 
     const spec = name !== undefined && getSpec ? getSpec(path) : null;
-    const keyLabel =
-        name !== undefined ? <KeyLabel name={name} spec={spec} /> : null;
+    const keyLabel = name !== undefined ? <KeyLabel name={name} spec={spec} /> : null;
 
     if (!expandable) {
         return (
@@ -163,7 +161,13 @@ function KeyLabel({ name, spec }: { name: string; spec: SpecInfo | null }) {
             )}
             {description && (
                 <SpecHint
-                    label={<DescriptionBlock text={description} type={spec?.type} enumValues={spec?.enumValues} />}
+                    label={
+                        <DescriptionBlock
+                            text={description}
+                            type={spec?.type}
+                            enumValues={spec?.enumValues}
+                        />
+                    }
                     tone="info"
                     className="text-ink-muted hover:text-ink-primary"
                     focusable
@@ -203,13 +207,7 @@ function DescriptionBlock({
     );
 }
 
-function SpecBadge({
-    tone,
-    explanation,
-}: {
-    tone: 'extension' | 'unknown';
-    explanation: string;
-}) {
+function SpecBadge({ tone, explanation }: { tone: 'extension' | 'unknown'; explanation: string }) {
     const cls =
         tone === 'extension'
             ? 'border-accent-warn/40 bg-accent-warn/10 text-accent-warn'

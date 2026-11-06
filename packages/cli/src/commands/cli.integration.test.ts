@@ -841,18 +841,22 @@ describe('CLI integration — per-command behavior', () => {
     });
 
     describe('agents', () => {
-        it('lists the built-in shortcuts as a table and as JSON', async () => {
-            const table = await run(['agents']);
-            expect(table.code).toBe(0);
-            expect(table.out).toMatch(/SHORTCUT/);
-            expect(table.out).toMatch(/junie/);
-            expect(table.out).toMatch(/goose/);
+        it(
+            'lists the built-in shortcuts as a table and as JSON',
+            async () => {
+                const table = await run(['agents']);
+                expect(table.code).toBe(0);
+                expect(table.out).toMatch(/SHORTCUT/);
+                expect(table.out).toMatch(/junie/);
+                expect(table.out).toMatch(/goose/);
 
-            const json = await run(['agents', '--json']);
-            expect(json.code).toBe(0);
-            const parsed = JSON.parse(json.out) as Array<{ shortName: string }>;
-            expect(parsed.map((a) => a.shortName)).toContain('junie');
-        }, TIMEOUT);
+                const json = await run(['agents', '--json']);
+                expect(json.code).toBe(0);
+                const parsed = JSON.parse(json.out) as Array<{ shortName: string }>;
+                expect(parsed.map((a) => a.shortName)).toContain('junie');
+            },
+            TIMEOUT,
+        );
     });
 
     describe('mock-agent / mock-editor', () => {

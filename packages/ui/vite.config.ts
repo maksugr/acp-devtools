@@ -2,11 +2,7 @@ import path from 'node:path';
 import type { Server as HttpServer } from 'node:http';
 import { defineConfig, type PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
-import {
-    attachReplayUpgrade,
-    createApiHandler,
-    defaultCapturesDbPath,
-} from '@acp-devtools/core';
+import { attachReplayUpgrade, createApiHandler, defaultCapturesDbPath } from '@acp-devtools/core';
 
 function discoveryPlugin(): PluginOption {
     const capturesDbPath = defaultCapturesDbPath();

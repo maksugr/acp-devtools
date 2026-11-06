@@ -51,14 +51,19 @@ function runProxy(args: string[], home: string): Promise<ProxyRun> {
     });
 }
 
-function dbCounts(dbPath: string): { sessions: number; messages: number; agentCommand: string | null; name: string | null } {
+function dbCounts(dbPath: string): {
+    sessions: number;
+    messages: number;
+    agentCommand: string | null;
+    name: string | null;
+} {
     const db = openDatabase(dbPath);
     try {
         const s = db.prepare('SELECT COUNT(*) AS c FROM sessions').get() as { c: number };
         const m = db.prepare('SELECT COUNT(*) AS c FROM messages').get() as { c: number };
-        const row = db
-            .prepare('SELECT agent_command, name FROM sessions LIMIT 1')
-            .get() as { agent_command: string | null; name: string | null } | undefined;
+        const row = db.prepare('SELECT agent_command, name FROM sessions LIMIT 1').get() as
+            | { agent_command: string | null; name: string | null }
+            | undefined;
         return {
             sessions: s.c,
             messages: m.c,
@@ -83,50 +88,42 @@ afterEach(() => {
 });
 
 describe('proxy command (integration)', () => {
-    it(
-        'captures a full session to SQLite and cleans up its discovery file on exit',
-        async () => {
-            const run = await runProxy(['--save-to', dbPath, '--ws-port', '0'], home);
+    it('captures a full session to SQLite and cleans up its discovery file on exit', async () => {
+        const run = await runProxy(['--save-to', dbPath, '--ws-port', '0'], home);
 
-            expect(run.code).toBe(0);
+        expect(run.code).toBe(0);
 
-            // 3 editor requests + 3 agent responses + 1 notification = 7 frames.
-            const counts = dbCounts(dbPath);
-            expect(counts.sessions).toBe(1);
-            expect(counts.messages).toBe(7);
-            expect(counts.agentCommand).toContain('mock-agent.js');
+        // 3 editor requests + 3 agent responses + 1 notification = 7 frames.
+        const counts = dbCounts(dbPath);
+        expect(counts.sessions).toBe(1);
+        expect(counts.messages).toBe(7);
+        expect(counts.agentCommand).toContain('mock-agent.js');
 
-            // The discovery descriptor written while live must be removed on exit.
-            const activeDir = join(home, 'active');
-            const leftover = existsSync(activeDir)
-                ? readdirSync(activeDir).filter((f) => f.endsWith('.json'))
-                : [];
-            expect(leftover).toEqual([]);
-        },
-        20_000,
-    );
+        // The discovery descriptor written while live must be removed on exit.
+        const activeDir = join(home, 'active');
+        const leftover = existsSync(activeDir)
+            ? readdirSync(activeDir).filter((f) => f.endsWith('.json'))
+            : [];
+        expect(leftover).toEqual([]);
+    }, 20_000);
 
-    it(
-        'records the session name and writes no discovery file with --no-ws',
-        async () => {
-            const run = await runProxy(
-                ['--no-ws', '--save-to', dbPath, '--session-name', 'smoke'],
-                home,
-            );
+    it('records the session name and writes no discovery file with --no-ws', async () => {
+        const run = await runProxy(
+            ['--no-ws', '--save-to', dbPath, '--session-name', 'smoke'],
+            home,
+        );
 
-            expect(run.code).toBe(0);
-            const counts = dbCounts(dbPath);
-            expect(counts.sessions).toBe(1);
-            expect(counts.messages).toBe(7);
-            expect(counts.name).toBe('smoke');
+        expect(run.code).toBe(0);
+        const counts = dbCounts(dbPath);
+        expect(counts.sessions).toBe(1);
+        expect(counts.messages).toBe(7);
+        expect(counts.name).toBe('smoke');
 
-            // --no-ws means no broadcaster, so no discovery descriptor at all.
-            const activeDir = join(home, 'active');
-            const leftover = existsSync(activeDir)
-                ? readdirSync(activeDir).filter((f) => f.endsWith('.json'))
-                : [];
-            expect(leftover).toEqual([]);
-        },
-        20_000,
-    );
+        // --no-ws means no broadcaster, so no discovery descriptor at all.
+        const activeDir = join(home, 'active');
+        const leftover = existsSync(activeDir)
+            ? readdirSync(activeDir).filter((f) => f.endsWith('.json'))
+            : [];
+        expect(leftover).toEqual([]);
+    }, 20_000);
 });

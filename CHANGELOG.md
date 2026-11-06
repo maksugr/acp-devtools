@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`acp-devtools export`** redacts auth headers and proxy tokens by default.
   A summary lands on stderr: `redacted N field(s) across M message(s) —
-  re-run with --raw to keep them`. Both the parsed `payload` and the
+re-run with --raw to keep them`. Both the parsed `payload` and the
   re-serialized `raw` are rewritten, so the secret can't leak via either
   field.
 - **UI "Download as JSON"** likewise redacts unconditionally (the UI has no

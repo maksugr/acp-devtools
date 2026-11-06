@@ -25,8 +25,7 @@ export function StreamCluster({
     const last = messages[messages.length - 1]!;
     const duration = lastTimestamp - firstTimestamp;
     const trimmed = combinedText.length > 140 ? `${combinedText.slice(0, 140)}…` : combinedText;
-    const isSelected =
-        selectedSeq !== null && messages.some((m) => m.seq === selectedSeq);
+    const isSelected = selectedSeq !== null && messages.some((m) => m.seq === selectedSeq);
 
     return (
         <div className="border-b border-line-grid/70">
@@ -42,14 +41,13 @@ export function StreamCluster({
                     isSelected ? 'bg-surface-rowHover ring-1 ring-inset ring-accent-note/40' : '',
                 )}
             >
-                <span
-                    aria-hidden
-                    className="absolute inset-y-0 left-0 w-[3px] bg-accent-note"
-                />
+                <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-accent-note" />
                 <span className="w-10 shrink-0 text-right text-ink-muted">
                     {String(first.seq).padStart(3, '0')}…{String(last.seq).padStart(3, '0')}
                 </span>
-                <span className="w-24 shrink-0 text-ink-secondary">{formatTimeMs(firstTimestamp)}</span>
+                <span className="w-24 shrink-0 text-ink-secondary">
+                    {formatTimeMs(firstTimestamp)}
+                </span>
                 <span
                     className="flex w-16 shrink-0 items-center gap-1 font-semibold text-accent-in"
                     title="agent → editor (AI replying or calling the host)"

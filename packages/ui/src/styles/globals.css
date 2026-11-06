@@ -114,11 +114,7 @@ body {
     right: 0;
     bottom: -3px;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        rgb(var(--accent-out)) 0%,
-        rgb(var(--accent-in)) 100%
-    );
+    background: linear-gradient(90deg, rgb(var(--accent-out)) 0%, rgb(var(--accent-in)) 100%);
     opacity: 0.85;
 }
 

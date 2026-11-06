@@ -29,8 +29,7 @@ export function ReplayControls() {
             return;
         }
         // From the start (null) the first tick reaches the first frame.
-        const currentIdx =
-            playhead === null ? -1 : messages.findIndex((m) => m.seq === playhead);
+        const currentIdx = playhead === null ? -1 : messages.findIndex((m) => m.seq === playhead);
         const nextMsg = messages[currentIdx + 1];
         if (!nextMsg) {
             setPlaying(false);

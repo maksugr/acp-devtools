@@ -7,7 +7,13 @@ import {
     type JsonRpcMessage,
     type SessionRecord,
 } from '@acp-devtools/core';
-import { headerJson, renderChange, renderDiff, renderInfoSection, renderPerfSection } from './diff.js';
+import {
+    headerJson,
+    renderChange,
+    renderDiff,
+    renderInfoSection,
+    renderPerfSection,
+} from './diff.js';
 
 /** renderDiff now also takes metadata + per-method deltas; compute them from
  *  the same frame arrays so tests exercise the real composition. */
@@ -42,7 +48,11 @@ const info = (id: number, overrides: Partial<SessionRecord> = {}): SessionRecord
 });
 
 let seq = 0;
-const req = (method: string, params: unknown, overrides: Partial<CapturedMessage> = {}): CapturedMessage => {
+const req = (
+    method: string,
+    params: unknown,
+    overrides: Partial<CapturedMessage> = {},
+): CapturedMessage => {
     const s = overrides.seq ?? ++seq;
     const payload: JsonRpcMessage = { jsonrpc: '2.0', id: s, method, params };
     return {
@@ -103,7 +113,12 @@ describe('renderDiff', () => {
     });
 
     it('renders the session header labels', () => {
-        const out = render([], [], info(5, { clientName: 'WebStorm', agentCommand: 'goose' }), info(6));
+        const out = render(
+            [],
+            [],
+            info(5, { clientName: 'WebStorm', agentCommand: 'goose' }),
+            info(6),
+        );
         expect(out).toContain('A #5  WebStorm · goose');
         expect(out).toContain('diff  #5  →  #6');
     });
@@ -120,11 +135,31 @@ describe('renderInfoSection / renderPerfSection', () => {
     it('surfaces a per-method p99 delta in the perf table', () => {
         const a = [
             req('session/prompt', {}, { seq: 1, rpcId: 1 }),
-            req('', {}, { seq: 2, rpcId: 1, kind: 'response', method: undefined, timestamp: 1_700_000_000_000 + 1000 }),
+            req(
+                '',
+                {},
+                {
+                    seq: 2,
+                    rpcId: 1,
+                    kind: 'response',
+                    method: undefined,
+                    timestamp: 1_700_000_000_000 + 1000,
+                },
+            ),
         ];
         const b = [
             req('session/prompt', {}, { seq: 1, rpcId: 1 }),
-            req('', {}, { seq: 2, rpcId: 1, kind: 'response', method: undefined, timestamp: 1_700_000_000_000 + 3000 }),
+            req(
+                '',
+                {},
+                {
+                    seq: 2,
+                    rpcId: 1,
+                    kind: 'response',
+                    method: undefined,
+                    timestamp: 1_700_000_000_000 + 3000,
+                },
+            ),
         ];
         const out = renderPerfSection(buildMethodStatsDiff(a, b));
         expect(out).toContain('PERF');
@@ -149,9 +184,9 @@ describe('headerJson (--json header shape)', () => {
     });
 
     it('falls back to em dash when nothing identifies the session', () => {
-        expect(headerJson(info(9, { clientName: null, agentCommand: null, name: null }), 0)).toEqual(
-            { id: 9, label: '—', messageCount: 0 },
-        );
+        expect(
+            headerJson(info(9, { clientName: null, agentCommand: null, name: null }), 0),
+        ).toEqual({ id: 9, label: '—', messageCount: 0 });
     });
 });
 

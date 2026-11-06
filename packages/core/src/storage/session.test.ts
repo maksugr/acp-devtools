@@ -30,7 +30,9 @@ describe('Session', () => {
 
         session.record(sample(1));
         session.record(sample(2, { direction: 'agent-to-editor', kind: 'response' }));
-        session.record(sample(3, { kind: 'notification', method: 'session/update', rpcId: undefined }));
+        session.record(
+            sample(3, { kind: 'notification', method: 'session/update', rpcId: undefined }),
+        );
 
         session.close(1_700_000_010_000);
         expect(session.info.endedAt).toBe(1_700_000_010_000);
@@ -60,7 +62,13 @@ describe('Session', () => {
     it('stores parse errors when payload is null', () => {
         const session = Session.start(db);
         session.record(
-            sample(1, { payload: null, parseError: 'invalid JSON', kind: 'unknown', method: undefined, rpcId: undefined }),
+            sample(1, {
+                payload: null,
+                parseError: 'invalid JSON',
+                kind: 'unknown',
+                method: undefined,
+                rpcId: undefined,
+            }),
         );
         const [msg] = [...session.messages()];
         expect(msg?.payload).toBeNull();

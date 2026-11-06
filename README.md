@@ -65,6 +65,7 @@ behind a permission dialog, a cancelled turn — and it's the same session the
 
 Sits between editor and agent over stdio (newline-delimited JSON-RPC 2.0).
 Neither side knows it's there.
+
 </details>
 
 <details>
@@ -74,6 +75,7 @@ Each row shows direction, kind, method, rpc id, size, and latency to its paired
 request. The detail panel renders the full payload as a spec-aware tree —
 hover any field for its schema description, `⚠ ext` badges mark `_meta` and
 fields not declared in the spec.
+
 </details>
 
 <details>
@@ -82,6 +84,7 @@ fields not declared in the spec.
 A shimmer bar marks the cluster while chunks are still arriving — tells
 "agent thinking" apart from "agent stuck". Click to expand the individual
 chunks.
+
 </details>
 
 <details>
@@ -90,6 +93,7 @@ chunks.
 Invalid frames get a red `⚠ SPEC N` badge in the timeline, per-error ajv
 details in the detail panel, and a footer aggregate across the session. CLI:
 `acp-devtools validate <id>` exits 1 on violations — wire into CI. Frames that are valid today but omit a field the spec says will become mandatory get a softer amber `⚠ ADV N` advisory instead.
+
 </details>
 
 <details>
@@ -99,6 +103,7 @@ Sortable table with latency sparklines, auto-detected insights (hotspot,
 long-tail, outlier, busiest, errors), and a waterfall canvas with
 gap-compression for multi-hour sessions. CLI mirror: `stats <id> --by-method`
 — same percentile algorithm, same numbers to the millisecond.
+
 </details>
 
 <details>
@@ -107,6 +112,7 @@ gap-compression for multi-hour sessions. CLI mirror: `stats <id> --by-method`
 LCS-aligned frame view with click-to-expand field-level changes, plus a
 metadata diff layer (versions, capabilities) and a per-method p99-delta layer.
 CLI: `diff <a> <b>` (add `--json` for machine output).
+
 </details>
 
 <details>
@@ -115,6 +121,7 @@ CLI: `diff <a> <b>` (add `--json` for machine output).
 Derived from the captured frames — client/agent versions, capability matrix,
 runtime mode/model, available slash commands, JetBrains `_meta.proxyConfig`.
 Drawer in the UI; CLI: `session-info <id>`; MCP: `get_session_summary`.
+
 </details>
 
 <details>
@@ -122,6 +129,7 @@ Drawer in the UI; CLI: `session-info <id>`; MCP: `get_session_summary`.
 
 Click a result to jump to that row in the timeline. CLI: `search <pattern>`
 with grep-style exit codes (1 if no match).
+
 </details>
 
 <details>
@@ -131,6 +139,7 @@ Every frame is on screen from the start; a left-rail playhead marks the
 current position and the timeline follows it as it runs (0.5×–8× speed via
 the scrubber). CLI: `replay <id>` rebroadcasts over WebSocket on a fixed
 port for repeatable demos.
+
 </details>
 
 <details>
@@ -140,6 +149,7 @@ Two engineers can debug the same capture without spinning up an editor.
 Imported sessions appear in the picker tagged `IMPORTED`. `export` redacts
 auth headers and proxy tokens (including JetBrains `proxy_key`) by default
 — see [Security & privacy](#security--privacy).
+
 </details>
 
 <details>
@@ -148,6 +158,7 @@ auth headers and proxy tokens (including JetBrains `proxy_key`) by default
 `mock-editor --script <export.json>` drives a real agent with recorded editor
 traffic (no IDE, no tokens burned); `mock-agent` does the inverse. Pair with
 `validate` and `stats --json` for headless spec/latency gating.
+
 </details>
 
 <details>
@@ -156,6 +167,7 @@ traffic (no IDE, no tokens burned); `mock-agent` does the inverse. Pair with
 Tools: `list_sessions`, `get_session_summary`, `find_spec_violations`,
 `diff_sessions`, `search_messages`, and 8 more. Wire via `acp-devtools mcp`
 and add to your AI agent's MCP config.
+
 </details>
 
 <details>
@@ -164,6 +176,7 @@ and add to your AI agent's MCP config.
 Every capture registers in `~/.acp-devtools/active/<pid>.json` with an
 ephemeral port. The session picker auto-discovers them — no port conflicts
 even with several chats open.
+
 </details>
 
 ## Quickstart
@@ -303,7 +316,7 @@ the proxy and a full turn only needs an account for that agent. Every
 verified and handshake row links its proof twice: `playground` opens the
 actual capture in the [playground](#playground) in one click, `json` is the
 same redacted export in [`fixtures/handshakes/`](fixtures/handshakes/) for
-`acp-devtools import` or your own tooling. 
+`acp-devtools import` or your own tooling.
 
 **Using any of these is the same regardless of status.** `untested` means we
 haven't captured it yet, not that it won't work. Any ACP agent runs through
@@ -324,68 +337,68 @@ verified.
 
 ### Editors
 
-| Editor                                                                 | ACP support                                                         | Status                                                                   |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [Zed](https://zed.dev/docs/ai/external-agents)                         | native                                                              | **verified** — Zed 1.3.5–1.5.4 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/zed-1.5.4-claude-code-0.43.0.json) · [json](fixtures/handshakes/zed-1.5.4-claude-code-0.43.0.json) · [setup](examples/zed-config.md)         |
-| [JetBrains IDEs](https://www.jetbrains.com/help/ai-assistant/acp.html) | native (AI Assistant)                                               | **verified** — WebStorm 2026.1.2 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/goose-1.37.0.json) · [json](fixtures/handshakes/goose-1.37.0.json) · [setup](examples/jetbrains-config.md) |
-| [Visual Studio Code](https://github.com/formulahendry/vscode-acp)      | `vscode-acp` extension                                              | untested                                                                 |
-| [Neovim](https://github.com/olimorris/codecompanion.nvim)              | CodeCompanion, [avante.nvim](https://github.com/yetone/avante.nvim) | untested                                                                 |
-| [Emacs](https://github.com/xenodium/agent-shell)                       | `agent-shell` package                                               | untested                                                                 |
-| [Obsidian](https://github.com/RAIT-09/obsidian-agent-client)           | Agent Client plugin                                                 | untested                                                                 |
-| [marimo](https://marimo.io)                                            | built into the notebook                                             | untested                                                                 |
-| [AionUi](https://github.com/iOfficeAI/AionUi)                          | desktop GUI                                                         | untested                                                                 |
-| [DeepChat](https://github.com/ThinkInAIXYZ/deepchat)                   | desktop chat app                                                    | untested                                                                 |
-| [Tidewave](https://tidewave.ai)                                        | web app                                                             | untested                                                                 |
-| [aizen](https://aizen.win)                                             | desktop app                                                         | untested                                                                 |
-| [Sidequery](https://sidequery.dev)                                     | browser-based, announced                                            | untested                                                                 |
-| [Web Browser (AI SDK)](https://zed.dev/acp/editor/web-browser)         | `@mcpc/acp-ai-provider`                                             | untested                                                                 |
+| Editor                                                                 | ACP support                                                         | Status                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Zed](https://zed.dev/docs/ai/external-agents)                         | native                                                              | **verified** — Zed 1.3.5–1.5.4 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/zed-1.5.4-claude-code-0.43.0.json) · [json](fixtures/handshakes/zed-1.5.4-claude-code-0.43.0.json) · [setup](examples/zed-config.md) |
+| [JetBrains IDEs](https://www.jetbrains.com/help/ai-assistant/acp.html) | native (AI Assistant)                                               | **verified** — WebStorm 2026.1.2 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/goose-1.37.0.json) · [json](fixtures/handshakes/goose-1.37.0.json) · [setup](examples/jetbrains-config.md)                         |
+| [Visual Studio Code](https://github.com/formulahendry/vscode-acp)      | `vscode-acp` extension                                              | untested                                                                                                                                                                                                                                                                                                    |
+| [Neovim](https://github.com/olimorris/codecompanion.nvim)              | CodeCompanion, [avante.nvim](https://github.com/yetone/avante.nvim) | untested                                                                                                                                                                                                                                                                                                    |
+| [Emacs](https://github.com/xenodium/agent-shell)                       | `agent-shell` package                                               | untested                                                                                                                                                                                                                                                                                                    |
+| [Obsidian](https://github.com/RAIT-09/obsidian-agent-client)           | Agent Client plugin                                                 | untested                                                                                                                                                                                                                                                                                                    |
+| [marimo](https://marimo.io)                                            | built into the notebook                                             | untested                                                                                                                                                                                                                                                                                                    |
+| [AionUi](https://github.com/iOfficeAI/AionUi)                          | desktop GUI                                                         | untested                                                                                                                                                                                                                                                                                                    |
+| [DeepChat](https://github.com/ThinkInAIXYZ/deepchat)                   | desktop chat app                                                    | untested                                                                                                                                                                                                                                                                                                    |
+| [Tidewave](https://tidewave.ai)                                        | web app                                                             | untested                                                                                                                                                                                                                                                                                                    |
+| [aizen](https://aizen.win)                                             | desktop app                                                         | untested                                                                                                                                                                                                                                                                                                    |
+| [Sidequery](https://sidequery.dev)                                     | browser-based, announced                                            | untested                                                                                                                                                                                                                                                                                                    |
+| [Web Browser (AI SDK)](https://zed.dev/acp/editor/web-browser)         | `@mcpc/acp-ai-provider`                                             | untested                                                                                                                                                                                                                                                                                                    |
 
 ### Agents
 
-| Agent                                                                              | Status                                                                                                                    |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [AgentPool](https://phil65.github.io/agentpool/advanced/acp-integration/)          | untested                                                                                                                  |
-| [Agoragentic](https://zed.dev/acp/agent/agoragentic-acp)                           | untested                                                                                                                  |
-| [Amp](https://ampcode.com)                                                         | handshake — amp-acp 0.8.1 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/amp-acp-0.8.1.json) · [json](fixtures/handshakes/amp-acp-0.8.1.json)                                                       |
-| [Augment Code](https://docs.augmentcode.com/cli/acp)                               | handshake — auggie 0.29.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/auggie-0.29.0.json) · [json](fixtures/handshakes/auggie-0.29.0.json)                                                       |
-| [Autohand Code](https://zed.dev/acp/agent/autohand)                                | untested                                                                                                                  |
-| [Blackbox AI](https://docs.blackbox.ai/features/blackbox-cli/introduction)         | untested                                                                                                                  |
-| [Claude Code](https://www.npmjs.com/package/@agentclientprotocol/claude-agent-acp) | **verified** — claude-agent-acp 0.37–0.44 · [playground](https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/06a5d8c926d6ad99a410688a07f8e35bd89bac36/gistfile1.txt) · [json](https://gist.github.com/maksugr/0059be3aba62538c099ae96f0bf34bbb)                                          |
-| [Cline](https://cline.bot)                                                         | untested — CLI 3.0.24 exposes no ACP mode                                                                                 |
-| [Code Assistant](https://github.com/stippi/code-assistant)                         | untested                                                                                                                  |
-| [Codebuddy Code](https://zed.dev/acp/agent/codebuddy-code)                         | untested                                                                                                                  |
-| [Codex CLI](https://developers.openai.com/codex/cli)                               | handshake — codex-acp 0.16.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/codex-acp-0.16.0.json) · [json](fixtures/handshakes/codex-acp-0.16.0.json)                              |
-| [Cortex Code](https://zed.dev/acp/agent/cortex-code)                               | untested                                                                                                                  |
-| [Corust Agent](https://zed.dev/acp/agent/corust-agent)                             | untested                                                                                                                  |
-| [crow-cli](https://crow-ai.dev)                                                    | fails — 0.3.0 npm binary links Intel-Homebrew `libgc`, crashes on Apple Silicon                                           |
-| [Cursor](https://cursor.com/docs/cli/acp)                                          | **verified** — cursor-agent 2026.05.16 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/cursor-cli-2026.05.16.json) · [json](fixtures/handshakes/cursor-cli-2026.05.16.json)                |
-| [DeepAgents](https://github.com/langchain-ai/deepagents)                           | untested                                                                                                                  |
-| [DimCode](https://zed.dev/acp/agent/dimcode)                                       | untested                                                                                                                  |
-| [Dirac](https://zed.dev/acp/agent/dirac)                                           | untested                                                                                                                  |
-| [Docker cagent](https://github.com/docker/cagent)                                  | untested                                                                                                                  |
-| [Factory Droid](https://factory.ai)                                                | untested                                                                                                                  |
-| [fast-agent](https://fast-agent.ai/acp)                                            | untested                                                                                                                  |
-| [Gemini CLI](https://github.com/google-gemini/gemini-cli)                          | handshake — gemini-cli 0.46.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/gemini-cli-0.46.0.json) · [json](fixtures/handshakes/gemini-cli-0.46.0.json)                                               |
-| [GitHub Copilot](https://github.com/features/copilot)                              | handshake — copilot 1.0.61 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/copilot-cli-1.0.61.json) · [json](fixtures/handshakes/copilot-cli-1.0.61.json)                                                 |
-| [GLM Agent](https://zed.dev/acp/agent/glm-acp-agent)                               | untested                                                                                                                  |
-| [Goose](https://block.github.io/goose/docs/guides/acp-clients)                     | **verified** — goose 1.37.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/goose-1.37.0.json) · [json](fixtures/handshakes/goose-1.37.0.json) |
-| [Grok Build](https://zed.dev/acp/agent/grok-build)                                 | untested                                                                                                                  |
-| [JetBrains Junie](https://junie.jetbrains.com)                                     | **verified** — Junie CLI 26.6.15 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/junie-26.6.15.json) · [json](fixtures/handshakes/junie-26.6.15.json)                                                |
-| [Kilo](https://kilocode.ai)                                                        | untested                                                                                                                  |
-| [Kimi CLI](https://github.com/MoonshotAI/kimi-cli)                                 | handshake — Kimi Code CLI 1.47.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/kimi-code-cli-1.47.0.json) · [json](fixtures/handshakes/kimi-code-cli-1.47.0.json)                                         |
-| [Kiro CLI](https://kiro.dev/docs/cli/acp/)                                         | untested                                                                                                                  |
-| [Minion Code](https://github.com/femto/minion-code)                                | untested                                                                                                                  |
-| [Mistral Vibe](https://github.com/mistralai/mistral-vibe)                          | handshake — vibe 2.15.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/mistral-vibe-2.15.0.json) · [json](fixtures/handshakes/mistral-vibe-2.15.0.json)                                                   |
-| [Nova](https://zed.dev/acp/agent/nova)                                             | untested                                                                                                                  |
-| [OpenCode](https://opencode.ai)                                                    | handshake — OpenCode 1.17.4 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/opencode-1.17.4.json) · [json](fixtures/handshakes/opencode-1.17.4.json)                             |
-| [OpenHands](https://docs.openhands.dev/openhands/usage/run-openhands/acp)          | untested                                                                                                                  |
-| [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)          | untested                                                                                                                  |
-| [Poolside](https://zed.dev/acp/agent/poolside)                                     | untested                                                                                                                  |
-| [Qoder CLI](https://docs.qoder.com/cli/acp)                                        | untested                                                                                                                  |
-| [Qwen Code](https://github.com/QwenLM/qwen-code)                                   | handshake — qwen-code 0.17.1 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/qwen-code-0.17.1.json) · [json](fixtures/handshakes/qwen-code-0.17.1.json)                                                 |
-| [siGit Code](https://github.com/getsigit/sigit)                                    | untested                                                                                                                  |
-| [Stakpak](https://github.com/stakpak/agent)                                        | untested                                                                                                                  |
-| [VT Code](https://github.com/vinhnx/vtcode)                                        | fails — `vtcode acp` 0.52.8 exits silently (no response to `initialize`)                                                  |
+| Agent                                                                              | Status                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [AgentPool](https://phil65.github.io/agentpool/advanced/acp-integration/)          | untested                                                                                                                                                                                                                                                                                                             |
+| [Agoragentic](https://zed.dev/acp/agent/agoragentic-acp)                           | untested                                                                                                                                                                                                                                                                                                             |
+| [Amp](https://ampcode.com)                                                         | handshake — amp-acp 0.8.1 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/amp-acp-0.8.1.json) · [json](fixtures/handshakes/amp-acp-0.8.1.json)                                                                               |
+| [Augment Code](https://docs.augmentcode.com/cli/acp)                               | handshake — auggie 0.29.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/auggie-0.29.0.json) · [json](fixtures/handshakes/auggie-0.29.0.json)                                                                               |
+| [Autohand Code](https://zed.dev/acp/agent/autohand)                                | untested                                                                                                                                                                                                                                                                                                             |
+| [Blackbox AI](https://docs.blackbox.ai/features/blackbox-cli/introduction)         | untested                                                                                                                                                                                                                                                                                                             |
+| [Claude Code](https://www.npmjs.com/package/@agentclientprotocol/claude-agent-acp) | **verified** — claude-agent-acp 0.37–0.44 · [playground](https://playground.acp-devtools.dev/?url=https://gist.githubusercontent.com/maksugr/0059be3aba62538c099ae96f0bf34bbb/raw/06a5d8c926d6ad99a410688a07f8e35bd89bac36/gistfile1.txt) · [json](https://gist.github.com/maksugr/0059be3aba62538c099ae96f0bf34bbb) |
+| [Cline](https://cline.bot)                                                         | untested — CLI 3.0.24 exposes no ACP mode                                                                                                                                                                                                                                                                            |
+| [Code Assistant](https://github.com/stippi/code-assistant)                         | untested                                                                                                                                                                                                                                                                                                             |
+| [Codebuddy Code](https://zed.dev/acp/agent/codebuddy-code)                         | untested                                                                                                                                                                                                                                                                                                             |
+| [Codex CLI](https://developers.openai.com/codex/cli)                               | handshake — codex-acp 0.16.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/codex-acp-0.16.0.json) · [json](fixtures/handshakes/codex-acp-0.16.0.json)                                                                      |
+| [Cortex Code](https://zed.dev/acp/agent/cortex-code)                               | untested                                                                                                                                                                                                                                                                                                             |
+| [Corust Agent](https://zed.dev/acp/agent/corust-agent)                             | untested                                                                                                                                                                                                                                                                                                             |
+| [crow-cli](https://crow-ai.dev)                                                    | fails — 0.3.0 npm binary links Intel-Homebrew `libgc`, crashes on Apple Silicon                                                                                                                                                                                                                                      |
+| [Cursor](https://cursor.com/docs/cli/acp)                                          | **verified** — cursor-agent 2026.05.16 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/cursor-cli-2026.05.16.json) · [json](fixtures/handshakes/cursor-cli-2026.05.16.json)                                                  |
+| [DeepAgents](https://github.com/langchain-ai/deepagents)                           | untested                                                                                                                                                                                                                                                                                                             |
+| [DimCode](https://zed.dev/acp/agent/dimcode)                                       | untested                                                                                                                                                                                                                                                                                                             |
+| [Dirac](https://zed.dev/acp/agent/dirac)                                           | untested                                                                                                                                                                                                                                                                                                             |
+| [Docker cagent](https://github.com/docker/cagent)                                  | untested                                                                                                                                                                                                                                                                                                             |
+| [Factory Droid](https://factory.ai)                                                | untested                                                                                                                                                                                                                                                                                                             |
+| [fast-agent](https://fast-agent.ai/acp)                                            | untested                                                                                                                                                                                                                                                                                                             |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli)                          | handshake — gemini-cli 0.46.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/gemini-cli-0.46.0.json) · [json](fixtures/handshakes/gemini-cli-0.46.0.json)                                                                   |
+| [GitHub Copilot](https://github.com/features/copilot)                              | handshake — copilot 1.0.61 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/copilot-cli-1.0.61.json) · [json](fixtures/handshakes/copilot-cli-1.0.61.json)                                                                    |
+| [GLM Agent](https://zed.dev/acp/agent/glm-acp-agent)                               | untested                                                                                                                                                                                                                                                                                                             |
+| [Goose](https://block.github.io/goose/docs/guides/acp-clients)                     | **verified** — goose 1.37.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/goose-1.37.0.json) · [json](fixtures/handshakes/goose-1.37.0.json)                                                                               |
+| [Grok Build](https://zed.dev/acp/agent/grok-build)                                 | untested                                                                                                                                                                                                                                                                                                             |
+| [JetBrains Junie](https://junie.jetbrains.com)                                     | **verified** — Junie CLI 26.6.15 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/junie-26.6.15.json) · [json](fixtures/handshakes/junie-26.6.15.json)                                                                        |
+| [Kilo](https://kilocode.ai)                                                        | untested                                                                                                                                                                                                                                                                                                             |
+| [Kimi CLI](https://github.com/MoonshotAI/kimi-cli)                                 | handshake — Kimi Code CLI 1.47.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/kimi-code-cli-1.47.0.json) · [json](fixtures/handshakes/kimi-code-cli-1.47.0.json)                                                          |
+| [Kiro CLI](https://kiro.dev/docs/cli/acp/)                                         | untested                                                                                                                                                                                                                                                                                                             |
+| [Minion Code](https://github.com/femto/minion-code)                                | untested                                                                                                                                                                                                                                                                                                             |
+| [Mistral Vibe](https://github.com/mistralai/mistral-vibe)                          | handshake — vibe 2.15.0 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/mistral-vibe-2.15.0.json) · [json](fixtures/handshakes/mistral-vibe-2.15.0.json)                                                                     |
+| [Nova](https://zed.dev/acp/agent/nova)                                             | untested                                                                                                                                                                                                                                                                                                             |
+| [OpenCode](https://opencode.ai)                                                    | handshake — OpenCode 1.17.4 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/opencode-1.17.4.json) · [json](fixtures/handshakes/opencode-1.17.4.json)                                                                         |
+| [OpenHands](https://docs.openhands.dev/openhands/usage/run-openhands/acp)          | untested                                                                                                                                                                                                                                                                                                             |
+| [Pi](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent)          | untested                                                                                                                                                                                                                                                                                                             |
+| [Poolside](https://zed.dev/acp/agent/poolside)                                     | untested                                                                                                                                                                                                                                                                                                             |
+| [Qoder CLI](https://docs.qoder.com/cli/acp)                                        | untested                                                                                                                                                                                                                                                                                                             |
+| [Qwen Code](https://github.com/QwenLM/qwen-code)                                   | handshake — qwen-code 0.17.1 · [playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/handshakes/qwen-code-0.17.1.json) · [json](fixtures/handshakes/qwen-code-0.17.1.json)                                                                      |
+| [siGit Code](https://github.com/getsigit/sigit)                                    | untested                                                                                                                                                                                                                                                                                                             |
+| [Stakpak](https://github.com/stakpak/agent)                                        | untested                                                                                                                                                                                                                                                                                                             |
+| [VT Code](https://github.com/vinhnx/vtcode)                                        | fails — `vtcode acp` 0.52.8 exits silently (no response to `initialize`)                                                                                                                                                                                                                                             |
 
 ### Launch shortcuts
 
@@ -393,12 +406,12 @@ The built-in registry maps five common agents to ready commands. npm-based
 agents auto-install on first use via `npx -y …`; binary-based agents need a
 one-time install. `acp-devtools agents` prints this list from the CLI.
 
-| Shortcut                  | What it runs                                   | Install                                          |
-| ------------------------- | ---------------------------------------------- | ------------------------------------------------ |
-| `claude-code` _(default)_ | `npx -y @agentclientprotocol/claude-agent-acp` | npx — automatic                                  |
-| `codex`                   | `npx -y @zed-industries/codex-acp`             | npx — automatic                                  |
-| `goose`                   | `goose acp`                                    | install Goose from <https://goose-docs.ai> first |
-| `opencode`                | `opencode acp`                                 | `curl -fsSL https://opencode.ai/install \| bash` |
+| Shortcut                  | What it runs                                   | Install                                                     |
+| ------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| `claude-code` _(default)_ | `npx -y @agentclientprotocol/claude-agent-acp` | npx — automatic                                             |
+| `codex`                   | `npx -y @zed-industries/codex-acp`             | npx — automatic                                             |
+| `goose`                   | `goose acp`                                    | install Goose from <https://goose-docs.ai> first            |
+| `opencode`                | `opencode acp`                                 | `curl -fsSL https://opencode.ai/install \| bash`            |
 | `junie`                   | `junie --acp=true`                             | install Junie CLI from <https://junie.jetbrains.com/> first |
 
 Every other agent runs through the explicit form:
@@ -440,15 +453,15 @@ This section spells out what's at risk and what the tool does about it.
 
 ### What ACP captures contain
 
-| Source                                                                   | Lives in                                                    | Sensitive?                                         |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------- | -------------------------------------------------- |
-| `initialize._meta.proxyConfig.proxies[].proxy.headers`                   | every WebStorm session                                      | **YES** — JetBrains LLM gateway auth (`proxy_key`) |
-| `session/new` / `session/load` → `mcpServers[].headers` and `mcpServers[].env` | every session whose editor forwards MCP servers (e.g. Zed context servers) | **YES** — MCP server tokens, API keys, DB URLs |
-| `initialize` response → `authMethods[].env` (terminal auth)              | agents offering terminal login                              | **YES**                                            |
-| HTTP-style `Authorization` / `X-Api-Key` / `Cookie` headers in any field | uncommon but possible in custom agents / `_meta` extensions | **YES**                                            |
-| `fs/read_text_file` results                                              | every session that opens files                              | depends — proprietary source vs. public code       |
-| Prompts you typed and model responses                                    | every session                                               | depends — internal context vs. generic question    |
-| Method names, latencies, frame counts, schema shapes                     | every session                                               | no — useful for bug reports                        |
+| Source                                                                         | Lives in                                                                   | Sensitive?                                         |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------- |
+| `initialize._meta.proxyConfig.proxies[].proxy.headers`                         | every WebStorm session                                                     | **YES** — JetBrains LLM gateway auth (`proxy_key`) |
+| `session/new` / `session/load` → `mcpServers[].headers` and `mcpServers[].env` | every session whose editor forwards MCP servers (e.g. Zed context servers) | **YES** — MCP server tokens, API keys, DB URLs     |
+| `initialize` response → `authMethods[].env` (terminal auth)                    | agents offering terminal login                                             | **YES**                                            |
+| HTTP-style `Authorization` / `X-Api-Key` / `Cookie` headers in any field       | uncommon but possible in custom agents / `_meta` extensions                | **YES**                                            |
+| `fs/read_text_file` results                                                    | every session that opens files                                             | depends — proprietary source vs. public code       |
+| Prompts you typed and model responses                                          | every session                                                              | depends — internal context vs. generic question    |
+| Method names, latencies, frame counts, schema shapes                           | every session                                                              | no — useful for bug reports                        |
 
 The capture file stays on your machine; nothing in the tool uploads it.
 The risk surface is when **you** share an export — and that's what default

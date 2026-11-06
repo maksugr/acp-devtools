@@ -35,18 +35,12 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
     }, [open]);
 
     const currentCapture = captures.find((c) => c.url === activeUrl) ?? null;
-    const replayId = activeUrl !== null && isReplayUrl(activeUrl)
-        ? sessionIdFromReplayUrl(activeUrl)
-        : null;
+    const replayId =
+        activeUrl !== null && isReplayUrl(activeUrl) ? sessionIdFromReplayUrl(activeUrl) : null;
     // Hide saved sessions that are still live — they would appear twice in the
     // list (once as the running proxy, once as their row in captures.db).
     const liveDbIds = useMemo(
-        () =>
-            new Set(
-                captures
-                    .map((c) => c.sessionDbId)
-                    .filter((id): id is number => id !== null),
-            ),
+        () => new Set(captures.map((c) => c.sessionDbId).filter((id): id is number => id !== null)),
         [captures],
     );
     const savedOnly = useMemo(
@@ -62,7 +56,7 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
         [savedOnly],
     );
     const currentSaved =
-        replayId !== null ? savedOnly.find((s) => s.id === replayId) ?? null : null;
+        replayId !== null ? (savedOnly.find((s) => s.id === replayId) ?? null) : null;
     const totalCount = captures.length + savedOnly.length;
 
     let label: string;
@@ -188,7 +182,8 @@ export function SessionPicker({ onSelect, activeUrl, overrideUrl }: SessionPicke
                         ))}
                     </ul>
 
-                    {(savedImported.length > 0 || savedSessions.some((s) => s.imported_at !== null)) && (
+                    {(savedImported.length > 0 ||
+                        savedSessions.some((s) => s.imported_at !== null)) && (
                         <>
                             <SectionHeader>
                                 imported · {savedImported.length} file
@@ -290,9 +285,7 @@ function SavedRow({ s, activeUrl, onPick }: SavedRowProps) {
                             ? `${s.client_name} · ${shortAgentName(s.agent_command ?? '')}`
                             : shortAgentName(s.agent_command ?? ''))}
                 </span>
-                <span
-                    className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted transition-colors group-hover:text-ink-secondary"
-                >
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-ink-muted transition-colors group-hover:text-ink-secondary">
                     {s.message_count}msg · {formatAge(s.started_at)}
                 </span>
             </button>
@@ -316,4 +309,3 @@ function SavedRow({ s, activeUrl, onPick }: SavedRowProps) {
         </li>
     );
 }
-

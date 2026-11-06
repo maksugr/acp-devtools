@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
-import {
-    buildRequestIndex,
-    useMessagesStore,
-} from '../store/messagesStore';
+import { buildRequestIndex, useMessagesStore } from '../store/messagesStore';
 import { formatBytes, formatLatency, percentile } from '../lib/format';
 import { buildValidationMap, summarizeValidation } from '../lib/validation';
 import { SpecHint } from './SpecHint';
@@ -104,7 +101,9 @@ function StarPrompt() {
             aria-label="Star acp-devtools on GitHub"
             className="inline-flex items-baseline gap-1 text-ink-muted transition-colors hover:text-accent-warn focus-visible:text-accent-warn focus-visible:outline-none"
         >
-            <span aria-hidden="true" className="text-[10px]">★</span>
+            <span aria-hidden="true" className="text-[10px]">
+                ★
+            </span>
             <span className="text-[9px] tracking-normal">Star on GitHub</span>
         </a>
     );

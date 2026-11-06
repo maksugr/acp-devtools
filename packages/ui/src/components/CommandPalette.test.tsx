@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CommandPalette } from './CommandPalette';
-import {
-    ALL_DIRECTIONS,
-    ALL_KINDS,
-    useMessagesStore,
-} from '../store/messagesStore';
+import { ALL_DIRECTIONS, ALL_KINDS, useMessagesStore } from '../store/messagesStore';
 import { useDiscoveryStore } from '../store/discoveryStore';
 
 beforeEach(() => {

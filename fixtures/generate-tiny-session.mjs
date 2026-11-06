@@ -41,16 +41,21 @@ function push(direction, kind, payload, method) {
 }
 
 // 1 — initialize
-push('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: 1,
-    method: 'initialize',
-    params: {
-        protocolVersion: 1,
-        clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
-        clientCapabilities: { fs: { readTextFile: true, writeTextFile: true }, terminal: true },
+push(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+            protocolVersion: 1,
+            clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
+            clientCapabilities: { fs: { readTextFile: true, writeTextFile: true }, terminal: true },
+        },
     },
-}, 'initialize');
+    'initialize',
+);
 ts += 120;
 push('agent-to-editor', 'response', {
     jsonrpc: '2.0',
@@ -65,18 +70,31 @@ push('agent-to-editor', 'response', {
 ts += 800;
 
 // 2 — single prompt
-push('editor-to-agent', 'request', {
-    jsonrpc: '2.0',
-    id: 2,
-    method: 'session/prompt',
-    params: { sessionId, prompt: [{ type: 'text', text: 'hello' }] },
-}, 'session/prompt');
+push(
+    'editor-to-agent',
+    'request',
+    {
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'session/prompt',
+        params: { sessionId, prompt: [{ type: 'text', text: 'hello' }] },
+    },
+    'session/prompt',
+);
 ts += 1_400; // 1.4s — single latency sample
-push('agent-to-editor', 'notification', {
-    jsonrpc: '2.0',
-    method: 'session/update',
-    params: { sessionId, update: { sessionUpdate: 'agent_message_chunk', content: { text: 'hi back' } } },
-}, 'session/update');
+push(
+    'agent-to-editor',
+    'notification',
+    {
+        jsonrpc: '2.0',
+        method: 'session/update',
+        params: {
+            sessionId,
+            update: { sessionUpdate: 'agent_message_chunk', content: { text: 'hi back' } },
+        },
+    },
+    'session/update',
+);
 ts += 30;
 push('agent-to-editor', 'response', {
     jsonrpc: '2.0',

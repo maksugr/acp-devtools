@@ -4,11 +4,7 @@ import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import type { Command } from 'commander';
-import {
-    attachReplayUpgrade,
-    createApiHandler,
-    defaultCapturesDbPath,
-} from '@acp-devtools/core';
+import { attachReplayUpgrade, createApiHandler, defaultCapturesDbPath } from '@acp-devtools/core';
 
 interface UiCommandOptions {
     port: string;

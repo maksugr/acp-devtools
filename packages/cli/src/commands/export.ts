@@ -20,7 +20,9 @@ interface ExportCommandOptions {
 export function registerExportCommand(program: Command): void {
     program
         .command('export')
-        .description('Export a recorded session as self-contained JSON (suitable for sharing and for mock-replay)')
+        .description(
+            'Export a recorded session as self-contained JSON (suitable for sharing and for mock-replay)',
+        )
         .argument('[id]', 'session id to export (default: latest in the database)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
         .option('-o, --output <file>', 'write to a file instead of stdout')
@@ -62,7 +64,11 @@ export function registerExportCommand(program: Command): void {
             const rawExp = exportSession(session, {
                 tool: { name: 'acp-devtools', version: CLI_VERSION },
             });
-            const { export: finalExp, fieldsRedacted, messagesAffected } = opts.raw
+            const {
+                export: finalExp,
+                fieldsRedacted,
+                messagesAffected,
+            } = opts.raw
                 ? { export: rawExp, fieldsRedacted: 0, messagesAffected: 0 }
                 : redactSessionExport(rawExp);
             const json = serializeExport(finalExp, opts.pretty ? 4 : 0);

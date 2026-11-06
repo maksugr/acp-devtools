@@ -19,7 +19,7 @@ export function registerSessionInfoCommand(program: Command): void {
     program
         .command('session-info')
         .description(
-            'Print derived client/agent metadata for a saved session — the terminal equivalent of the inspector\'s session info panel.',
+            "Print derived client/agent metadata for a saved session — the terminal equivalent of the inspector's session info panel.",
         )
         .argument('<id>', 'session id (see `acp-devtools list`)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
@@ -114,7 +114,11 @@ export function registerSessionInfoCommand(program: Command): void {
         });
 }
 
-function renderText(session: Session, meta: ReturnType<typeof extractSessionMetadata>, msgCount: number): void {
+function renderText(
+    session: Session,
+    meta: ReturnType<typeof extractSessionMetadata>,
+    msgCount: number,
+): void {
     const w = process.stdout;
     const s = createStyler(colorEnabled(process.stdout));
     w.write(`${s.bold(s.cyan(`SESSION #${session.info.id}`))}\n`);
@@ -126,7 +130,9 @@ function renderText(session: Session, meta: ReturnType<typeof extractSessionMeta
     const agentLabel = meta.agent.name ?? shortAgent(session.info.agentCommand) ?? '—';
     w.write(pad(s, 'Agent', withVersion(agentLabel, meta.agent.version)));
 
-    w.write(pad(s, 'Protocol', meta.protocolVersion !== null ? `ACP v${meta.protocolVersion}` : '—'));
+    w.write(
+        pad(s, 'Protocol', meta.protocolVersion !== null ? `ACP v${meta.protocolVersion}` : '—'),
+    );
     w.write(
         pad(
             s,
@@ -152,11 +158,16 @@ function renderText(session: Session, meta: ReturnType<typeof extractSessionMeta
     w.write(`  ${s.dim('auth methods'.padEnd(18))} ${meta.agent.authMethods}\n`);
 
     w.write(`\n${heading(s, 'RUNTIME STATE')}\n`);
-    const modeSuffix = meta.runtime.modeChanges > 0 ? s.dim(`  (changed ${meta.runtime.modeChanges}×)`) : '';
+    const modeSuffix =
+        meta.runtime.modeChanges > 0 ? s.dim(`  (changed ${meta.runtime.modeChanges}×)`) : '';
     const modelSuffix =
         meta.runtime.modelChanges > 0 ? s.dim(`  (changed ${meta.runtime.modelChanges}×)`) : '';
-    w.write(`  ${s.dim('current mode'.padEnd(18))} ${meta.runtime.currentMode ?? '—'}${modeSuffix}\n`);
-    w.write(`  ${s.dim('current model'.padEnd(18))} ${meta.runtime.currentModel ?? '—'}${modelSuffix}\n`);
+    w.write(
+        `  ${s.dim('current mode'.padEnd(18))} ${meta.runtime.currentMode ?? '—'}${modeSuffix}\n`,
+    );
+    w.write(
+        `  ${s.dim('current model'.padEnd(18))} ${meta.runtime.currentModel ?? '—'}${modelSuffix}\n`,
+    );
     w.write(
         `  ${s.dim('available cmds'.padEnd(18))} ${meta.runtime.availableCommands.length > 0 ? meta.runtime.availableCommands.join(', ') : '—'}\n`,
     );

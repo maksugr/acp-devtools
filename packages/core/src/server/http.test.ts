@@ -156,7 +156,9 @@ describe('createApiHandler', () => {
         const req = makeReq('/api/sessions');
         const res = makeRes();
         handler(req as never, res as never);
-        const body = JSON.parse(res.body) as { sessions: Array<{ id: number; client_name: string }> };
+        const body = JSON.parse(res.body) as {
+            sessions: Array<{ id: number; client_name: string }>;
+        };
         expect(body.sessions).toHaveLength(1);
         expect(body.sessions[0]?.id).toBe(session.info.id);
         expect(body.sessions[0]?.client_name).toBe('Zed');
@@ -245,7 +247,9 @@ describe('POST /api/import', () => {
         const body = JSON.parse(res.body) as { id: number; messageCount: number };
         expect(body.id).toBeGreaterThan(0);
         expect(body.messageCount).toBe(1);
-        const rows = db.prepare(`SELECT name, client_name, imported_at FROM sessions`).all() as Array<{
+        const rows = db
+            .prepare(`SELECT name, client_name, imported_at FROM sessions`)
+            .all() as Array<{
             name: string | null;
             client_name: string | null;
             imported_at: number | null;

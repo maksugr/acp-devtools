@@ -27,7 +27,8 @@ stores sessions in SQLite, and validates frames against the official schema.
 
 ```bash
 npm ci                 # install (Node ≥ 22; better-sqlite3 is a native addon)
-npm run precommit      # lint + typecheck + all tests — run before every commit
+npm run precommit      # lint + format check + typecheck + all tests — run before every commit
+npm run format         # Prettier over the whole repo; CI fails on unformatted files
 npm test               # vitest, ~70 s (CLI integration tests dominate)
 npx vitest run <path>  # a single file or directory
 npm run build:full     # core + CLI bundle + UI, embedded into packages/cli/dist
@@ -79,6 +80,8 @@ rules: [CONTRIBUTING.md § Security design rules](CONTRIBUTING.md#security-desig
 
 ## Conventions and gotchas
 
+- Run `npm run format` before committing — CI runs `format:check` on every
+  file. Never reformat by hand or exclude files to get it green.
 - 4-space indent, Prettier (`printWidth` 100), ESM with explicit `.js` import
   extensions, `import type` for types. Comments explain _why_, not _what_.
 - JSON-RPC ids are scoped per sender: an editor request and an agent request

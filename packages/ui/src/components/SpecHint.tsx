@@ -110,9 +110,7 @@ export function SpecHint({
                 className={cn('cursor-help', className)}
                 onMouseEnter={show}
                 onMouseLeave={hide}
-                {...(focusable
-                    ? { onFocus: show, onBlur: hide, tabIndex: 0 }
-                    : {})}
+                {...(focusable ? { onFocus: show, onBlur: hide, tabIndex: 0 } : {})}
             >
                 {children}
             </span>

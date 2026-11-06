@@ -789,7 +789,7 @@ export function buildMcpServer(opts: McpOptions): McpServer {
         'list_agent_shortcuts',
         {
             description:
-                'List the built-in agent shortcuts you can pass to generate_editor_config as `agent` (or that the CLI accepts as `acp-devtools <name>` / `proxy --agent <name>`). Each is a known ACP agent wired into the registry; anything else is still supported via generate_editor_config\'s `command` argument. Same data as the CLI `acp-devtools agents`.',
+                "List the built-in agent shortcuts you can pass to generate_editor_config as `agent` (or that the CLI accepts as `acp-devtools <name>` / `proxy --agent <name>`). Each is a known ACP agent wired into the registry; anything else is still supported via generate_editor_config's `command` argument. Same data as the CLI `acp-devtools agents`.",
             inputSchema: {},
             outputSchema: {
                 agents: z.array(

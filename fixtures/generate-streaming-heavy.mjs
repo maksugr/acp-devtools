@@ -48,33 +48,43 @@ function advance(min, max) {
 function streamLongResponse(text, chunkSize) {
     for (let i = 0; i < text.length; i += chunkSize) {
         advance(12, 35);
-        push('agent-to-editor', 'notification', {
-            jsonrpc: '2.0',
-            method: 'session/update',
-            params: {
-                sessionId,
-                update: {
-                    sessionUpdate: 'agent_message_chunk',
-                    content: { text: text.slice(i, i + chunkSize) },
+        push(
+            'agent-to-editor',
+            'notification',
+            {
+                jsonrpc: '2.0',
+                method: 'session/update',
+                params: {
+                    sessionId,
+                    update: {
+                        sessionUpdate: 'agent_message_chunk',
+                        content: { text: text.slice(i, i + chunkSize) },
+                    },
                 },
             },
-        }, 'session/update');
+            'session/update',
+        );
     }
 }
 
 // Preamble.
 {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'initialize',
-        params: {
-            protocolVersion: 1,
-            clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
-            clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'initialize',
+            params: {
+                protocolVersion: 1,
+                clientInfo: { name: 'zed', title: 'Zed', version: '1.3.5' },
+                clientCapabilities: { fs: { readTextFile: true, writeTextFile: true } },
+            },
         },
-    }, 'initialize');
+        'initialize',
+    );
     advance(60, 120);
     push('agent-to-editor', 'response', {
         jsonrpc: '2.0',
@@ -97,27 +107,36 @@ const PROMPTS = [
 ];
 const RESPONSES = [
     // ~1800 chars — splits into ~225 chunks at chunkSize=8.
-    Array.from({ length: 80 }, () =>
-        'Once upon a time the parser found a buffer it could not understand. ',
+    Array.from(
+        { length: 80 },
+        () => 'Once upon a time the parser found a buffer it could not understand. ',
     ).join(''),
     // ~2200 chars — ~275 chunks.
-    Array.from({ length: 60 }, () =>
-        'The Agent Client Protocol describes a JSON-RPC pipe over stdio. Both peers may send notifications. ',
+    Array.from(
+        { length: 60 },
+        () =>
+            'The Agent Client Protocol describes a JSON-RPC pipe over stdio. Both peers may send notifications. ',
     ).join(''),
     // ~1500 chars — ~190 chunks.
-    Array.from({ length: 30 }, () =>
-        'A request goes out, a response comes back, in perfect rhythm we attack. ',
+    Array.from(
+        { length: 30 },
+        () => 'A request goes out, a response comes back, in perfect rhythm we attack. ',
     ).join(''),
 ];
 
 for (let p = 0; p < PROMPTS.length; p++) {
     const id = ++rpcId;
-    push('editor-to-agent', 'request', {
-        jsonrpc: '2.0',
-        id,
-        method: 'session/prompt',
-        params: { sessionId, prompt: [{ type: 'text', text: PROMPTS[p] }] },
-    }, 'session/prompt');
+    push(
+        'editor-to-agent',
+        'request',
+        {
+            jsonrpc: '2.0',
+            id,
+            method: 'session/prompt',
+            params: { sessionId, prompt: [{ type: 'text', text: PROMPTS[p] }] },
+        },
+        'session/prompt',
+    );
     advance(800, 1500);
     // Tiny chunkSize → many notifications per response.
     streamLongResponse(RESPONSES[p], 8);
@@ -130,17 +149,22 @@ for (let p = 0; p < PROMPTS.length; p++) {
 // streaming side-channel) to test how unpaired notifications render.
 for (let i = 0; i < 40; i++) {
     advance(20, 70);
-    push('agent-to-editor', 'notification', {
-        jsonrpc: '2.0',
-        method: 'session/update',
-        params: {
-            sessionId,
-            update: {
-                sessionUpdate: 'agent_message_chunk',
-                content: { text: `progress ${i}/40` },
+    push(
+        'agent-to-editor',
+        'notification',
+        {
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+                sessionId,
+                update: {
+                    sessionUpdate: 'agent_message_chunk',
+                    content: { text: `progress ${i}/40` },
+                },
             },
         },
-    }, 'session/update');
+        'session/update',
+    );
 }
 
 const endedAt = ts;

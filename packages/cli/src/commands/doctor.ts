@@ -2,12 +2,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { homedir, platform, release } from 'node:os';
 import { join } from 'node:path';
 import type { Command } from 'commander';
-import {
-    acpHomeDir,
-    defaultCapturesDbPath,
-    listActive,
-    openDatabase,
-} from '@acp-devtools/core';
+import { acpHomeDir, defaultCapturesDbPath, listActive, openDatabase } from '@acp-devtools/core';
 import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 import { zedSettingsPath } from '../lib/setup-config.js';
 

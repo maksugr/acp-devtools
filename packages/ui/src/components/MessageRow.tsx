@@ -84,7 +84,9 @@ function MessageRowImpl({
                 'border-b border-line-grid/70 transition-colors',
                 'hover:bg-surface-rowHover',
                 selected ? 'bg-surface-rowHover ring-1 ring-inset ring-accent-out/40' : '',
-                paired && !selected ? 'bg-accent-out/[0.04] ring-1 ring-inset ring-accent-out/15' : '',
+                paired && !selected
+                    ? 'bg-accent-out/[0.04] ring-1 ring-inset ring-accent-out/15'
+                    : '',
                 isError ? 'bg-accent-error/[0.06]' : '',
             )}
         >
@@ -125,12 +127,7 @@ function MessageRowImpl({
                 {KIND_BADGES[message.kind]}
             </span>
             <span className="flex min-w-0 flex-1 items-baseline gap-3 overflow-hidden">
-                <span
-                    className={cn(
-                        'shrink-0',
-                        isPrompt ? 'text-accent-out' : 'text-ink-primary',
-                    )}
-                >
+                <span className={cn('shrink-0', isPrompt ? 'text-accent-out' : 'text-ink-primary')}>
                     {message.method ? message.method : '—'}
                 </span>
                 {specBadge && validation && (

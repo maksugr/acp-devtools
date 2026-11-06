@@ -39,7 +39,7 @@ export function registerValidateCommand(program: Command): void {
     program
         .command('validate')
         .description(
-            'Check every frame in a session against the official ACP JSON schema (`@agentclientprotocol/sdk`). Use to confirm that an editor or agent you do not control speaks the protocol correctly — same data the inspector\'s ⚠ SPEC badges surface.',
+            "Check every frame in a session against the official ACP JSON schema (`@agentclientprotocol/sdk`). Use to confirm that an editor or agent you do not control speaks the protocol correctly — same data the inspector's ⚠ SPEC badges surface.",
         )
         .argument('<id>', 'session id (see `acp-devtools list`)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())

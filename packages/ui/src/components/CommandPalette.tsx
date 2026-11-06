@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
-import {
-    ALL_DIRECTIONS,
-    ALL_KINDS,
-    useMessagesStore,
-    type Filters,
-} from '../store/messagesStore';
+import { ALL_DIRECTIONS, ALL_KINDS, useMessagesStore, type Filters } from '../store/messagesStore';
 import { useDiscoveryStore } from '../store/discoveryStore';
 import { captureLabel, shortAgentName } from '../lib/captureLabel';
 import { downloadSessionExport } from '../lib/downloadExport';
@@ -199,9 +194,7 @@ function buildCommands(onClose: () => void): Command[] {
     });
     cmds.push({
         id: 'view.toggle-streams',
-        label: msgState.filters.showStreams
-            ? 'Hide streaming chunks'
-            : 'Show streaming chunks',
+        label: msgState.filters.showStreams ? 'Hide streaming chunks' : 'Show streaming chunks',
         section: 'filter',
         run: () => msgState.toggleStreams(),
     });
@@ -273,8 +266,7 @@ function buildCommands(onClose: () => void): Command[] {
     }
     for (const s of discState.savedSessions.slice(0, 25)) {
         const agent = shortAgentName(s.agent_command ?? '');
-        const label =
-            s.name ?? (s.client_name ? `${s.client_name} · ${agent}` : agent);
+        const label = s.name ?? (s.client_name ? `${s.client_name} · ${agent}` : agent);
         cmds.push({
             id: `switch.saved.${s.id}`,
             label: `Open saved #${s.id} · ${label} (${s.message_count} msg)`,

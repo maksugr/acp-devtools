@@ -38,9 +38,10 @@ describe('command grouping', () => {
         const registered = new Set(commandNames());
         for (const group of GROUPS) {
             for (const name of group.commands) {
-                expect(registered.has(name), `group "${group.title}" lists unknown command ${name}`).toBe(
-                    true,
-                );
+                expect(
+                    registered.has(name),
+                    `group "${group.title}" lists unknown command ${name}`,
+                ).toBe(true);
             }
         }
     });
@@ -119,7 +120,10 @@ describe('tidyHome', () => {
     it('handles the Windows JSON-escaped form and normalizes slashes', () => {
         // commander JSON.stringify-encodes the default, doubling backslashes.
         expect(
-            tidyHome('(default: "C:\\\\Users\\\\me\\\\.acp-devtools\\\\captures.db")', 'C:\\Users\\me'),
+            tidyHome(
+                '(default: "C:\\\\Users\\\\me\\\\.acp-devtools\\\\captures.db")',
+                'C:\\Users\\me',
+            ),
         ).toBe('(default: "~/.acp-devtools/captures.db")');
     });
 

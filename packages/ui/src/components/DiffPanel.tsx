@@ -216,7 +216,10 @@ export function DiffPanel({ open, onClose }: DiffPanelProps) {
                         onSelect={setAId}
                     />
                     <span className="text-ink-muted">→</span>
-                    <span className="font-mono text-[11px] text-ink-secondary" title="comparison (right)">
+                    <span
+                        className="font-mono text-[11px] text-ink-secondary"
+                        title="comparison (right)"
+                    >
                         B
                     </span>
                     <SessionDropdown
@@ -232,7 +235,9 @@ export function DiffPanel({ open, onClose }: DiffPanelProps) {
                         return <Filler>Pick a baseline session (A) to compare from.</Filler>;
                     if (bId === null)
                         return (
-                            <Filler>Pick a session in the B selector above to compare against A.</Filler>
+                            <Filler>
+                                Pick a session in the B selector above to compare against A.
+                            </Filler>
                         );
                     if (loading) return <Filler>Loading sessions…</Filler>;
                     if (error)
@@ -352,7 +357,8 @@ function FramesView({
             </div>
             {identical ? (
                 <Hint tone="ok">
-                    Sessions are identical{bLabel ? ` — every frame in B (${bLabel}) matches A` : ''}.
+                    Sessions are identical
+                    {bLabel ? ` — every frame in B (${bLabel}) matches A` : ''}.
                 </Hint>
             ) : visibleRows.length === 0 ? (
                 <Hint>Only unchanged frames — toggle “hide unchanged” to see them.</Hint>
@@ -442,7 +448,12 @@ function PerfView({ perf }: { perf: MethodStatsDelta[] }) {
     }
     return (
         <>
-            <div className={cn(TAB_BAR, 'font-mono text-[10px] uppercase tracking-widest text-ink-muted')}>
+            <div
+                className={cn(
+                    TAB_BAR,
+                    'font-mono text-[10px] uppercase tracking-widest text-ink-muted',
+                )}
+            >
                 <span>Δ = B − A · sorted by |Δ p99|</span>
                 <span className="inline-flex items-baseline gap-1">
                     <span className="text-accent-error">+</span> slower in B
@@ -453,42 +464,47 @@ function PerfView({ perf }: { perf: MethodStatsDelta[] }) {
             </div>
             <table className="w-full text-[11px]">
                 <thead className="sticky top-0 z-10 bg-surface-base">
-                <tr className="border-b border-line text-left font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-                    <th className="py-2 pl-5 pr-3">method</th>
-                    <th className="px-3 py-2">kind</th>
-                    <th className="px-3 py-2 text-right">A p99</th>
-                    <th className="px-3 py-2 text-right">B p99</th>
-                    <th className="px-3 py-2 text-right">Δ p99</th>
-                    <th className="px-3 py-2 text-right">count</th>
-                </tr>
-            </thead>
-            <tbody className="font-mono">
-                {perf.map((d) => {
-                    const delta = fmtDelta(d.p99Delta);
-                    return (
-                        <tr
-                            key={`${d.kind}:${d.method}`}
-                            className="border-b border-line/40 hover:bg-surface-rowHover/50"
-                        >
-                            <td className="truncate py-1.5 pl-5 pr-3 text-ink-primary" title={d.method}>
-                                {d.method}
-                            </td>
-                            <td className="px-3 py-1.5 text-[10px] uppercase tracking-widest text-ink-muted">
-                                {d.kind === 'request' ? 'req' : 'ntf'}
-                            </td>
-                            <td className="px-3 py-1.5 text-right text-ink-secondary">
-                                {fmtLatencyCell(d.a?.p99 ?? null)}
-                            </td>
-                            <td className="px-3 py-1.5 text-right text-ink-secondary">
-                                {fmtLatencyCell(d.b?.p99 ?? null)}
-                            </td>
-                            <td className={cn('px-3 py-1.5 text-right', delta.tone)}>{delta.text}</td>
-                            <td className="px-3 py-1.5 text-right text-ink-muted">
-                                {d.a?.count ?? 0}→{d.b?.count ?? 0}
-                            </td>
-                        </tr>
-                    );
-                })}
+                    <tr className="border-b border-line text-left font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+                        <th className="py-2 pl-5 pr-3">method</th>
+                        <th className="px-3 py-2">kind</th>
+                        <th className="px-3 py-2 text-right">A p99</th>
+                        <th className="px-3 py-2 text-right">B p99</th>
+                        <th className="px-3 py-2 text-right">Δ p99</th>
+                        <th className="px-3 py-2 text-right">count</th>
+                    </tr>
+                </thead>
+                <tbody className="font-mono">
+                    {perf.map((d) => {
+                        const delta = fmtDelta(d.p99Delta);
+                        return (
+                            <tr
+                                key={`${d.kind}:${d.method}`}
+                                className="border-b border-line/40 hover:bg-surface-rowHover/50"
+                            >
+                                <td
+                                    className="truncate py-1.5 pl-5 pr-3 text-ink-primary"
+                                    title={d.method}
+                                >
+                                    {d.method}
+                                </td>
+                                <td className="px-3 py-1.5 text-[10px] uppercase tracking-widest text-ink-muted">
+                                    {d.kind === 'request' ? 'req' : 'ntf'}
+                                </td>
+                                <td className="px-3 py-1.5 text-right text-ink-secondary">
+                                    {fmtLatencyCell(d.a?.p99 ?? null)}
+                                </td>
+                                <td className="px-3 py-1.5 text-right text-ink-secondary">
+                                    {fmtLatencyCell(d.b?.p99 ?? null)}
+                                </td>
+                                <td className={cn('px-3 py-1.5 text-right', delta.tone)}>
+                                    {delta.text}
+                                </td>
+                                <td className="px-3 py-1.5 text-right text-ink-muted">
+                                    {d.a?.count ?? 0}→{d.b?.count ?? 0}
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </>
@@ -496,7 +512,13 @@ function PerfView({ perf }: { perf: MethodStatsDelta[] }) {
 }
 
 /** Full-height centered message for the gating states (no A/B yet, loading…). */
-function Filler({ children, tone }: { children: React.ReactNode; tone?: 'muted' | 'error' | 'ok' }) {
+function Filler({
+    children,
+    tone,
+}: {
+    children: React.ReactNode;
+    tone?: 'muted' | 'error' | 'ok';
+}) {
     return (
         <div className="min-h-0 flex-1 overflow-y-auto">
             <Hint {...(tone ? { tone } : {})}>{children}</Hint>
@@ -651,9 +673,15 @@ function Hint({
     tone?: 'muted' | 'error' | 'ok';
 }) {
     const toneClass =
-        tone === 'error' ? 'text-accent-error' : tone === 'ok' ? 'text-accent-ok' : 'text-ink-muted';
+        tone === 'error'
+            ? 'text-accent-error'
+            : tone === 'ok'
+              ? 'text-accent-ok'
+              : 'text-ink-muted';
     return (
-        <div className={cn('px-5 py-8 text-center font-mono text-[12px]', toneClass)}>{children}</div>
+        <div className={cn('px-5 py-8 text-center font-mono text-[12px]', toneClass)}>
+            {children}
+        </div>
     );
 }
 
@@ -688,8 +716,13 @@ function SessionDropdown({
 
     const regular = sessions.filter((s) => s.imported_at === null);
     const imported = sessions.filter((s) => s.imported_at !== null);
-    const selected = selectedId !== null ? sessions.find((s) => s.id === selectedId) ?? null : null;
-    const label = selected ? savedLabel(selected) : selectedId !== null ? `#${selectedId}` : 'select a session…';
+    const selected =
+        selectedId !== null ? (sessions.find((s) => s.id === selectedId) ?? null) : null;
+    const label = selected
+        ? savedLabel(selected)
+        : selectedId !== null
+          ? `#${selectedId}`
+          : 'select a session…';
 
     return (
         <div ref={ref} className="relative">
@@ -768,7 +801,15 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
     );
 }
 
-function PickerRow({ s, active, onPick }: { s: SavedSession; active: boolean; onPick: () => void }) {
+function PickerRow({
+    s,
+    active,
+    onPick,
+}: {
+    s: SavedSession;
+    active: boolean;
+    onPick: () => void;
+}) {
     return (
         <li>
             <button

@@ -33,13 +33,21 @@ describe('MessageRow', () => {
             <MessageRow message={msg({ kind: 'request' })} selected={false} onSelect={() => {}} />,
         );
         expect(screen.getByText('REQ')).toBeInTheDocument();
-        rerender(<MessageRow message={msg({ kind: 'response' })} selected={false} onSelect={() => {}} />);
+        rerender(
+            <MessageRow message={msg({ kind: 'response' })} selected={false} onSelect={() => {}} />,
+        );
         expect(screen.getByText('RSP')).toBeInTheDocument();
         rerender(
-            <MessageRow message={msg({ kind: 'notification' })} selected={false} onSelect={() => {}} />,
+            <MessageRow
+                message={msg({ kind: 'notification' })}
+                selected={false}
+                onSelect={() => {}}
+            />,
         );
         expect(screen.getByText('NTF')).toBeInTheDocument();
-        rerender(<MessageRow message={msg({ kind: 'error' })} selected={false} onSelect={() => {}} />);
+        rerender(
+            <MessageRow message={msg({ kind: 'error' })} selected={false} onSelect={() => {}} />,
+        );
         expect(screen.getByText('ERR')).toBeInTheDocument();
     });
 

@@ -29,9 +29,9 @@ have to pick a port by hand.
             // The default: bare command — the editor resolves it on PATH. Use
             // the absolute path from `which acp-devtools` only if the editor's
             // GUI can't find it. (JetBrains always needs the absolute path.)
-            "command": "acp-devtools"
-        }
-    }
+            "command": "acp-devtools",
+        },
+    },
 }
 ```
 

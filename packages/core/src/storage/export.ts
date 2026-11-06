@@ -95,7 +95,8 @@ export function parseExport(input: string): SessionExport {
     const toolName = raw.tool.name;
     const toolVersion = raw.tool.version;
     if (typeof toolName !== 'string') throw new ExportParseError('tool.name must be a string');
-    if (typeof toolVersion !== 'string') throw new ExportParseError('tool.version must be a string');
+    if (typeof toolVersion !== 'string')
+        throw new ExportParseError('tool.version must be a string');
 
     const session = raw.session;
     if (!isObject(session)) throw new ExportParseError('session must be an object');

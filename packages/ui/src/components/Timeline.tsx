@@ -155,16 +155,7 @@ export function Timeline() {
                 }, 500);
             }),
         );
-    }, [
-        isLive,
-        replayDone,
-        sessionId,
-        grouped,
-        messages,
-        playhead,
-        selectedSeq,
-        setPlayhead,
-    ]);
+    }, [isLive, replayDone, sessionId, grouped, messages, playhead, selectedSeq, setPlayhead]);
 
     // Playback rail: a recorded session (anything that is not a live capture)
     // shows the left-gutter playhead. The rail marks position only — every
@@ -191,8 +182,7 @@ export function Timeline() {
     useEffect(() => {
         if (!playing || !followPlayhead.current || currentEntryIndex < 0) return;
         const { startIndex, endIndex } = visibleRange.current;
-        const outOfView =
-            currentEntryIndex <= startIndex || currentEntryIndex >= endIndex;
+        const outOfView = currentEntryIndex <= startIndex || currentEntryIndex >= endIndex;
         if (outOfView) {
             virtuoso.current?.scrollToIndex({
                 index: currentEntryIndex,
@@ -251,9 +241,7 @@ export function Timeline() {
                     {...(isLive
                         ? { initialTopMostItemIndex: Math.max(0, grouped.length - 1) }
                         : {})}
-                    followOutput={
-                        isLive ? (isAtBottom) => (isAtBottom ? 'auto' : false) : false
-                    }
+                    followOutput={isLive ? (isAtBottom) => (isAtBottom ? 'auto' : false) : false}
                     computeItemKey={(index) => entryKey(grouped[index]!)}
                 />
             )}

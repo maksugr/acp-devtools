@@ -71,7 +71,9 @@ describe('PlayheadRail', () => {
         expect(halves(render(<PlayheadRail state="upcoming" />).container.innerHTML)).toBe(2);
         expect(halves(render(<PlayheadRail state="played" />).container.innerHTML)).toBe(2);
         // the first event has no rail above its centre …
-        expect(halves(render(<PlayheadRail state="upcoming" firstRow />).container.innerHTML)).toBe(1);
+        expect(halves(render(<PlayheadRail state="upcoming" firstRow />).container.innerHTML)).toBe(
+            1,
+        );
         // … and the last none below it
         expect(halves(render(<PlayheadRail state="played" lastRow />).container.innerHTML)).toBe(1);
         // a single-entry session keeps just the knob, no line

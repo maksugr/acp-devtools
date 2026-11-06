@@ -12,9 +12,7 @@ const src = join(__dirname, '..', '..', 'ui', 'dist');
 const dst = join(__dirname, '..', 'dist', 'ui');
 
 if (!existsSync(src)) {
-    process.stderr.write(
-        `embed-ui: ${src} not found. Run \`npm run build:ui\` first.\n`,
-    );
+    process.stderr.write(`embed-ui: ${src} not found. Run \`npm run build:ui\` first.\n`);
     process.exit(1);
 }
 if (!existsSync(join(__dirname, '..', 'dist'))) {
@@ -28,6 +26,4 @@ rmSync(dst, { recursive: true, force: true });
 cpSync(src, dst, { recursive: true });
 
 const files = statSync(dst).isDirectory();
-process.stderr.write(
-    `embed-ui: copied ${src} → ${dst}${files ? '' : ' (empty?)'}\n`,
-);
+process.stderr.write(`embed-ui: copied ${src} → ${dst}${files ? '' : ' (empty?)'}\n`);

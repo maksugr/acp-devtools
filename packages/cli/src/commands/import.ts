@@ -1,11 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import type { Command } from 'commander';
-import {
-    defaultCapturesDbPath,
-    insertImportedSession,
-    parseExport,
-} from '@acp-devtools/core';
+import { defaultCapturesDbPath, insertImportedSession, parseExport } from '@acp-devtools/core';
 
 interface ImportCommandOptions {
     db: string;
@@ -19,11 +15,7 @@ export function registerImportCommand(program: Command): void {
             'Insert a JSON session export into the captures database as a new saved session. The new session appears in the inspector picker under its IMPORTED section, with imported_at set to now.',
         )
         .argument('<file>', 'path to a JSON export produced by `acp-devtools export`')
-        .option(
-            '--db <path>',
-            'captures database to write into',
-            defaultCapturesDbPath(),
-        )
+        .option('--db <path>', 'captures database to write into', defaultCapturesDbPath())
         .option('--quiet', 'suppress the human-readable status line on stderr', false)
         .action((file: string, opts: ImportCommandOptions) => {
             let text: string;
