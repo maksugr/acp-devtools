@@ -7,6 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Releases are published from CI.** npm packages are built and published by
+  GitHub Actions with [provenance](https://docs.npmjs.com/generating-provenance-statements)
+  attestations (verify with `npm audit signatures`); each release gets a git tag,
+  a GitHub Release with its CHANGELOG section, and a Homebrew formula bump.
+- CHANGELOG backfilled for 0.3.0–0.6.0.
+
+## [0.6.0] — 2026-06-18
+
+### Added
+
+- **`acp-devtools setup`** — generates a Zed / JetBrains agent config with
+  the absolute binary path filled in. `--write` inserts only the new
+  `agent_servers` entry via `jsonc-parser`, preserving the file's existing
+  indentation and comments. Defaults to Claude Code; wraps any agent via
+  `setup --editor <ed> -- <command>`.
+- **`acp-devtools agents`** — lists the built-in agent shortcuts straight
+  from the registry (`--json` for machines).
+- **MCP: `generate_editor_config`** (the read-only twin of `setup`) and
+  **`list_agent_shortcuts`** (the twin of `agents`) — 13 tools in total.
+- **`junie` agent shortcut** (`junie --acp=true`) — JetBrains Junie verified
+  with a full WebStorm 2026.1.2 turn.
+
+### Changed
+
+- Config recipes and the README Quickstart lead with `setup`; the
+  supported-agents section spells out how to run any agent — verified or
+  not — via `setup --editor <ed> -- <launch command>`.
+
+## [0.5.0] — 2026-06-17
+
+### Added
+
+- **Soon-required field advisories.** Frames that are valid today but omit a
+  field the spec says will become mandatory (`clientInfo`, `agentInfo`) get
+  an amber `⚠ ADV N` badge in the UI, an advisory section in `validate`
+  output, and an `advisories` list in the MCP `find_spec_violations` tool.
+  Advisories never fail validation.
+
+### Fixed
+
+- Agent labels resolve from absolute-path launches (JetBrains always spawns
+  `/opt/homebrew/bin/goose acp`), so the session picker shows the friendly
+  name instead of the raw path.
+
+## [0.4.0] — 2026-06-13
+
+### Changed
+
+- **Session playback reworked.** Every frame is on screen from the start; a
+  left-rail playhead marks the current position and the timeline follows it
+  while playing (wheel to take over). Play / Pause / Replay, scrubber starts
+  at 0, 0.5×–8× speed. Recorded and imported sessions no longer auto-jump to
+  the bottom on open.
+- Reload restores position from the URL (`seq` wins over `play`); playground
+  deep links (`?url=…&seq=…&play=…`) restore scroll position.
+
+### Added
+
+- `docs/session-anatomy.md` — how to read a capture (handshake → prompt
+  turn → cancellation), grounded in a real WebStorm ↔ claude-agent-acp
+  session.
+- Agent verification sweep across 13 ACP agents; README "Supported editors &
+  agents" tables with per-row status and evidence links;
+  `fixtures/drive-full-turn.mjs` live smoke driver.
+
+## [0.3.0] — 2026-06-13
+
+### Security
+
+- `diff` and `session-info` redact auth headers and proxy tokens by default;
+  pass `--raw` to opt out.
+- The HTTP API and the `/replay/:id` WebSocket validate the `Host` header
+  (DNS-rebinding protection); a custom `--host` bind is allowlisted
+  explicitly.
+
+### Changed
+
+- Session listing filters (`--client`, `--imported`) run in SQL instead of
+  post-filtering.
+
 ## [0.2.1] — 2026-06-09
 
 ### Fixed
@@ -121,6 +203,11 @@ performance dashboard, multi-session diff, mock-agent / mock-editor for CI,
 read-only MCP server, JSON export / import. See `packages/cli/README.md` and
 the root `README.md` for the full feature inventory.
 
-[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/maksugr/acp-devtools/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/maksugr/acp-devtools/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/maksugr/acp-devtools/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/maksugr/acp-devtools/compare/v0.2.1...v0.3.0
+[0.2.1]: https://github.com/maksugr/acp-devtools/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/maksugr/acp-devtools/releases/tag/v0.2.0
 [0.1.0]: https://github.com/maksugr/acp-devtools/releases/tag/v0.1.0

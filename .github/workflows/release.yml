@@ -1,0 +1,136 @@
+name: Release
+
+# Publishes whatever version `main` is at, once CI on that commit is green:
+#   1. npm — via trusted publishing (OIDC, no token; provenance attached).
+#      One-time setup on npmjs.com: package settings → Trusted publisher →
+#      GitHub Actions, repo maksugr/acp-devtools, workflow `release.yml`.
+#   2. git tag `vX.Y.Z` + GitHub Release with the CHANGELOG section as notes.
+#   3. Homebrew — bumps maksugr/homebrew-tap if `HOMEBREW_TAP_TOKEN` is set.
+#
+# Every step is idempotent: a version already on npm / already tagged / already
+# in the formula is skipped, so re-running a half-failed release finishes it
+# and a merge that didn't bump the version publishes nothing.
+
+on:
+    workflow_run:
+        workflows: [CI]
+        types: [completed]
+        branches: [main]
+    workflow_dispatch:
+
+concurrency:
+    group: release
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+
+jobs:
+    release:
+        name: Publish
+        if: >-
+            github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' ||
+            github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # tag + GitHub Release
+            id-token: write # npm trusted publishing + provenance
+        env:
+            SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: ${{ env.SHA }}
+                  fetch-depth: 0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '24'
+                  registry-url: 'https://registry.npmjs.org'
+                  cache: 'npm'
+
+            # Trusted publishing needs npm ≥ 11.5.1.
+            - run: npm install -g npm@^11.5.1
+
+            - name: Determine what to release
+              id: state
+              run: |
+                  set -euo pipefail
+                  node scripts/check-release.mjs
+                  V=$(node -p "require('./packages/cli/package.json').version")
+                  echo "version=$V" >> "$GITHUB_OUTPUT"
+                  if [ "$(npm view "acp-devtools@$V" version 2>/dev/null || true)" = "$V" ]; then
+                      echo "publish=false" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "publish=true" >> "$GITHUB_OUTPUT"
+                  fi
+                  if git ls-remote --exit-code --tags origin "refs/tags/v$V" >/dev/null; then
+                      echo "tag=false" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "tag=true" >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Build
+              if: steps.state.outputs.publish == 'true'
+              run: |
+                  npm ci
+                  npm run build:full
+
+            - name: Publish to npm
+              if: steps.state.outputs.publish == 'true'
+              working-directory: packages/cli
+              run: npm publish --access public --provenance
+
+            - name: Tag and create GitHub Release
+              if: steps.state.outputs.tag == 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  V: ${{ steps.state.outputs.version }}
+              run: |
+                  set -euo pipefail
+                  node scripts/release-notes.mjs "$V" > "$RUNNER_TEMP/notes.md"
+                  gh release create "v$V" --target "$SHA" --title "v$V" --notes-file "$RUNNER_TEMP/notes.md"
+
+            - name: Bump Homebrew formula
+              env:
+                  HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+                  V: ${{ steps.state.outputs.version }}
+              run: |
+                  set -euo pipefail
+                  if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
+                      echo "::notice::HOMEBREW_TAP_TOKEN not set — skipping the Homebrew bump."
+                      exit 0
+                  fi
+                  URL="https://registry.npmjs.org/acp-devtools/-/acp-devtools-$V.tgz"
+                  # The tarball can take a moment to appear after publish.
+                  for _ in $(seq 1 20); do
+                      curl -fsSL "$URL" -o "$RUNNER_TEMP/pkg.tgz" && break
+                      sleep 15
+                  done
+                  SUM=$(sha256sum "$RUNNER_TEMP/pkg.tgz" | cut -d' ' -f1)
+
+                  git clone --depth 1 "https://x-access-token:$HOMEBREW_TAP_TOKEN@github.com/maksugr/homebrew-tap.git" "$RUNNER_TEMP/tap"
+                  cd "$RUNNER_TEMP/tap"
+                  F=Formula/acp-devtools.rb
+                  if grep -q "acp-devtools-$V.tgz" "$F"; then
+                      echo "Formula already at $V."
+                      exit 0
+                  fi
+                  sed -i -E "s#^(  url \")[^\"]+(\")#\1$URL\2#; s#^(  sha256 \")[0-9a-f]+(\")#\1$SUM\2#" "$F"
+                  grep -q "acp-devtools-$V.tgz" "$F"
+                  grep -q "$SUM" "$F"
+                  git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+                      commit -am "acp-devtools $V"
+                  git push
+
+            - name: Summary
+              env:
+                  V: ${{ steps.state.outputs.version }}
+                  PUBLISH: ${{ steps.state.outputs.publish }}
+                  TAG: ${{ steps.state.outputs.tag }}
+              run: |
+                  {
+                      echo "### acp-devtools $V"
+                      echo "- npm: $([ "$PUBLISH" = true ] && echo "published" || echo "already published — skipped")"
+                      echo "- GitHub Release: $([ "$TAG" = true ] && echo "created v$V" || echo "v$V already exists — skipped")"
+                  } >> "$GITHUB_STEP_SUMMARY"

@@ -141,6 +141,41 @@ CLI bundle, `ui` is embedded as a static bundle at `dist/ui/`. The published
 pulled from npm are `better-sqlite3`, `ws`, `commander`,
 `@agentclientprotocol/sdk`, and `@modelcontextprotocol/sdk`.
 
+## Releasing
+
+Releases are automated: whatever version `main` is at gets published once CI
+on that commit is green. So **a PR that ships code carries its own release**:
+
+1. Describe the change under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md)
+   ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) sections).
+2. `npm run release:bump -- patch` (or `minor` / `major` / an explicit
+   `x.y.z`). It moves the `[Unreleased]` entries under a dated version heading,
+   updates the compare links, and rewrites every version literal listed in
+   [`scripts/release/version-files.mjs`](scripts/release/version-files.mjs).
+3. Update the README and `docs/` if user-visible behaviour changed.
+
+Checks on every PR:
+
+| Check           | Passes when                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ci-ok`         | lint, typecheck, tests, build and the packed-tarball smoke test pass on Linux / macOS / Windows × Node 22 / 24                                               |
+| `release-check` | all version literals agree; shipped files (anything under `packages/` except tests) changed ⇒ version bumped above `main`, CHANGELOG section written, not yet on npm or tagged |
+| `ship-gate`     | a maintainer added the `ship` label; pushing commits that change the diff removes it again (updating the branch from `main` doesn't)                         |
+
+With all three green, GitHub auto-merges the PR (squash). The
+[Release workflow](.github/workflows/release.yml) then publishes to npm with
+provenance (trusted publishing — no token in the repo), tags `vX.Y.Z`, creates
+the GitHub Release from the CHANGELOG section and bumps the Homebrew formula in
+[maksugr/homebrew-tap](https://github.com/maksugr/homebrew-tap). Each step
+skips itself when already done, so re-running a failed release finishes it.
+
+Docs, CI and test-only PRs need no bump and publish nothing. To merge
+shipped-file changes without publishing, a maintainer adds `no-release`.
+
+One-time repository setup (merge settings, labels, the `main` ruleset) lives in
+[`scripts/setup-github.sh`](scripts/setup-github.sh); the npm trusted-publisher
+link and the optional `HOMEBREW_TAP_TOKEN` secret are described at its top.
+
 ## Pre-commit hook
 
 `simple-git-hooks` is wired in via the root `prepare` script, so a fresh `npm

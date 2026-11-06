@@ -1,0 +1,113 @@
+name: PR gate
+
+# Cheap, label-aware checks that decide whether a PR may merge. Kept out of
+# ci.yml so adding or removing a label doesn't re-run the whole OS × Node
+# matrix. Both jobs are required status checks on `main` (see
+# scripts/setup-github.sh), alongside `ci-ok` from ci.yml.
+
+on:
+    pull_request:
+        types: [opened, reopened, synchronize, labeled, unlabeled, ready_for_review, converted_to_draft]
+
+concurrency:
+    group: pr-gate-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    release-check:
+        name: release-check
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '24'
+
+            # Version consistency + "shipped files changed → version bumped,
+            # CHANGELOG section written, version not yet on npm / tagged".
+            # The `no-release` label lets a maintainer merge shipped-file
+            # changes without publishing.
+            - name: Check version and CHANGELOG
+              env:
+                  BASE: origin/${{ github.base_ref }}
+                  NO_RELEASE: ${{ contains(github.event.pull_request.labels.*.name, 'no-release') }}
+              run: |
+                  args=(--base "$BASE" --registry)
+                  if [ "$NO_RELEASE" = "true" ]; then args+=(--allow-no-bump); fi
+                  node scripts/check-release.mjs "${args[@]}"
+
+    ship-gate:
+        name: ship-gate
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: read
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # A maintainer approves a PR by adding the `ship` label (GitHub
+            # doesn't let an author approve their own PR, and PRs opened by
+            # the coding agent are authored by the maintainer's account).
+            # New commits that change the PR's diff revoke the approval, like
+            # "dismiss stale reviews"; merging `main` into the branch doesn't.
+            - name: Require maintainer `ship` label
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  REPO: ${{ github.repository }}
+                  PR: ${{ github.event.pull_request.number }}
+                  ACTION: ${{ github.event.action }}
+                  DRAFT: ${{ github.event.pull_request.draft }}
+                  HAS_SHIP: ${{ contains(github.event.pull_request.labels.*.name, 'ship') }}
+                  BEFORE: ${{ github.event.before }}
+                  AFTER: ${{ github.event.after }}
+                  BASE: origin/${{ github.base_ref }}
+              run: |
+                  set -euo pipefail
+
+                  if [ "$DRAFT" = "true" ]; then
+                      echo "::error::Draft PR — mark it ready for review first."
+                      exit 1
+                  fi
+                  if [ "$HAS_SHIP" != "true" ]; then
+                      echo "::error::Waiting for a maintainer to add the \`ship\` label."
+                      exit 1
+                  fi
+
+                  # Patch-id of the PR's own changes at a given head: equal
+                  # before/after a push means the push only brought in base.
+                  pr_patch_id() {
+                      git diff "$(git merge-base "$BASE" "$1")" "$1" | git patch-id --stable | cut -d' ' -f1
+                  }
+
+                  if [ "$ACTION" = "synchronize" ]; then
+                      if git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
+                          && [ "$(pr_patch_id "$BEFORE")" = "$(pr_patch_id "$AFTER")" ]; then
+                          echo "Push only updated the branch from base — approval kept."
+                      else
+                          gh api -X DELETE "repos/$REPO/issues/$PR/labels/ship" >/dev/null || true
+                          echo "::error::New commits changed the PR after approval — \`ship\` removed, re-review and add it again."
+                          exit 1
+                      fi
+                  fi
+
+                  # The label must have been added by someone with write access.
+                  ACTOR=$(gh api "repos/$REPO/issues/$PR/events" --paginate \
+                      --jq '.[] | select(.event == "labeled" and .label.name == "ship") | .actor.login' | tail -n1)
+                  if [ -z "$ACTOR" ]; then
+                      echo "::error::Could not find who added \`ship\`."
+                      exit 1
+                  fi
+                  PERM=$(gh api "repos/$REPO/collaborators/$ACTOR/permission" --jq .permission)
+                  case "$PERM" in
+                      admin|maintain|write) echo "Approved by @$ACTOR ($PERM)." ;;
+                      *) echo "::error::\`ship\` was added by @$ACTOR, who has '$PERM' access — needs write or higher."; exit 1 ;;
+                  esac
