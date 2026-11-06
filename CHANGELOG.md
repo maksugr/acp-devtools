@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-11-06
+
+### Fixed
+
+- **The proxy no longer drops the agent's last frames.** It treated the agent
+  as finished on the process `exit` event, which can fire before the agent's
+  final stdout bytes have been read — routinely on Windows — and then closed
+  the session, so the last responses and notifications were missing from the
+  capture and never reached the editor. It now waits for the agent's stdio to
+  close, for up to 2 s after exit (so a child process the agent left holding
+  stdout can't keep the proxy open).
+
 ## [0.6.2] — 2026-11-06
 
 ### Fixed
@@ -234,7 +246,8 @@ performance dashboard, multi-session diff, mock-agent / mock-editor for CI,
 read-only MCP server, JSON export / import. See `packages/cli/README.md` and
 the root `README.md` for the full feature inventory.
 
-[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/maksugr/acp-devtools/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/maksugr/acp-devtools/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/maksugr/acp-devtools/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/maksugr/acp-devtools/compare/v0.5.0...v0.6.0
