@@ -443,6 +443,8 @@ This section spells out what's at risk and what the tool does about it.
 | Source                                                                   | Lives in                                                    | Sensitive?                                         |
 | ------------------------------------------------------------------------ | ----------------------------------------------------------- | -------------------------------------------------- |
 | `initialize._meta.proxyConfig.proxies[].proxy.headers`                   | every WebStorm session                                      | **YES** — JetBrains LLM gateway auth (`proxy_key`) |
+| `session/new` / `session/load` → `mcpServers[].headers` and `mcpServers[].env` | every session whose editor forwards MCP servers (e.g. Zed context servers) | **YES** — MCP server tokens, API keys, DB URLs |
+| `initialize` response → `authMethods[].env` (terminal auth)              | agents offering terminal login                              | **YES**                                            |
 | HTTP-style `Authorization` / `X-Api-Key` / `Cookie` headers in any field | uncommon but possible in custom agents / `_meta` extensions | **YES**                                            |
 | `fs/read_text_file` results                                              | every session that opens files                              | depends — proprietary source vs. public code       |
 | Prompts you typed and model responses                                    | every session                                               | depends — internal context vs. generic question    |
@@ -459,11 +461,18 @@ acp-devtools export 21 > capture.json    # safe-by-default for sharing
 acp-devtools export 21 --raw             # opt-in: keep everything (self-debug only)
 ```
 
-What gets replaced with `<REDACTED>`: every string value under any
-`proxyConfig.proxies[*].proxy.headers.*` subtree (catches future JetBrains
-fields, not just `proxy_key`), plus standard HTTP auth headers
-(`Authorization`, `X-Api-Key`, `Cookie`, …) anywhere in the JSON. Full list
-lives in [`packages/core/src/storage/redact.ts`](packages/core/src/storage/redact.ts).
+What gets replaced with `<REDACTED>`:
+
+- every string value under any `proxyConfig.proxies[*].proxy.headers.*`
+  subtree (catches future JetBrains fields, not just `proxy_key`);
+- every `value` in a `headers` or `env` list of `{ name, value }` pairs — the
+  spec's shape for MCP server headers and env in `session/new` /
+  `session/load` — and every value of an `env` map (terminal auth). Names
+  stay, so you can still see which variables were passed;
+- standard HTTP auth headers (`Authorization`, `X-Api-Key`, `Cookie`, …)
+  anywhere in the JSON, as object keys or as `{ name, value }` pairs.
+
+Full rules live in [`packages/core/src/storage/redact.ts`](packages/core/src/storage/redact.ts).
 
 Redaction rewrites **both** `payload` (parsed) and `raw` (wire string), so
 the secret can't leak via either field. A summary lands on stderr:
@@ -479,8 +488,9 @@ like the database file itself, not like an export.
 
 ### What it does **not** redact (your call)
 
-File contents loaded via `fs/read_text_file` and the prompts / responses
-stay as-is. There's no reliable heuristic for "is this code proprietary" —
+File contents loaded via `fs/read_text_file`, the prompts / responses, and
+MCP server `args` and `url`s stay as-is (a token passed as a command-line flag
+or a query parameter is not detected). There's no reliable heuristic for "is this code proprietary" —
 that's a judgement call. Before sharing, audit with:
 
 ```bash

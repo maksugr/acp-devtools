@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-11-06
+
+### Security
+
+- **MCP server credentials are now redacted.** ACP sends MCP server headers
+  and env to the agent as lists of `{ name, value }` pairs
+  (`session/new` / `session/load` → `mcpServers[].headers`, `mcpServers[].env`),
+  which the name-keyed redaction rules missed: an `Authorization` header, a
+  `GITHUB_TOKEN` or a `DATABASE_URL` passed to an MCP server leaked into
+  `export`, the UI download, playground shares, `diff`, `session-info` and
+  every MCP tool response. Every value in those lists is now masked (names
+  kept), as are terminal-auth `env` maps and any sensitive-named
+  `{ name, value }` pair. **If you shared an export of a session that used
+  MCP servers with credentials, rotate those credentials.**
+
 ### Changed
 
 - **Releases are published from CI.** npm packages are built and published by
@@ -203,7 +218,8 @@ performance dashboard, multi-session diff, mock-agent / mock-editor for CI,
 read-only MCP server, JSON export / import. See `packages/cli/README.md` and
 the root `README.md` for the full feature inventory.
 
-[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/maksugr/acp-devtools/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/maksugr/acp-devtools/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/maksugr/acp-devtools/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/maksugr/acp-devtools/compare/v0.3.0...v0.4.0
