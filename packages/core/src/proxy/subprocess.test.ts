@@ -1,86 +1,105 @@
 // @vitest-environment node
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { EventEmitter } from 'node:events';
+import { PassThrough } from 'node:stream';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { spawnAgent } from './subprocess.js';
 
-// An "agent" that exits immediately while a child it spawned keeps the
-// inherited stdout open and writes to it later. This reproduces, on every
-// OS, what Windows pipes do on their own: the agent's `exit` event arrives
-// before its last stdout bytes have been read.
-const AGENT = `
-const { spawn } = require('node:child_process');
-const [holdMs, exitCode] = process.argv.slice(2).map(Number);
-const child = spawn(
-    process.execPath,
-    ['-e', 'setTimeout(() => process.stdout.write("late frame\\\\n"), ' + holdMs + ')'],
-    { stdio: ['ignore', 'inherit', 'ignore'] },
-);
-process.stdout.write('pid:' + child.pid + '\\n');
-child.unref();
-process.exit(exitCode);
-`;
+// A stand-in for the agent process, so each test decides the order in which
+// `exit`, stdout data and `close` arrive. The real ordering depends on the OS
+// (Windows routinely delivers `exit` before the last stdout bytes are read),
+// so driving it by hand is the only way to test it the same everywhere.
+class FakeChild extends EventEmitter {
+    pid = 4242;
+    stdin = new PassThrough();
+    stdout = new PassThrough();
+    stderr = new PassThrough();
+    kill = vi.fn(() => true);
+}
 
-let dir: string;
-let agentPath: string;
-const strays: number[] = [];
+const fake: { child: FakeChild | null } = { child: null };
 
-beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'acp-subprocess-'));
-    agentPath = join(dir, 'agent.cjs');
-    writeFileSync(agentPath, AGENT);
+vi.mock('node:child_process', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('node:child_process')>();
+    return {
+        ...actual,
+        spawn: (...args: Parameters<typeof actual.spawn>) => fake.child ?? actual.spawn(...args),
+    };
 });
 
 afterEach(() => {
-    for (const pid of strays.splice(0)) {
-        try {
-            process.kill(pid);
-        } catch {
-            // already gone
-        }
-    }
-    rmSync(dir, { recursive: true, force: true });
+    fake.child = null;
 });
 
-function run(holdMs: number, exitCode: number, stdioGraceMs?: number) {
+function spawnFake(stdioGraceMs?: number) {
+    const child = new FakeChild();
+    fake.child = child;
     const agent = spawnAgent({
-        command: process.execPath,
-        args: [agentPath, String(holdMs), String(exitCode)],
+        command: 'agent',
         ...(stdioGraceMs !== undefined ? { stdioGraceMs } : {}),
     });
     let out = '';
-    agent.stdout.on('data', (d: Buffer) => {
-        out += d.toString();
-        const pid = /pid:(\d+)/.exec(out)?.[1];
-        if (pid && !strays.includes(Number(pid))) strays.push(Number(pid));
-    });
-    return { agent, output: () => out };
+    agent.stdout.on('data', (d: Buffer) => (out += d.toString()));
+    let settled = false;
+    void agent.exited.then(
+        () => (settled = true),
+        () => (settled = true),
+    );
+    return { child, agent, output: () => out, settled: () => settled };
 }
 
+const tick = () => new Promise((r) => setImmediate(r));
+
 describe('spawnAgent — exit handling', () => {
-    it('resolves `exited` only after the agent stdout has been drained', async () => {
-        const { agent, output } = run(300, 0);
+    it('waits for stdio to close after `exit`, so late stdout still arrives', async () => {
+        const { child, agent, output, settled } = spawnFake();
 
-        const info = await agent.exited;
+        child.emit('exit', 0, null);
+        await tick();
+        expect(settled()).toBe(false);
 
+        child.stdout.write('late frame\n');
+        child.emit('close', 0, null);
+
+        expect(await agent.exited).toEqual({ code: 0, signal: null });
         expect(output()).toContain('late frame');
-        expect(info).toEqual({ code: 0, signal: null });
     });
 
-    it('passes the exit code through', async () => {
-        const { agent } = run(0, 3);
+    it('reports the code and signal from `exit`', async () => {
+        const { child, agent } = spawnFake();
+
+        child.emit('exit', null, 'SIGTERM');
+        child.emit('close', null, null);
+
+        expect(await agent.exited).toEqual({ code: null, signal: 'SIGTERM' });
+    });
+
+    it('gives up on stdio after the grace period, so a stray child holding stdout cannot hang it', async () => {
+        const { child, agent, settled } = spawnFake(20);
+
+        child.emit('exit', 0, null);
+        await tick();
+        expect(settled()).toBe(false);
+
+        expect(await agent.exited).toEqual({ code: 0, signal: null });
+    });
+
+    it('rejects when the agent cannot be spawned', async () => {
+        const { child, agent } = spawnFake();
+
+        child.emit('error', new Error('spawn agent ENOENT'));
+
+        await expect(agent.exited).rejects.toThrow('ENOENT');
+    });
+
+    it('works end to end with a real process', async () => {
+        const agent = spawnAgent({
+            command: process.execPath,
+            args: ['-e', 'process.stdout.write("bye\\n"); process.exit(3)'],
+        });
+        let out = '';
+        agent.stdout.on('data', (d: Buffer) => (out += d.toString()));
+
         expect(await agent.exited).toEqual({ code: 3, signal: null });
-    });
-
-    it('stops waiting for stdio after the grace period, so a stray child cannot hang it', async () => {
-        const { agent, output } = run(60_000, 0, 200);
-        const started = Date.now();
-
-        const info = await agent.exited;
-
-        expect(Date.now() - started).toBeLessThan(5_000);
-        expect(info.code).toBe(0);
-        expect(output()).not.toContain('late frame');
+        expect(out).toBe('bye\n');
     });
 });
