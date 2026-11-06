@@ -71,6 +71,23 @@ creates the GitHub Release, bumps the Homebrew tap once the new formula passes
 `brew install` + `brew test` on macOS. New commits that change the
 diff revoke `ship`.
 
+## Issues
+
+Follow-ups that won't fit the current PR go into a GitHub issue — the
+conversation that found them doesn't survive the session.
+
+- Search open issues first; extend one rather than filing a duplicate.
+- **Labels:** only ones that already exist — GitHub's defaults (`bug`,
+  `enhancement`, `documentation`, …) plus `ci` and `security` (defined in
+  `scripts/setup-github.sh`). If nothing fits, propose a new label to the
+  maintainer instead of creating one. `ship` and `no-release` are PR-only and
+  maintainer-only.
+- **Assignee:** the maintainer (`maksugr`).
+- **Body:** _Problem_ with evidence (failing run, PR, exact error), _Proposal_,
+  and a _Done when_ checklist that can be ticked off from CI or the release.
+- Link related issues and PRs by full URL; the PR that resolves an issue says
+  `Closes #N`.
+
 ## Security rules (constraints, not suggestions)
 
 Captures hold real secrets (JetBrains `proxy_key`, MCP server headers/env, …).

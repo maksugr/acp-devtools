@@ -7,7 +7,8 @@
 #
 # What it configures (all idempotent — safe to re-run):
 #   - merge settings: squash-only, auto-merge on, delete head branch on merge
-#   - labels: `ship` (maintainer approval), `no-release` (merge without publishing)
+#   - labels: `ship` (maintainer approval), `no-release` (merge without publishing),
+#     `ci` and `security` (issue/PR categories on top of GitHub's defaults)
 #   - a `main` ruleset: changes only via PR, no force-push or deletion, and the
 #     required checks `ci-ok`, `release-check`, `ship-gate` (from GitHub
 #     Actions only), with the branch up to date before merging
@@ -48,6 +49,10 @@ run gh label create ship --repo "$REPO" --force --color 0E8A16 \
     --description "Maintainer approval: merge once all checks are green"
 run gh label create no-release --repo "$REPO" --force --color BFD4F2 \
     --description "Merge shipped-file changes without bumping or publishing"
+run gh label create ci --repo "$REPO" --force --color 1D76DB \
+    --description "CI, build and the release pipeline"
+run gh label create security --repo "$REPO" --force --color B60205 \
+    --description "Secret redaction, leaks and other security fixes"
 
 echo "→ ruleset for main"
 # 15368 is the GitHub Actions app: only checks reported by Actions count.
