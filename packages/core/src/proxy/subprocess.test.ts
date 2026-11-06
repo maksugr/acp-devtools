@@ -1,4 +1,5 @@
 // @vitest-environment node
+import type * as ChildProcess from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -19,7 +20,7 @@ class FakeChild extends EventEmitter {
 const fake: { child: FakeChild | null } = { child: null };
 
 vi.mock('node:child_process', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('node:child_process')>();
+    const actual = await importOriginal<typeof ChildProcess>();
     return {
         ...actual,
         spawn: (...args: Parameters<typeof actual.spawn>) => fake.child ?? actual.spawn(...args),
