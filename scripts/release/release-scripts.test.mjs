@@ -197,6 +197,8 @@ describe('bump-version + check-release', () => {
     it('does not require a bump for tests, docs or CI', () => {
         mkdirSync(join(ctx.dir, 'packages/core/src'), { recursive: true });
         writeFileSync(join(ctx.dir, 'packages/core/src/x.test.ts'), '');
+        mkdirSync(join(ctx.dir, 'packages/core/src/__golden__'), { recursive: true });
+        writeFileSync(join(ctx.dir, 'packages/core/src/__golden__/x.golden.json'), '{}\n');
         writeFileSync(join(ctx.dir, 'README.md'), '# hi\n');
         ctx.git('add', '-A');
         ctx.git('commit', '-qm', 'docs');

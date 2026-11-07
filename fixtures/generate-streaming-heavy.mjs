@@ -12,6 +12,9 @@
 //   node fixtures/generate-streaming-heavy.mjs --out /tmp/streams.json
 //   acp-devtools import /tmp/streams.json
 import { writeFileSync } from 'node:fs';
+import { seededRandom } from './random.mjs';
+
+const random = seededRandom(280688436);
 
 const OUT_PATH = process.argv.includes('--out')
     ? process.argv[process.argv.indexOf('--out') + 1]
@@ -42,7 +45,7 @@ function push(direction, kind, payload, method) {
 }
 
 function advance(min, max) {
-    ts += min + Math.floor(Math.random() * (max - min));
+    ts += min + Math.floor(random() * (max - min));
 }
 
 function streamLongResponse(text, chunkSize) {

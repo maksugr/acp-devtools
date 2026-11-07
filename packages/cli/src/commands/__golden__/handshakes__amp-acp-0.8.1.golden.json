@@ -1,0 +1,319 @@
+{
+  "cli": {
+    "validate": {
+      "exitCode": 0,
+      "output": {
+        "checked": 6,
+        "skipped": 1,
+        "violations": [],
+        "advisories": [
+          {
+            "method": "initialize",
+            "schemaName": "InitializeRequest",
+            "path": "clientInfo",
+            "message": "missing clientInfo — will be required in a future ACP version",
+            "frames": 1,
+            "firstSeqs": [
+              1
+            ]
+          }
+        ]
+      }
+    },
+    "stats": {
+      "exitCode": 0,
+      "output": {
+        "sessionName": "handshakes/amp-acp-0.8.1.json",
+        "clientName": null,
+        "agentCommand": "npx -y amp-acp",
+        "startedAt": 1781267484411,
+        "total": 7,
+        "direction": {
+          "editorToAgent": 3,
+          "agentToEditor": 4
+        },
+        "kind": {
+          "request": 3,
+          "response": 2,
+          "notification": 1,
+          "error": 1,
+          "unknown": 0
+        },
+        "parseErrors": 0,
+        "spec": {
+          "checked": 6,
+          "valid": 6,
+          "violations": 0,
+          "affectedMethods": []
+        },
+        "latency": {
+          "sampleSize": 3,
+          "p50": 3507,
+          "p90": 3507,
+          "p99": 3507,
+          "max": 3507,
+          "mean": 3507
+        },
+        "insights": [
+          {
+            "kind": "errors",
+            "summary": "1 method returned an error",
+            "detail": "session/prompt",
+            "methods": [
+              "session/prompt"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "mcp": {
+    "find_spec_violations": {
+      "checked": 6,
+      "violations": [],
+      "advisories": [
+        {
+          "method": "initialize",
+          "path": "clientInfo",
+          "message": "missing clientInfo — will be required in a future ACP version",
+          "frames": 1,
+          "firstSeqs": [
+            1
+          ]
+        }
+      ]
+    },
+    "get_session_metadata": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": null,
+          "title": null,
+          "version": null,
+          "platform": null
+        },
+        "agent": {
+          "name": "amp-acp",
+          "version": "0.8.1",
+          "authMethods": 1
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": false
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": [
+            "init"
+          ]
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      }
+    },
+    "get_latency_stats": {
+      "perMethod": [
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3507,
+          "p99": 3507,
+          "max": 3507,
+          "totalLatencyMs": 3507,
+          "latencies": [
+            3507
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3507,
+          "p99": 3507,
+          "max": 3507,
+          "totalLatencyMs": 3507,
+          "latencies": [
+            3507
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3506,
+          "p99": 3506,
+          "max": 3506,
+          "totalLatencyMs": 3506,
+          "latencies": [
+            3506
+          ]
+        },
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 1,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        }
+      ],
+      "sessionLatency": {
+        "sampleSize": 3,
+        "p50": 3507,
+        "p90": 3507,
+        "p99": 3507,
+        "max": 3507
+      },
+      "insights": [
+        {
+          "kind": "errors",
+          "summary": "1 method returned an error",
+          "detail": "session/prompt",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    },
+    "get_session_summary": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": null,
+          "title": null,
+          "version": null,
+          "platform": null
+        },
+        "agent": {
+          "name": "amp-acp",
+          "version": "0.8.1",
+          "authMethods": 1
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": false
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": [
+            "init"
+          ]
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      },
+      "totals": {
+        "messages": 7,
+        "direction": {
+          "editorToAgent": 3,
+          "agentToEditor": 4
+        },
+        "kind": {
+          "request": 3,
+          "response": 2,
+          "notification": 1,
+          "error": 1,
+          "unknown": 0
+        }
+      },
+      "latency": {
+        "sampleSize": 3,
+        "p50": 3507,
+        "p90": 3507,
+        "p99": 3507,
+        "max": 3507
+      },
+      "perMethod": [
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3507,
+          "p99": 3507,
+          "max": 3507,
+          "totalLatencyMs": 3507,
+          "latencies": [
+            3507
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3507,
+          "p99": 3507,
+          "max": 3507,
+          "totalLatencyMs": 3507,
+          "latencies": [
+            3507
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3506,
+          "p99": 3506,
+          "max": 3506,
+          "totalLatencyMs": 3506,
+          "latencies": [
+            3506
+          ]
+        },
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 1,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        }
+      ],
+      "insights": [
+        {
+          "kind": "errors",
+          "summary": "1 method returned an error",
+          "detail": "session/prompt",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    }
+  }
+}

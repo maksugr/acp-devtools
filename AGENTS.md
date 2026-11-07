@@ -22,6 +22,10 @@ stores sessions in SQLite, and validates frames against the official schema.
   `Co-Authored-By:` trailer, never as the sole author.
 - One concern per PR. Never skip, disable or weaken a test to get CI green.
 - Ship a test with every behaviour change (colocated `*.test.ts`).
+- Golden snapshots (`__golden__/`) record what the tools report for every
+  fixture. Update them with `-u` only for an intended change and say in the PR
+  what moved; an unexpected diff is a regression
+  ([CONTRIBUTING.md § Golden tests](CONTRIBUTING.md#golden-tests)).
 
 ## Commands
 

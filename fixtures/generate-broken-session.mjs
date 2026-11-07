@@ -11,6 +11,9 @@
 // Run `acp-devtools validate <new id>` on the imported session — you
 // should see at least one violation per non-OK row below.
 import { writeFileSync } from 'node:fs';
+import { seededRandom } from './random.mjs';
+
+const random = seededRandom(1135079846);
 
 const args = process.argv.slice(2);
 const flag = (name, fallback) => {
@@ -47,7 +50,7 @@ function frame(direction, kind, payload, method) {
         frameObj.rpcId = payload.id;
     }
     messages.push(frameObj);
-    ts += 50 + Math.floor(Math.random() * 500);
+    ts += 50 + Math.floor(random() * 500);
     return frameObj;
 }
 

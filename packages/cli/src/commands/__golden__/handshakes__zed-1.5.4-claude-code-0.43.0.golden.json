@@ -1,0 +1,356 @@
+{
+  "cli": {
+    "validate": {
+      "exitCode": 0,
+      "output": {
+        "checked": 18,
+        "skipped": 0,
+        "violations": [],
+        "advisories": []
+      }
+    },
+    "stats": {
+      "exitCode": 0,
+      "output": {
+        "sessionName": "handshakes/zed-1.5.4-claude-code-0.43.0.json",
+        "clientName": "Zed",
+        "agentCommand": "npx -y @agentclientprotocol/claude-agent-acp",
+        "startedAt": 1781027007183,
+        "total": 18,
+        "direction": {
+          "editorToAgent": 4,
+          "agentToEditor": 14
+        },
+        "kind": {
+          "request": 4,
+          "response": 4,
+          "notification": 10,
+          "error": 0,
+          "unknown": 0
+        },
+        "parseErrors": 0,
+        "spec": {
+          "checked": 18,
+          "valid": 18,
+          "violations": 0,
+          "affectedMethods": []
+        },
+        "latency": {
+          "sampleSize": 4,
+          "p50": 835,
+          "p90": 2430.3,
+          "p99": 2997.0299999999997,
+          "max": 3060,
+          "mean": 1345
+        },
+        "insights": [
+          {
+            "kind": "hotspot",
+            "summary": "session/prompt consumed 3.06s of total wall time",
+            "detail": "57% of 5.38s sampled latency",
+            "methods": [
+              "session/prompt"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "mcp": {
+    "find_spec_violations": {
+      "checked": 18,
+      "violations": [],
+      "advisories": []
+    },
+    "get_session_metadata": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": "zed",
+          "title": "Zed",
+          "version": "1.5.4+stable.300.193b55aa3aa71accf0dcd78709ee164a8ca42d54",
+          "platform": null
+        },
+        "agent": {
+          "name": "@agentclientprotocol/claude-agent-acp",
+          "version": "0.43.0",
+          "authMethods": 2
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": true,
+          "authTerminal": true,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": [
+            "deep-research",
+            "frontend-design",
+            "huggingface-papers",
+            "positioning",
+            "update-config",
+            "verify",
+            "debug",
+            "code-review",
+            "simplify",
+            "batch",
+            "fewer-permission-prompts",
+            "loop",
+            "schedule",
+            "claude-api",
+            "run",
+            "run-skill-generator",
+            "compact",
+            "context",
+            "heapdump",
+            "init",
+            "reload-skills",
+            "review",
+            "security-review",
+            "usage-credits",
+            "extra-usage",
+            "usage",
+            "insights",
+            "goal",
+            "team-onboarding"
+          ]
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      }
+    },
+    "get_latency_stats": {
+      "perMethod": [
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 10,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 2,
+          "sampleSize": 2,
+          "p50": 678.5,
+          "p99": 708.39,
+          "max": 709,
+          "totalLatencyMs": 1357,
+          "latencies": [
+            648,
+            709
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3060,
+          "p99": 3060,
+          "max": 3060,
+          "totalLatencyMs": 3060,
+          "latencies": [
+            3060
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 961,
+          "p99": 961,
+          "max": 961,
+          "totalLatencyMs": 961,
+          "latencies": [
+            961
+          ]
+        }
+      ],
+      "sessionLatency": {
+        "sampleSize": 4,
+        "p50": 835,
+        "p90": 2430.3,
+        "p99": 2997.0299999999997,
+        "max": 3060
+      },
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 3.06s of total wall time",
+          "detail": "57% of 5.38s sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    },
+    "get_session_summary": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": "zed",
+          "title": "Zed",
+          "version": "1.5.4+stable.300.193b55aa3aa71accf0dcd78709ee164a8ca42d54",
+          "platform": null
+        },
+        "agent": {
+          "name": "@agentclientprotocol/claude-agent-acp",
+          "version": "0.43.0",
+          "authMethods": 2
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": true,
+          "authTerminal": true,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": [
+            "deep-research",
+            "frontend-design",
+            "huggingface-papers",
+            "positioning",
+            "update-config",
+            "verify",
+            "debug",
+            "code-review",
+            "simplify",
+            "batch",
+            "fewer-permission-prompts",
+            "loop",
+            "schedule",
+            "claude-api",
+            "run",
+            "run-skill-generator",
+            "compact",
+            "context",
+            "heapdump",
+            "init",
+            "reload-skills",
+            "review",
+            "security-review",
+            "usage-credits",
+            "extra-usage",
+            "usage",
+            "insights",
+            "goal",
+            "team-onboarding"
+          ]
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      },
+      "totals": {
+        "messages": 18,
+        "direction": {
+          "editorToAgent": 4,
+          "agentToEditor": 14
+        },
+        "kind": {
+          "request": 4,
+          "response": 4,
+          "notification": 10,
+          "error": 0,
+          "unknown": 0
+        }
+      },
+      "latency": {
+        "sampleSize": 4,
+        "p50": 835,
+        "p90": 2430.3,
+        "p99": 2997.0299999999997,
+        "max": 3060
+      },
+      "perMethod": [
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 10,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 2,
+          "sampleSize": 2,
+          "p50": 678.5,
+          "p99": 708.39,
+          "max": 709,
+          "totalLatencyMs": 1357,
+          "latencies": [
+            648,
+            709
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 3060,
+          "p99": 3060,
+          "max": 3060,
+          "totalLatencyMs": 3060,
+          "latencies": [
+            3060
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 961,
+          "p99": 961,
+          "max": 961,
+          "totalLatencyMs": 961,
+          "latencies": [
+            961
+          ]
+        }
+      ],
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 3.06s of total wall time",
+          "detail": "57% of 5.38s sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    }
+  }
+}

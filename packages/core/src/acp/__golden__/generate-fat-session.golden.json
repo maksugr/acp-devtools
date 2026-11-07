@@ -1,0 +1,764 @@
+{
+  "frames": 1392,
+  "validation": {
+    "summary": {
+      "checked": 1391,
+      "valid": 710,
+      "invalid": 681,
+      "advisories": 0,
+      "skipped": {
+        "wrong-kind": 1
+      }
+    },
+    "outcomes": [
+      {
+        "schema": "InitializeRequest",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          1
+        ]
+      },
+      {
+        "schema": "InitializeResponse",
+        "valid": false,
+        "errors": [
+          "/authMethods/0 required: must have required property 'name'",
+          "/authMethods/0 required: must have required property 'vars'",
+          "/authMethods/0 required: must have required property 'type'",
+          "/authMethods/0 required: must have required property 'name'",
+          "/authMethods/0 required: must have required property 'type'",
+          "/authMethods/0 required: must have required property 'name'",
+          "/authMethods/0 anyOf: must match a schema in anyOf",
+          "/authMethods/1 required: must have required property 'name'",
+          "/authMethods/1 required: must have required property 'vars'",
+          "/authMethods/1 required: must have required property 'type'",
+          "/authMethods/1 required: must have required property 'name'",
+          "/authMethods/1 required: must have required property 'type'",
+          "/authMethods/1 required: must have required property 'name'",
+          "/authMethods/1 anyOf: must match a schema in anyOf"
+        ],
+        "frames": 1,
+        "firstSeqs": [
+          2
+        ]
+      },
+      {
+        "schema": "NewSessionRequest",
+        "valid": false,
+        "errors": [
+          "/ required: must have required property 'cwd'",
+          "/ required: must have required property 'mcpServers'"
+        ],
+        "frames": 1,
+        "firstSeqs": [
+          3
+        ]
+      },
+      {
+        "schema": "NewSessionResponse",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          4
+        ]
+      },
+      {
+        "schema": "SessionNotification",
+        "valid": true,
+        "frames": 2,
+        "firstSeqs": [
+          5,
+          699
+        ]
+      },
+      {
+        "schema": "SetSessionModeRequest",
+        "valid": true,
+        "frames": 2,
+        "firstSeqs": [
+          6,
+          963
+        ]
+      },
+      {
+        "schema": "SetSessionModeResponse",
+        "valid": false,
+        "errors": [
+          "/ type: must be object"
+        ],
+        "frames": 2,
+        "firstSeqs": [
+          7,
+          964
+        ]
+      },
+      {
+        "schema": "SetSessionModelRequest",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          8
+        ]
+      },
+      {
+        "schema": "SetSessionModelResponse",
+        "valid": false,
+        "errors": [
+          "/ type: must be object"
+        ],
+        "frames": 1,
+        "firstSeqs": [
+          9
+        ]
+      },
+      {
+        "schema": "PromptRequest",
+        "valid": true,
+        "frames": 31,
+        "firstSeqs": [
+          10,
+          41,
+          73,
+          107,
+          140
+        ]
+      },
+      {
+        "schema": "SessionNotification",
+        "valid": false,
+        "errors": [
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'toolCallId'",
+          "/update required: must have required property 'title'",
+          "/update/content type: must be array",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'toolCallId'",
+          "/update/content type: must be array,null",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'entries'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'availableCommands'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'currentModeId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'configOptions'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'used'",
+          "/update required: must have required property 'size'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update oneOf: must match exactly one schema in oneOf"
+        ],
+        "frames": 448,
+        "firstSeqs": [
+          11,
+          12,
+          13,
+          14,
+          15
+        ]
+      },
+      {
+        "schema": "ReadTextFileRequest",
+        "valid": true,
+        "frames": 321,
+        "firstSeqs": [
+          17,
+          19,
+          21,
+          23,
+          25
+        ]
+      },
+      {
+        "schema": "ReadTextFileResponse",
+        "valid": true,
+        "frames": 321,
+        "firstSeqs": [
+          18,
+          20,
+          22,
+          24,
+          26
+        ]
+      },
+      {
+        "schema": "SessionNotification",
+        "valid": false,
+        "errors": [
+          "/update required: must have required property 'content'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'content'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'content'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'title'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'entries'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'availableCommands'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'currentModeId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'configOptions'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'used'",
+          "/update required: must have required property 'size'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update oneOf: must match exactly one schema in oneOf"
+        ],
+        "frames": 98,
+        "firstSeqs": [
+          37,
+          38,
+          39,
+          68,
+          69
+        ]
+      },
+      {
+        "schema": "PromptResponse",
+        "valid": true,
+        "frames": 30,
+        "firstSeqs": [
+          40,
+          72,
+          106,
+          139,
+          171
+        ]
+      },
+      {
+        "schema": "SetSessionConfigOptionRequest",
+        "valid": false,
+        "errors": [
+          "/ required: must have required property 'sessionId'",
+          "/ required: must have required property 'configId'"
+        ],
+        "frames": 48,
+        "firstSeqs": [
+          382,
+          384,
+          386,
+          390,
+          1265
+        ]
+      },
+      {
+        "schema": "SetSessionConfigOptionResponse",
+        "valid": false,
+        "errors": [
+          "/ type: must be object"
+        ],
+        "frames": 65,
+        "firstSeqs": [
+          383,
+          385,
+          387,
+          389,
+          391
+        ]
+      },
+      {
+        "schema": "SetSessionConfigOptionRequest",
+        "valid": false,
+        "errors": [
+          "/type const: must be equal to constant",
+          "/value type: must be string",
+          "/ anyOf: must match a schema in anyOf",
+          "/ required: must have required property 'sessionId'",
+          "/ required: must have required property 'configId'"
+        ],
+        "frames": 17,
+        "firstSeqs": [
+          388,
+          1291,
+          1301,
+          1313,
+          1317
+        ]
+      },
+      {
+        "method": null,
+        "skipped": "wrong-kind",
+        "frames": 1,
+        "firstSeqs": [
+          598
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "protocolVersion": 1,
+    "client": {
+      "name": "JetBrains.WebStorm",
+      "title": "WebStorm 2026.1.2",
+      "version": "2026.1.2",
+      "platform": "intellij"
+    },
+    "agent": {
+      "name": "claude-agent-acp",
+      "version": "0.37.0",
+      "authMethods": 2
+    },
+    "clientCapabilities": {
+      "fsReadTextFile": true,
+      "fsWriteTextFile": true,
+      "terminal": false,
+      "authTerminal": false,
+      "authGateway": true
+    },
+    "agentCapabilities": {
+      "prompt": true,
+      "loadSession": true
+    },
+    "runtime": {
+      "currentMode": "debug",
+      "modeChanges": 1,
+      "currentModel": "claude-opus-4-7",
+      "modelChanges": 0,
+      "availableCommands": [
+        "debug",
+        "compact",
+        "init",
+        "review"
+      ]
+    },
+    "extensions": {
+      "jetbrainsProxyConfig": {
+        "proxies": [
+          {
+            "apiType": {
+              "provider": "anthropic"
+            },
+            "proxy": {
+              "url": "http://127.0.0.1:50001"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "perMethod": [
+    {
+      "method": "session/update",
+      "kind": "notification",
+      "count": 548,
+      "sampleSize": 0,
+      "p50": null,
+      "p99": null,
+      "max": null,
+      "totalLatencyMs": null
+    },
+    {
+      "method": "fs/read_text_file",
+      "kind": "request",
+      "count": 321,
+      "sampleSize": 321,
+      "p50": 16,
+      "p99": 27,
+      "max": 27,
+      "totalLatencyMs": 4976
+    },
+    {
+      "method": "session/set_config_option",
+      "kind": "request",
+      "count": 65,
+      "sampleSize": 65,
+      "p50": 4,
+      "p99": 5,
+      "max": 5,
+      "totalLatencyMs": 231
+    },
+    {
+      "method": "session/prompt",
+      "kind": "request",
+      "count": 31,
+      "sampleSize": 31,
+      "p50": 2458,
+      "p99": 17576.299999999992,
+      "max": 20630,
+      "totalLatencyMs": 97731
+    },
+    {
+      "method": "session/set_mode",
+      "kind": "request",
+      "count": 2,
+      "sampleSize": 2,
+      "p50": 50,
+      "p99": 69.6,
+      "max": 70,
+      "totalLatencyMs": 100
+    },
+    {
+      "method": "session/set_model",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 51,
+      "p99": 51,
+      "max": 51,
+      "totalLatencyMs": 51
+    },
+    {
+      "method": "session/new",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 2204,
+      "p99": 2204,
+      "max": 2204,
+      "totalLatencyMs": 2204
+    },
+    {
+      "method": "initialize",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 140,
+      "p99": 140,
+      "max": 140,
+      "totalLatencyMs": 140
+    }
+  ],
+  "insights": [
+    {
+      "kind": "hotspot",
+      "summary": "session/prompt consumed 1m38s of total wall time",
+      "methods": [
+        "session/prompt"
+      ]
+    },
+    {
+      "kind": "long-tail",
+      "summary": "session/prompt has a long tail — p99 is 7× the p50",
+      "methods": [
+        "session/prompt"
+      ]
+    },
+    {
+      "kind": "errors",
+      "summary": "1 method returned an error",
+      "methods": [
+        "session/prompt"
+      ]
+    }
+  ],
+  "redactedFields": 0,
+  "previews": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10 [prompt] Write a changelog summarising recent commits",
+    "11 state session agent parser value metho",
+    "12 d method the request.\nthe value the ev",
+    "13 ent the parser session value the parse",
+    "14 r state request state.\nrequest the the",
+    "15  value value event method event agent.",
+    "16 \nstate val",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+    "30",
+    "31",
+    "32",
+    "33",
+    "34",
+    "35",
+    "36",
+    "37",
+    "38",
+    "39",
+    "40",
+    "41 [prompt] Convert this for-loop to a reduce",
+    "42 session method event request parser met",
+    "43 hod agent event method.\nagent session a",
+    "44 gent parser state agent the session met",
+    "45 hod state callback event method.\nparser",
+    "46  the session session event event agent",
+    "47 the e",
+    "48",
+    "49",
+    "50",
+    "51",
+    "52",
+    "53",
+    "54",
+    "55",
+    "56",
+    "57",
+    "58",
+    "59",
+    "60",
+    "61",
+    "62",
+    "63",
+    "64",
+    "65",
+    "66",
+    "67",
+    "68",
+    "69",
+    "70",
+    "71",
+    "72",
+    "73 [prompt] Find every place in the codebase that does `process.env`",
+    "74 value request request re",
+    "75 quest request agent agen",
+    "76 t parser value event val",
+    "77 ue.\nmethod request parse",
+    "78 r the parser callback th",
+    "79 e state request value th",
+    "80 e.\nthe agent event sessi",
+    "81 on value the callback se",
+    "82 ssion me",
+    "83",
+    "84",
+    "85",
+    "86",
+    "87",
+    "88",
+    "89",
+    "90",
+    "91",
+    "92",
+    "93",
+    "94",
+    "95",
+    "96",
+    "97",
+    "98",
+    "99",
+    "100",
+    "101",
+    "102",
+    "103",
+    "104",
+    "105",
+    "106",
+    "107 [prompt] Convert this for-loop to a reduce",
+    "108 parser event callback reques",
+    "109 t event method session sessi",
+    "110 on session parser state call",
+    "111 back.\nrequest the request st",
+    "112 ate method request request m",
+    "113 ethod session value the.\nthe",
+    "114  parser agent state state me",
+    "115 thod",
+    "116",
+    "117",
+    "118",
+    "119",
+    "120",
+    "121",
+    "122",
+    "123",
+    "124",
+    "125",
+    "126",
+    "127",
+    "128",
+    "129",
+    "130",
+    "131",
+    "132",
+    "133",
+    "134",
+    "135",
+    "136",
+    "137",
+    "138",
+    "139",
+    "140 [prompt] Inspect captures.db schema and propose a migration",
+    "141 the state agent request event value",
+    "142  the method the callback.\nmethod st",
+    "143 ate the value value request value r",
+    "144 equest request value the session.\nm",
+    "145 ethod parser agent session callback",
+    "146  event method callback.\nt",
+    "147",
+    "148",
+    "149",
+    "150"
+  ],
+  "spec": {
+    "InitializeRequest": {
+      "params": "unresolved",
+      "params._meta": "spec ext object desc",
+      "params._meta.proxyConfig": "not-in-spec ext",
+      "params._meta.proxyConfig.proxies": "not-in-spec ext",
+      "params._meta.proxyConfig.proxies.[]": "not-in-spec ext",
+      "params._meta.proxyConfig.proxies.[].apiType": "not-in-spec ext",
+      "params._meta.proxyConfig.proxies.[].apiType.provider": "not-in-spec ext",
+      "params._meta.proxyConfig.proxies.[].proxy": "not-in-spec ext",
+      "params._meta.proxyConfig.proxies.[].proxy.url": "not-in-spec ext",
+      "params.clientCapabilities": "spec object desc",
+      "params.clientCapabilities.auth": "spec object desc",
+      "params.clientCapabilities.auth._meta": "spec ext object desc",
+      "params.clientCapabilities.auth._meta.gateway": "not-in-spec ext",
+      "params.clientCapabilities.fs": "spec object desc",
+      "params.clientCapabilities.fs.readTextFile": "spec boolean desc",
+      "params.clientCapabilities.fs.writeTextFile": "spec boolean desc",
+      "params.clientCapabilities.terminal": "spec boolean desc",
+      "params.clientInfo": "spec object desc",
+      "params.clientInfo._meta": "spec ext object desc",
+      "params.clientInfo._meta.platform": "not-in-spec ext",
+      "params.clientInfo.name": "spec string desc",
+      "params.clientInfo.title": "spec string desc",
+      "params.clientInfo.version": "spec string desc",
+      "params.protocolVersion": "spec integer desc"
+    },
+    "InitializeResponse": {
+      "result": "unresolved",
+      "result.agentCapabilities": "spec object desc",
+      "result.agentCapabilities.loadSession": "spec boolean desc",
+      "result.agentCapabilities.promptCapabilities": "spec object desc",
+      "result.agentCapabilities.promptCapabilities.audio": "spec boolean desc",
+      "result.agentCapabilities.promptCapabilities.image": "spec boolean desc",
+      "result.agentInfo": "spec object desc",
+      "result.agentInfo.name": "spec string desc",
+      "result.agentInfo.version": "spec string desc",
+      "result.authMethods": "spec array desc",
+      "result.authMethods.[]": "spec object desc",
+      "result.authMethods.[].id": "spec string desc",
+      "result.protocolVersion": "spec integer desc"
+    },
+    "NewSessionRequest": {
+      "params": "unresolved",
+      "params.workspaceUri": "not-in-spec"
+    },
+    "NewSessionResponse": {
+      "result": "unresolved",
+      "result.currentMode": "not-in-spec",
+      "result.sessionId": "spec string desc"
+    },
+    "PromptRequest": {
+      "params": "unresolved",
+      "params._meta": "spec ext object desc",
+      "params._meta.additionalRoots": "not-in-spec ext",
+      "params._meta.additionalRoots.[]": "not-in-spec ext",
+      "params.prompt": "spec array desc",
+      "params.prompt.[]": "spec object desc",
+      "params.prompt.[].text": "spec string",
+      "params.prompt.[].type": "not-in-spec",
+      "params.sessionId": "spec string desc"
+    },
+    "PromptResponse": {
+      "error": "unresolved",
+      "error.code": "not-in-spec",
+      "error.message": "not-in-spec",
+      "result": "unresolved",
+      "result.stopReason": "spec string desc"
+    },
+    "ReadTextFileRequest": {
+      "params": "unresolved",
+      "params.path": "spec string desc",
+      "params.sessionId": "spec string desc"
+    },
+    "ReadTextFileResponse": {
+      "result": "unresolved",
+      "result.content": "spec string"
+    },
+    "SessionNotification": {
+      "params": "unresolved",
+      "params.sessionId": "spec string desc",
+      "params.update": "spec object desc",
+      "params.update.availableCommands": "spec array desc",
+      "params.update.availableCommands.[]": "spec object desc",
+      "params.update.availableCommands.[].description": "spec string desc",
+      "params.update.availableCommands.[].name": "spec string desc",
+      "params.update.content": "spec object desc",
+      "params.update.content.text": "spec string",
+      "params.update.name": "not-in-spec",
+      "params.update.params": "not-in-spec",
+      "params.update.params.command": "not-in-spec",
+      "params.update.params.file_path": "not-in-spec",
+      "params.update.params.new_string": "not-in-spec",
+      "params.update.params.old_string": "not-in-spec",
+      "params.update.sessionUpdate": "not-in-spec",
+      "params.update.toolCallId": "spec string desc"
+    },
+    "SetSessionConfigOptionRequest": {
+      "params": "unresolved",
+      "params.type": "not-in-spec | spec string",
+      "params.value": "spec boolean desc | spec string desc"
+    },
+    "SetSessionConfigOptionResponse": {
+      "result": "unresolved"
+    },
+    "SetSessionModelRequest": {
+      "params": "unresolved",
+      "params.modelId": "spec string desc",
+      "params.sessionId": "spec string desc"
+    },
+    "SetSessionModelResponse": {
+      "result": "unresolved"
+    },
+    "SetSessionModeRequest": {
+      "params": "unresolved",
+      "params.modeId": "spec string desc",
+      "params.sessionId": "spec string desc"
+    },
+    "SetSessionModeResponse": {
+      "result": "unresolved"
+    }
+  }
+}

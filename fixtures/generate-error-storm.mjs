@@ -7,6 +7,9 @@
 //   node fixtures/generate-error-storm.mjs --out /tmp/errors.json
 //   acp-devtools import /tmp/errors.json
 import { writeFileSync } from 'node:fs';
+import { seededRandom } from './random.mjs';
+
+const random = seededRandom(407730117);
 
 const OUT_PATH = process.argv.includes('--out')
     ? process.argv[process.argv.indexOf('--out') + 1]
@@ -34,7 +37,7 @@ function push(direction, kind, payload, method) {
         frame.rpcId = payload.id;
     }
     messages.push(frame);
-    ts += 40 + Math.floor(Math.random() * 200);
+    ts += 40 + Math.floor(random() * 200);
 }
 
 function advance(ms) {

@@ -1,0 +1,320 @@
+{
+  "frames": 14,
+  "validation": {
+    "summary": {
+      "checked": 7,
+      "valid": 3,
+      "invalid": 4,
+      "advisories": 0,
+      "skipped": {
+        "wrong-kind": 1,
+        "parse-error": 4,
+        "no-method": 2
+      }
+    },
+    "outcomes": [
+      {
+        "schema": "InitializeRequest",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          1
+        ]
+      },
+      {
+        "method": null,
+        "skipped": "wrong-kind",
+        "frames": 1,
+        "firstSeqs": [
+          2
+        ]
+      },
+      {
+        "schema": "NewSessionRequest",
+        "valid": false,
+        "errors": [
+          "/ required: must have required property 'cwd'",
+          "/ required: must have required property 'mcpServers'"
+        ],
+        "frames": 2,
+        "firstSeqs": [
+          3,
+          8
+        ]
+      },
+      {
+        "method": null,
+        "skipped": "parse-error",
+        "frames": 4,
+        "firstSeqs": [
+          4,
+          5,
+          7,
+          11
+        ]
+      },
+      {
+        "method": null,
+        "skipped": "no-method",
+        "frames": 2,
+        "firstSeqs": [
+          6,
+          9
+        ]
+      },
+      {
+        "schema": "SessionNotification",
+        "valid": false,
+        "errors": [
+          "/ type: must be object"
+        ],
+        "frames": 1,
+        "firstSeqs": [
+          10
+        ]
+      },
+      {
+        "schema": "PromptRequest",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          12
+        ]
+      },
+      {
+        "schema": "SessionNotification",
+        "valid": false,
+        "errors": [
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'toolCallId'",
+          "/update required: must have required property 'title'",
+          "/update/content type: must be array",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'toolCallId'",
+          "/update/content type: must be array,null",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'entries'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'availableCommands'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'currentModeId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'configOptions'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'used'",
+          "/update required: must have required property 'size'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update oneOf: must match exactly one schema in oneOf"
+        ],
+        "frames": 1,
+        "firstSeqs": [
+          13
+        ]
+      },
+      {
+        "schema": "PromptResponse",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          14
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "protocolVersion": 1,
+    "client": {
+      "name": "zed",
+      "title": "Zed",
+      "version": "1.3.5",
+      "platform": null
+    },
+    "agent": {
+      "name": null,
+      "version": null,
+      "authMethods": 0
+    },
+    "clientCapabilities": {
+      "fsReadTextFile": true,
+      "fsWriteTextFile": true,
+      "terminal": false,
+      "authTerminal": false,
+      "authGateway": false
+    },
+    "agentCapabilities": {
+      "prompt": false,
+      "loadSession": false
+    },
+    "runtime": {
+      "currentMode": null,
+      "modeChanges": 0,
+      "currentModel": null,
+      "modelChanges": 0,
+      "availableCommands": []
+    },
+    "extensions": {
+      "jetbrainsProxyConfig": null
+    }
+  },
+  "perMethod": [
+    {
+      "method": "session/new",
+      "kind": "request",
+      "count": 2,
+      "sampleSize": 0,
+      "p50": null,
+      "p99": null,
+      "max": null,
+      "totalLatencyMs": null
+    },
+    {
+      "method": "session/update",
+      "kind": "notification",
+      "count": 2,
+      "sampleSize": 0,
+      "p50": null,
+      "p99": null,
+      "max": null,
+      "totalLatencyMs": null
+    },
+    {
+      "method": "session/prompt",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 1638,
+      "p99": 1638,
+      "max": 1638,
+      "totalLatencyMs": 1638
+    },
+    {
+      "method": "initialize",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 168,
+      "p99": 168,
+      "max": 168,
+      "totalLatencyMs": 168
+    }
+  ],
+  "insights": [
+    {
+      "kind": "hotspot",
+      "summary": "session/prompt consumed 1.64s of total wall time",
+      "methods": [
+        "session/prompt"
+      ]
+    },
+    {
+      "kind": "errors",
+      "summary": "1 method returned an error",
+      "methods": [
+        "initialize"
+      ]
+    }
+  ],
+  "redactedFields": 0,
+  "previews": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12 [prompt] one that works",
+    "13 OK.",
+    "14"
+  ],
+  "spec": {
+    "InitializeRequest": {
+      "params": "unresolved",
+      "params.clientCapabilities": "spec object desc",
+      "params.clientCapabilities.fs": "spec object desc",
+      "params.clientCapabilities.fs.readTextFile": "spec boolean desc",
+      "params.clientCapabilities.fs.writeTextFile": "spec boolean desc",
+      "params.clientInfo": "spec object desc",
+      "params.clientInfo.name": "spec string desc",
+      "params.clientInfo.title": "spec string desc",
+      "params.clientInfo.version": "spec string desc",
+      "params.protocolVersion": "spec integer desc"
+    },
+    "InitializeResponse": {
+      "error": "unresolved",
+      "error.code": "not-in-spec",
+      "error.data": "not-in-spec",
+      "error.data.env": "not-in-spec",
+      "error.data.stage": "not-in-spec",
+      "error.message": "not-in-spec"
+    },
+    "NewSessionRequest": {
+      "params": "unresolved"
+    },
+    "PromptRequest": {
+      "params": "unresolved",
+      "params.prompt": "spec array desc",
+      "params.prompt.[]": "spec object desc",
+      "params.prompt.[].text": "spec string",
+      "params.prompt.[].type": "not-in-spec",
+      "params.sessionId": "spec string desc"
+    },
+    "PromptResponse": {
+      "result": "unresolved",
+      "result.stopReason": "spec string desc"
+    },
+    "SessionNotification": {
+      "params": "unresolved",
+      "params.sessionId": "spec string desc",
+      "params.update": "spec object desc",
+      "params.update.content": "spec object desc",
+      "params.update.content.text": "spec string",
+      "params.update.sessionUpdate": "not-in-spec"
+    }
+  }
+}
