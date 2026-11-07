@@ -2,11 +2,13 @@ import type { Command } from 'commander';
 import {
     type CapturedMessage,
     Session,
+    DEFAULT_PROTOCOL_VERSION,
     defaultCapturesDbPath,
+    detectProtocolVersion,
+    isSupportedProtocolVersion,
     openExistingDatabase,
-    validateAcpMessage,
+    validateMessages,
 } from '@acp-devtools/core';
-import { buildPairIndex } from './inspect.js';
 import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 import { renderTable, type Column } from '../lib/table.js';
 
@@ -39,7 +41,7 @@ export function registerValidateCommand(program: Command): void {
     program
         .command('validate')
         .description(
-            "Check every frame in a session against the official ACP JSON schema (`@agentclientprotocol/sdk`). Use to confirm that an editor or agent you do not control speaks the protocol correctly — same data the inspector's ⚠ SPEC badges surface.",
+            "Check every frame in a session against the official ACP JSON schema for the protocol version the session negotiated (v1 or v2). Use to confirm that an editor or agent you do not control speaks the protocol correctly — same data the inspector's ⚠ SPEC badges surface.",
         )
         .argument('<id>', 'session id (see `acp-devtools list`)')
         .option('--db <path>', 'captures database', defaultCapturesDbPath())
@@ -77,11 +79,8 @@ export function registerValidateCommand(program: Command): void {
             const messages = [...session.messages()];
             db.close();
 
-            const pairs = buildPairIndex(messages);
-            const seqToMethod = new Map<number, string>();
-            for (const m of messages) {
-                if (m.method) seqToMethod.set(m.seq, m.method);
-            }
+            const protocolVersion = detectProtocolVersion(messages);
+            const results = validateMessages(messages);
 
             const methodNeedle = opts.method ? opts.method.toLowerCase() : null;
             const violations: Violation[] = [];
@@ -89,17 +88,13 @@ export function registerValidateCommand(program: Command): void {
             let checked = 0;
             let skipped = 0;
             for (const m of messages) {
-                const pair = pairs.get(m.seq);
-                const pairedMethod = pair ? seqToMethod.get(pair.pairSeq) : undefined;
-                const opts2: Parameters<typeof validateAcpMessage>[1] = {};
-                if (pairedMethod !== undefined) opts2.pairedMethod = pairedMethod;
-                const result = validateAcpMessage(m, opts2);
-                if (result.skipped) {
+                const result = results.get(m.seq);
+                if (!result || result.skipped) {
                     skipped += 1;
                     continue;
                 }
                 checked += 1;
-                const method = m.method ?? pairedMethod ?? null;
+                const method = result.method ?? null;
                 const methodMatch =
                     !methodNeedle || (!!method && method.toLowerCase().includes(methodNeedle));
                 if (methodMatch && result.advisories) {
@@ -133,7 +128,14 @@ export function registerValidateCommand(program: Command): void {
             if (opts.json) {
                 process.stdout.write(
                     JSON.stringify(
-                        { sessionId: id, checked, skipped, violations, advisories },
+                        {
+                            sessionId: id,
+                            protocolVersion,
+                            checked,
+                            skipped,
+                            violations,
+                            advisories,
+                        },
                         null,
                         2,
                     ) + '\n',
@@ -152,9 +154,20 @@ export function registerValidateCommand(program: Command): void {
                 advisories.length === 0
                     ? ''
                     : ` · ${errStyler.yellow(`${advisories.length} advisor${advisories.length === 1 ? 'y' : 'ies'}`)}`;
+            const proto =
+                protocolVersion === null
+                    ? `ACP v${DEFAULT_PROTOCOL_VERSION} (assumed: no initialize captured)`
+                    : `ACP v${protocolVersion}`;
             process.stderr.write(
-                `${errStyler.bold(errStyler.cyan(`session #${id}`))} · ${checked} checked · ${skipped} skipped (no schema) · ${vCount} in ${affected.size} method${affected.size === 1 ? '' : 's'}${aCount}\n\n`,
+                `${errStyler.bold(errStyler.cyan(`session #${id}`))} · ${proto} · ${checked} checked · ${skipped} skipped (no schema) · ${vCount} in ${affected.size} method${affected.size === 1 ? '' : 's'}${aCount}\n\n`,
             );
+            if (protocolVersion !== null && !isSupportedProtocolVersion(protocolVersion)) {
+                process.stderr.write(
+                    errStyler.yellow(
+                        `acp-devtools has no schema for ACP v${protocolVersion}; its frames were not checked.`,
+                    ) + '\n\n',
+                );
+            }
             const s = createStyler(colorEnabled(process.stdout));
             if (violations.length > 0) {
                 process.stdout.write(renderViolations(s, violations));

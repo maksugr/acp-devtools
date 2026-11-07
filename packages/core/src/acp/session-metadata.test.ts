@@ -87,6 +87,39 @@ describe('extractSessionMetadata', () => {
         expect(meta.runtime.currentMode).toBeNull();
     });
 
+    it('takes the protocol version from the last initialize the agent answered', () => {
+        const init = (seq: number, id: number, version: number): CapturedMessage[] => [
+            {
+                seq,
+                timestamp: seq,
+                direction: 'editor-to-agent',
+                kind: 'request',
+                method: 'initialize',
+                rpcId: id,
+                raw: '',
+                payload: {
+                    jsonrpc: '2.0',
+                    id,
+                    method: 'initialize',
+                    params: { protocolVersion: version },
+                },
+            },
+            {
+                seq: seq + 1,
+                timestamp: seq + 1,
+                direction: 'agent-to-editor',
+                kind: 'response',
+                rpcId: id,
+                raw: '',
+                payload: { jsonrpc: '2.0', id, result: { protocolVersion: 1 } },
+            },
+        ];
+        // The editor offers v2, the agent answers v1, the editor re-initializes on v1.
+        expect(extractSessionMetadata([...init(1, 0, 2), ...init(3, 1, 1)]).protocolVersion).toBe(
+            1,
+        );
+    });
+
     it('extracts Zed client info + capabilities from initialize', () => {
         const meta = extractSessionMetadata([zedInit]);
         expect(meta.protocolVersion).toBe(1);

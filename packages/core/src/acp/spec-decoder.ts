@@ -1,16 +1,10 @@
-// Node-side entry point for the ACP spec decoder. Loads the schema via
-// `createRequire` (same trick as `validate.ts`). Browser uses
-// `spec-decoder-browser.ts`.
+// The ACP spec decoder bound to the bundled schemas (see `schemas.ts`).
+// Works unchanged in Node, the CLI bundle and the browser.
 
-import { createRequire } from 'node:module';
+import { ACP_SCHEMAS } from './schemas.js';
 import { createSpecDecoder } from './spec-decoder-factory.js';
 
-const require = createRequire(import.meta.url);
-const schema = require('@agentclientprotocol/sdk/schema/schema.json') as {
-    $defs?: Record<string, { 'x-method'?: unknown }>;
-};
-
-const decoder = createSpecDecoder(schema);
+const decoder = createSpecDecoder(ACP_SCHEMAS);
 export const resolveSpecForMessage = decoder.resolveForMessage;
 export const knownAcpSpecMethods = decoder.knownMethods;
 export type {

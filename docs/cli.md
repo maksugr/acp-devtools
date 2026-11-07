@@ -384,10 +384,16 @@ JETBRAINS EXTENSIONS
 
 ## `validate <id>`
 
-Checks every frame in a session against the official ACP JSON schema shipped in
-`@agentclientprotocol/sdk` (Draft 2020-12, ajv). Surfaces violations as a flat
-table — useful when you suspect an editor or agent you don't control is sending
-malformed traffic.
+Checks every frame in a session against the official ACP JSON schema
+(Draft 2020-12, ajv) and surfaces violations as a flat table — useful when you
+suspect an editor or agent you don't control is sending malformed traffic.
+
+The schema is picked per session: the protocol version the agent answered with
+in its last `initialize` response (v1, or the v2 draft). A capture without an
+`initialize` exchange is read as v1, and the summary line says so. The schemas
+come from `@agentclientprotocol/sdk` and include its unstable features
+(`session/fork`, `subagent_update`, …), since agents ship those before they are
+stabilised.
 
 ```bash
 acp-devtools validate 23                          # whole session
@@ -405,7 +411,7 @@ acp-devtools validate 23 --json                   # CI-friendly, exit 1 on any v
 Sample output for a corrupted session:
 
 ```
-session #31 · 7 checked · 0 skipped (no schema) · 2 violations in 2 methods
+session #31 · ACP v1 · 7 checked · 0 skipped (no schema) · 2 violations in 2 methods
 
  #1  initialize      InitializeRequest  /     must have required property 'protocolVersion'
  #3  session/prompt  PromptRequest      /     must have required property 'prompt'
@@ -414,8 +420,12 @@ session #31 · 7 checked · 0 skipped (no schema) · 2 violations in 2 methods
 Exit code is `1` whenever at least one violation is found, `0` on clean
 sessions — drop into a CI step to gate releases. Frames are skipped (counted
 but not flagged) when the message failed to parse, the method isn't in the spec
-(extension methods, future additions), or the spec has no schema for the kind
-(JSON-RPC error envelopes are framing, not ACP-specific).
+(extension methods, future additions), the spec has no schema for the kind
+(JSON-RPC error envelopes are framing, not ACP-specific), or the session uses a
+protocol version acp-devtools has no schema for.
+
+`--json` prints `{ sessionId, protocolVersion, checked, skipped, violations,
+advisories }`; `protocolVersion` is `null` when no `initialize` was captured.
 
 A session can be clean and still earn **advisories** — fields the spec marks
 optional today but slated to become mandatory. These print in a separate amber

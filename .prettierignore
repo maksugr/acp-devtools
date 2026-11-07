@@ -4,3 +4,6 @@ build
 coverage
 *.tsbuildinfo
 package-lock.json
+
+# Byte-exact snapshots written by the golden tests (`vitest run -u`).
+*.golden.json

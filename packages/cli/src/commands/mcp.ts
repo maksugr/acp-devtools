@@ -11,6 +11,7 @@ import {
     buildSessionDiff,
     type CapturedMessage,
     defaultCapturesDbPath,
+    detectProtocolVersion,
     extractSessionMetadata,
     findSessionsByClient,
     listAgents,
@@ -19,7 +20,8 @@ import {
     percentile,
     redactMessage,
     Session,
-    validateAcpMessage,
+    validateMessages,
+    type ValidationResult,
 } from '@acp-devtools/core';
 import { CLI_VERSION } from '../version.js';
 import { buildSetupPlan, renderConfigBlock } from '../lib/setup-config.js';
@@ -607,12 +609,13 @@ export function buildMcpServer(opts: McpOptions): McpServer {
         'find_spec_violations',
         {
             description:
-                "Validate every captured frame in a session against the ACP JSON schema (Draft 2020-12, ajv-compiled). Returns every offender with its seq, method, and per-error path + keyword + message. Schema-skipped frames (unknown methods, parse errors, generic envelopes) are not counted. Also returns `advisories`: frames valid under today's schema that omit a field the spec says will become mandatory (e.g. `agentInfo` on an initialize response, `clientInfo` on the request) — these never count as violations. Use the returned seq with get_message to inspect the offending raw payload. Start here when an agent is misbehaving but you don't yet know how.",
+                "Validate every captured frame in a session against the ACP JSON schema (Draft 2020-12, ajv-compiled) of the protocol version the session negotiated in `initialize` — v1 or v2; `protocol_version` reports it (null when no initialize was captured, in which case v1 is assumed). Returns every offender with its seq, method, and per-error path + keyword + message. Schema-skipped frames (unknown methods, parse errors, generic envelopes) are not counted. Also returns `advisories`: frames valid under today's schema that omit a field the spec says will become mandatory (e.g. `agentInfo` on an initialize response, `clientInfo` on the request) — these never count as violations. Use the returned seq with get_message to inspect the offending raw payload. Start here when an agent is misbehaving but you don't yet know how.",
             inputSchema: {
                 session_id: z.number().int().positive().describe('session id from list_sessions'),
             },
             outputSchema: {
                 session_id: z.number(),
+                protocol_version: z.number().nullable(),
                 checked: z.number(),
                 // Each entry holds the raw ajv ErrorObject which has a
                 // variable shape per keyword (data/schema/parentSchema get
@@ -647,13 +650,11 @@ export function buildMcpServer(opts: McpOptions): McpServer {
         },
         async ({ session_id }) => {
             const messages = readMessages(opts.db, session_id);
-            const pairs = buildPairIndex(messages);
-            const seqToMethod = new Map<number, string>();
-            for (const m of messages) if (m.method) seqToMethod.set(m.seq, m.method);
+            const results = validateMessages(messages);
             const violations: Array<{
                 seq: number;
                 method: string | null;
-                errors: ReturnType<typeof validateAcpMessage>['errors'];
+                errors: ValidationResult['errors'];
             }> = [];
             const advisories: Array<{
                 seq: number;
@@ -662,23 +663,24 @@ export function buildMcpServer(opts: McpOptions): McpServer {
                 message: string;
             }> = [];
             let checked = 0;
-            for (const m of messages) {
-                const pair = pairs.get(m.seq);
-                const pairedMethod = pair ? seqToMethod.get(pair.pairSeq) : undefined;
-                const validationOpts: Parameters<typeof validateAcpMessage>[1] = {};
-                if (pairedMethod !== undefined) validationOpts.pairedMethod = pairedMethod;
-                const result = validateAcpMessage(m, validationOpts);
+            for (const [seq, result] of results) {
                 if (result.skipped) continue;
                 checked += 1;
-                const method = m.method ?? pairedMethod ?? null;
+                const method = result.method ?? null;
                 if (!result.valid) {
-                    violations.push({ seq: m.seq, method, errors: result.errors });
+                    violations.push({ seq, method, errors: result.errors });
                 }
                 for (const a of result.advisories ?? []) {
-                    advisories.push({ seq: m.seq, method, path: a.path, message: a.message });
+                    advisories.push({ seq, method, path: a.path, message: a.message });
                 }
             }
-            return structuredResult({ session_id, checked, violations, advisories });
+            return structuredResult({
+                session_id,
+                protocol_version: detectProtocolVersion(messages),
+                checked,
+                violations,
+                advisories,
+            });
         },
     );
 

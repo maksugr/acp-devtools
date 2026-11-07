@@ -1,18 +1,12 @@
-// Node-side entry point for the ACP validator. Loads the schema via
-// `createRequire` (the standard ESM-from-CJS escape hatch — works both in
-// raw tsc output and inside the tsup-bundled CLI). For the browser bundle
-// see `validate-browser.ts`, which uses Vite's native JSON loader.
+// The ACP validator bound to the bundled schemas (see `schemas.ts`). Works
+// unchanged in Node, the CLI bundle and the browser.
 
-import { createRequire } from 'node:module';
+import { ACP_SCHEMAS } from './schemas.js';
 import { createAcpValidator } from './validate-factory.js';
 
-const require = createRequire(import.meta.url);
-const schema = require('@agentclientprotocol/sdk/schema/schema.json') as {
-    $defs?: Record<string, { 'x-method'?: unknown }>;
-};
-
-const validator = createAcpValidator(schema);
+const validator = createAcpValidator(ACP_SCHEMAS);
 export const validateAcpMessage = validator.validateAcpMessage;
+export const validateMessages = validator.validateMessages;
 export const knownAcpMethods = validator.knownAcpMethods;
 export type {
     AcpValidator,

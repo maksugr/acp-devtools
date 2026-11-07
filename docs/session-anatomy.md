@@ -8,6 +8,13 @@ taken verbatim from the official ACP JSON schema. The [playground sample](https:
 is this exact capture (97 frames, auth tokens redacted) — open it and click
 along; frame numbers below match it one-to-one.
 
+This session speaks ACP v1, the stable protocol version. The v2 draft reshapes several of these frames — `initialize` carries
+`info` and `capabilities`, and a turn ends with a `state_update` to `idle`
+rather than with the `session/prompt` response. A v2 turn recorded from the
+SDK's reference client and agent is in
+[`fixtures/v2-session.json`](../fixtures/v2-session.json)
+([open in the playground](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/v2-session.json)).
+
 ## The whole session at a glance
 
 Every session has the same skeleton: a handshake, a session setup, then a
@@ -107,7 +114,9 @@ methods it accepts:
 `protocolVersion` is a negotiation: the editor sends the
 latest version it supports, and the agent must echo it back if compatible —
 otherwise it answers with the latest version _it_ supports, and an editor
-that can't speak that version is expected to close the connection.
+that can't speak that version is expected to close the connection. An editor
+that can, may send `initialize` again with that version before any other
+request; acp-devtools reads the session with the version of the last answer.
 Capabilities are contracts for the rest of the session: an agent may only
 call `fs/read_text_file` because the editor declared `fs` here —
 
@@ -320,7 +329,7 @@ token streaming, tool calls. A 60s `session/prompt` with steady chunks in
 between is a healthy long turn; the same 60s with no updates is an agent
 that went silent.
 
-The schema defines eleven `session/update` variants:
+The v1 schema defines fourteen `session/update` variants:
 
 | `sessionUpdate`             | What it carries                                                              |
 | --------------------------- | ---------------------------------------------------------------------------- |
@@ -334,7 +343,10 @@ The schema defines eleven `session/update` variants:
 | `current_mode_update`       | session mode switched                                                        |
 | `config_option_update`      | session config options changed                                               |
 | `session_info_update`       | session metadata changed (title, …)                                          |
-| `usage_update`              | token-usage counter (marked UNSTABLE in the spec)                            |
+| `usage_update`              | context-window usage and cumulative cost                                     |
+| `notice`                    | fire-and-forget information for the user                                     |
+| `compaction_update`         | a context compaction started or changed status                               |
+| `compaction_summary_chunk`  | the summary a compaction produced, streamed in chunks                        |
 
 Three spec rules make these frames less confusing than they look:
 

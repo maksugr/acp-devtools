@@ -1,0 +1,1479 @@
+{
+  "cli": {
+    "validate": {
+      "exitCode": 1,
+      "output": {
+        "protocolVersion": 1,
+        "checked": 9,
+        "skipped": 6,
+        "violations": [
+          {
+            "method": "session/new",
+            "direction": "editor-to-agent",
+            "schemaName": "NewSessionRequest",
+            "path": "/",
+            "message": "must have required property 'cwd'",
+            "keyword": "required",
+            "frames": 1,
+            "firstSeqs": [
+              3
+            ]
+          },
+          {
+            "method": "session/new",
+            "direction": "editor-to-agent",
+            "schemaName": "NewSessionRequest",
+            "path": "/",
+            "message": "must have required property 'mcpServers'",
+            "keyword": "required",
+            "frames": 1,
+            "firstSeqs": [
+              3
+            ]
+          },
+          {
+            "method": "authenticate",
+            "direction": "editor-to-agent",
+            "schemaName": "AuthenticateRequest",
+            "path": "/",
+            "message": "must have required property 'methodId'",
+            "keyword": "required",
+            "frames": 1,
+            "firstSeqs": [
+              5
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must have required property 'type'",
+            "keyword": "required",
+            "frames": 45,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must have required property 'data'",
+            "keyword": "required",
+            "frames": 18,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must have required property 'mimeType'",
+            "keyword": "required",
+            "frames": 18,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must have required property 'name'",
+            "keyword": "required",
+            "frames": 9,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must have required property 'uri'",
+            "keyword": "required",
+            "frames": 9,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must have required property 'resource'",
+            "keyword": "required",
+            "frames": 9,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must match exactly one schema in oneOf",
+            "keyword": "oneOf",
+            "frames": 9,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/sessionUpdate",
+            "message": "must be equal to constant",
+            "keyword": "const",
+            "frames": 35,
+            "firstSeqs": [
+              8,
+              8,
+              8,
+              8,
+              8
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'toolCallId'",
+            "keyword": "required",
+            "frames": 4,
+            "firstSeqs": [
+              8,
+              8,
+              15,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'title'",
+            "keyword": "required",
+            "frames": 4,
+            "firstSeqs": [
+              8,
+              8,
+              15,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must be array",
+            "keyword": "type",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update/content",
+            "message": "must be array,null",
+            "keyword": "type",
+            "frames": 4,
+            "firstSeqs": [
+              8,
+              8,
+              15,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'entries'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'plan'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'planId'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'availableCommands'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'currentModeId'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'configOptions'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'used'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'size'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'severity'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'compactionId'",
+            "keyword": "required",
+            "frames": 4,
+            "firstSeqs": [
+              8,
+              8,
+              15,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'status'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'sessionId'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              8,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'messageId'",
+            "keyword": "required",
+            "frames": 4,
+            "firstSeqs": [
+              8,
+              8,
+              15,
+              15
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must match exactly one schema in oneOf",
+            "keyword": "oneOf",
+            "frames": 1,
+            "firstSeqs": [
+              8
+            ]
+          }
+        ],
+        "advisories": []
+      }
+    },
+    "stats": {
+      "exitCode": 0,
+      "output": {
+        "sessionName": "error-storm-fixture",
+        "clientName": "WebStorm 2026.1.2",
+        "agentCommand": "npx -y @agentclientprotocol/claude-agent-acp",
+        "startedAt": 1779791400000,
+        "total": 24,
+        "direction": {
+          "editorToAgent": 11,
+          "agentToEditor": 13
+        },
+        "kind": {
+          "request": 11,
+          "response": 2,
+          "notification": 2,
+          "error": 9,
+          "unknown": 0
+        },
+        "parseErrors": 0,
+        "spec": {
+          "checked": 14,
+          "valid": 7,
+          "violations": 221,
+          "affectedMethods": [
+            "authenticate",
+            "session/load",
+            "session/new",
+            "session/update"
+          ]
+        },
+        "latency": {
+          "sampleSize": 11,
+          "p50": 345,
+          "p90": 2496,
+          "p99": 27655.50000000001,
+          "max": 30451,
+          "mean": 3329
+        },
+        "insights": [
+          {
+            "kind": "hotspot",
+            "summary": "session/prompt consumed 32.2s of total wall time",
+            "detail": "88% of 36.6s sampled latency",
+            "methods": [
+              "session/prompt"
+            ]
+          },
+          {
+            "kind": "long-tail",
+            "summary": "session/prompt has a long tail — p99 is 23× the p50",
+            "detail": "p50 1.29s · p99 29.9s · 3 samples",
+            "methods": [
+              "session/prompt"
+            ]
+          },
+          {
+            "kind": "errors",
+            "summary": "6 methods returned an error",
+            "detail": "authenticate, fs/write_text_file, session/cancel (+3 more)",
+            "methods": [
+              "authenticate",
+              "fs/write_text_file",
+              "session/cancel",
+              "session/load",
+              "session/new",
+              "session/prompt"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "mcp": {
+    "find_spec_violations": {
+      "protocol_version": 1,
+      "checked": 14,
+      "violations": [
+        {
+          "method": "session/new",
+          "errors": [
+            {
+              "path": "/",
+              "message": "must have required property 'cwd'",
+              "keyword": "required"
+            },
+            {
+              "path": "/",
+              "message": "must have required property 'mcpServers'",
+              "keyword": "required"
+            }
+          ],
+          "frames": 1,
+          "firstSeqs": [
+            3
+          ]
+        },
+        {
+          "method": "authenticate",
+          "errors": [
+            {
+              "path": "/",
+              "message": "must have required property 'methodId'",
+              "keyword": "required"
+            }
+          ],
+          "frames": 1,
+          "firstSeqs": [
+            5
+          ]
+        },
+        {
+          "method": "session/update",
+          "errors": [
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'toolCallId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'title'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must be array",
+              "keyword": "type"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'toolCallId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must be array,null",
+              "keyword": "type"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'entries'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'plan'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'planId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'availableCommands'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'currentModeId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'configOptions'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'used'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'size'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'severity'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'title'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'compactionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'status'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'compactionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'sessionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'messageId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must be array,null",
+              "keyword": "type"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'messageId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            }
+          ],
+          "frames": 2,
+          "firstSeqs": [
+            8,
+            15
+          ]
+        },
+        {
+          "method": "session/load",
+          "errors": [
+            {
+              "path": "/",
+              "message": "must have required property 'mcpServers'",
+              "keyword": "required"
+            },
+            {
+              "path": "/",
+              "message": "must have required property 'cwd'",
+              "keyword": "required"
+            }
+          ],
+          "frames": 3,
+          "firstSeqs": [
+            19,
+            21,
+            23
+          ]
+        }
+      ],
+      "advisories": []
+    },
+    "get_session_metadata": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": "JetBrains.WebStorm",
+          "title": "WebStorm 2026.1.2",
+          "version": "2026.1.2",
+          "platform": null
+        },
+        "agent": {
+          "name": "claude-agent-acp",
+          "version": "0.37.0",
+          "authMethods": 0
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": false,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": []
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      }
+    },
+    "get_latency_stats": {
+      "perMethod": [
+        {
+          "method": "session/load",
+          "kind": "request",
+          "count": 3,
+          "sampleSize": 3,
+          "p50": 240,
+          "p99": 342.9,
+          "max": 345,
+          "totalLatencyMs": 822,
+          "latencies": [
+            237,
+            240,
+            345
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 3,
+          "sampleSize": 3,
+          "p50": 1290,
+          "p99": 29867.78,
+          "max": 30451,
+          "totalLatencyMs": 32161,
+          "latencies": [
+            420,
+            1290,
+            30451
+          ]
+        },
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 2,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/cancel",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 239,
+          "p99": 239,
+          "max": 239,
+          "totalLatencyMs": 239,
+          "latencies": [
+            239
+          ]
+        },
+        {
+          "method": "fs/write_text_file",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 170,
+          "p99": 170,
+          "max": 170,
+          "totalLatencyMs": 170,
+          "latencies": [
+            170
+          ]
+        },
+        {
+          "method": "authenticate",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 652,
+          "p99": 652,
+          "max": 652,
+          "totalLatencyMs": 652,
+          "latencies": [
+            652
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 2496,
+          "p99": 2496,
+          "max": 2496,
+          "totalLatencyMs": 2496,
+          "latencies": [
+            2496
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 74,
+          "p99": 74,
+          "max": 74,
+          "totalLatencyMs": 74,
+          "latencies": [
+            74
+          ]
+        }
+      ],
+      "sessionLatency": {
+        "sampleSize": 11,
+        "p50": 345,
+        "p90": 2496,
+        "p99": 27655.50000000001,
+        "max": 30451
+      },
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 32.2s of total wall time",
+          "detail": "88% of 36.6s sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        },
+        {
+          "kind": "long-tail",
+          "summary": "session/prompt has a long tail — p99 is 23× the p50",
+          "detail": "p50 1.29s · p99 29.9s · 3 samples",
+          "methods": [
+            "session/prompt"
+          ]
+        },
+        {
+          "kind": "errors",
+          "summary": "6 methods returned an error",
+          "detail": "authenticate, fs/write_text_file, session/cancel (+3 more)",
+          "methods": [
+            "authenticate",
+            "fs/write_text_file",
+            "session/cancel",
+            "session/load",
+            "session/new",
+            "session/prompt"
+          ]
+        }
+      ]
+    },
+    "get_session_summary": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": "JetBrains.WebStorm",
+          "title": "WebStorm 2026.1.2",
+          "version": "2026.1.2",
+          "platform": null
+        },
+        "agent": {
+          "name": "claude-agent-acp",
+          "version": "0.37.0",
+          "authMethods": 0
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": false,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": []
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      },
+      "totals": {
+        "messages": 24,
+        "direction": {
+          "editorToAgent": 11,
+          "agentToEditor": 13
+        },
+        "kind": {
+          "request": 11,
+          "response": 2,
+          "notification": 2,
+          "error": 9,
+          "unknown": 0
+        }
+      },
+      "latency": {
+        "sampleSize": 11,
+        "p50": 345,
+        "p90": 2496,
+        "p99": 27655.50000000001,
+        "max": 30451
+      },
+      "perMethod": [
+        {
+          "method": "session/load",
+          "kind": "request",
+          "count": 3,
+          "sampleSize": 3,
+          "p50": 240,
+          "p99": 342.9,
+          "max": 345,
+          "totalLatencyMs": 822,
+          "latencies": [
+            237,
+            240,
+            345
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 3,
+          "sampleSize": 3,
+          "p50": 1290,
+          "p99": 29867.78,
+          "max": 30451,
+          "totalLatencyMs": 32161,
+          "latencies": [
+            420,
+            1290,
+            30451
+          ]
+        },
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 2,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/cancel",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 239,
+          "p99": 239,
+          "max": 239,
+          "totalLatencyMs": 239,
+          "latencies": [
+            239
+          ]
+        },
+        {
+          "method": "fs/write_text_file",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 170,
+          "p99": 170,
+          "max": 170,
+          "totalLatencyMs": 170,
+          "latencies": [
+            170
+          ]
+        },
+        {
+          "method": "authenticate",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 652,
+          "p99": 652,
+          "max": 652,
+          "totalLatencyMs": 652,
+          "latencies": [
+            652
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 2496,
+          "p99": 2496,
+          "max": 2496,
+          "totalLatencyMs": 2496,
+          "latencies": [
+            2496
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 74,
+          "p99": 74,
+          "max": 74,
+          "totalLatencyMs": 74,
+          "latencies": [
+            74
+          ]
+        }
+      ],
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 32.2s of total wall time",
+          "detail": "88% of 36.6s sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        },
+        {
+          "kind": "long-tail",
+          "summary": "session/prompt has a long tail — p99 is 23× the p50",
+          "detail": "p50 1.29s · p99 29.9s · 3 samples",
+          "methods": [
+            "session/prompt"
+          ]
+        },
+        {
+          "kind": "errors",
+          "summary": "6 methods returned an error",
+          "detail": "authenticate, fs/write_text_file, session/cancel (+3 more)",
+          "methods": [
+            "authenticate",
+            "fs/write_text_file",
+            "session/cancel",
+            "session/load",
+            "session/new",
+            "session/prompt"
+          ]
+        }
+      ]
+    }
+  }
+}

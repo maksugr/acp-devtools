@@ -22,6 +22,10 @@ stores sessions in SQLite, and validates frames against the official schema.
   `Co-Authored-By:` trailer, never as the sole author.
 - One concern per PR. Never skip, disable or weaken a test to get CI green.
 - Ship a test with every behaviour change (colocated `*.test.ts`).
+- Golden snapshots (`__golden__/`) record what the tools report for every
+  fixture. Update them with `-u` only for an intended change and say in the PR
+  what moved; an unexpected diff is a regression
+  ([CONTRIBUTING.md § Golden tests](CONTRIBUTING.md#golden-tests)).
 
 ## Commands
 
@@ -104,8 +108,10 @@ rules: [CONTRIBUTING.md § Security design rules](CONTRIBUTING.md#security-desig
   extensions, `import type` for types. Comments explain _why_, not _what_.
 - JSON-RPC ids are scoped per sender: an editor request and an agent request
   can share an id. Correlate by `(direction, id)`, never by id alone.
-- The ACP schema comes from `@agentclientprotocol/sdk` (`validate*.ts`,
-  `spec-decoder*.ts` — a Node and a browser entry each). SDK ≥ 2 moved it to
-  versioned paths (`schema/v1/…`, `schema/v2/…`).
+- ACP has two protocol versions in the wild (v1, and the v2 draft) with
+  different shapes. Anything that reads frames must pick the version per
+  session (`detectProtocolVersion`, `frameProtocolVersion` in
+  `acp/protocol-version.ts`); the schemas are bundled from
+  `@agentclientprotocol/sdk` in `acp/schemas.ts`.
 - Tests run with `TZ=UTC` under jsdom; CI covers Linux, macOS and Windows ×
   Node 22/24, so avoid POSIX-only paths and shell assumptions in tests.

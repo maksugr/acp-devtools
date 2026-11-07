@@ -707,6 +707,29 @@ describe('CLI integration — per-command behavior', () => {
         );
 
         it(
+            'reads an ACP v2 session with the v2 schema',
+            async () => {
+                const v2Db = join(home, 'v2.db');
+                const fixture = join(repoRoot, 'fixtures', 'v2-session.json');
+                expect((await run(['import', fixture, '--db', v2Db])).code).toBe(0);
+
+                const text = await run(['validate', '1', '--db', v2Db]);
+                expect(text.code).toBe(0);
+                expect(text.err).toContain('ACP v2');
+                expect(text.err).toMatch(/17 checked · 0 skipped/);
+
+                const json = await run(['validate', '1', '--db', v2Db, '--json']);
+                const j = JSON.parse(json.out) as {
+                    protocolVersion: number;
+                    violations: unknown[];
+                };
+                expect(j.protocolVersion).toBe(2);
+                expect(j.violations).toEqual([]);
+            },
+            TIMEOUT,
+        );
+
+        it(
             '--json includes an advisories array',
             async () => {
                 const r = await run(['validate', String(id5), '--db', dbPath, '--json']);
