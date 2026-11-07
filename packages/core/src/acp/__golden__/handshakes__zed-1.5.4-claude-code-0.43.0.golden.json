@@ -6,7 +6,10 @@
       "valid": 18,
       "invalid": 0,
       "advisories": 0,
-      "skipped": {}
+      "skipped": {},
+      "byProtocolVersion": {
+        "1": 18
+      }
     },
     "outcomes": [
       {
@@ -242,7 +245,7 @@
       "result.agentCapabilities.promptCapabilities": "spec object desc",
       "result.agentCapabilities.promptCapabilities.embeddedContext": "spec boolean desc",
       "result.agentCapabilities.promptCapabilities.image": "spec boolean desc",
-      "result.agentCapabilities.sessionCapabilities": "spec object",
+      "result.agentCapabilities.sessionCapabilities": "spec object desc",
       "result.agentCapabilities.sessionCapabilities.additionalDirectories": "spec object desc",
       "result.agentCapabilities.sessionCapabilities.close": "spec object desc",
       "result.agentCapabilities.sessionCapabilities.delete": "spec object desc",
@@ -292,9 +295,9 @@
       "result.modes": "spec object desc",
       "result.modes.availableModes": "spec array desc",
       "result.modes.availableModes.[]": "spec object desc",
-      "result.modes.availableModes.[].description": "spec string",
-      "result.modes.availableModes.[].id": "spec SessionModeId desc",
-      "result.modes.availableModes.[].name": "spec string",
+      "result.modes.availableModes.[].description": "spec string desc",
+      "result.modes.availableModes.[].id": "spec string desc",
+      "result.modes.availableModes.[].name": "spec string desc",
       "result.modes.currentModeId": "spec string desc",
       "result.sessionId": "spec string desc"
     },
@@ -302,7 +305,7 @@
       "params": "unresolved",
       "params.prompt": "spec array desc",
       "params.prompt.[]": "spec object desc",
-      "params.prompt.[].text": "spec string",
+      "params.prompt.[].text": "spec string desc",
       "params.prompt.[].type": "not-in-spec",
       "params.sessionId": "spec string desc"
     },
@@ -335,7 +338,7 @@
       "params.update.availableCommands.[].input.hint": "spec string desc",
       "params.update.availableCommands.[].name": "spec string desc",
       "params.update.content": "spec object desc",
-      "params.update.content.text": "spec string",
+      "params.update.content.text": "spec string desc",
       "params.update.content.type": "not-in-spec",
       "params.update.cost": "spec object desc",
       "params.update.cost.amount": "spec number desc",

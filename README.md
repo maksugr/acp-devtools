@@ -88,8 +88,11 @@ chunks.
 </details>
 
 <details>
-<summary><b>Spec validation</b> — every frame against the official ACP JSON schema</summary>
+<summary><b>Spec validation</b> — every frame against the official ACP JSON schema, v1 and v2</summary>
 
+Each session is checked against the schema of the protocol version it
+negotiated in `initialize` (ACP v1, or the v2 draft); captures without an
+`initialize` are read as v1 ([v2 sample](https://playground.acp-devtools.dev/?url=https://raw.githubusercontent.com/maksugr/acp-devtools/main/fixtures/v2-session.json)).
 Invalid frames get a red `⚠ SPEC N` badge in the timeline, per-error ajv
 details in the detail panel, and a footer aggregate across the session. CLI:
 `acp-devtools validate <id>` exits 1 on violations — wire into CI. Frames that are valid today but omit a field the spec says will become mandatory get a softer amber `⚠ ADV N` advisory instead.

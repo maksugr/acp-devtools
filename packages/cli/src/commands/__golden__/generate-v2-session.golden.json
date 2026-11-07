@@ -1,0 +1,322 @@
+{
+  "cli": {
+    "validate": {
+      "exitCode": 0,
+      "output": {
+        "protocolVersion": 2,
+        "checked": 17,
+        "skipped": 0,
+        "violations": [],
+        "advisories": []
+      }
+    },
+    "stats": {
+      "exitCode": 0,
+      "output": {
+        "sessionName": "ACP v2 reference session (@agentclientprotocol/sdk 2.4.0)",
+        "clientName": "Fixture Client",
+        "agentCommand": "fixture-agent",
+        "startedAt": 1794045600000,
+        "total": 17,
+        "direction": {
+          "editorToAgent": 4,
+          "agentToEditor": 13
+        },
+        "kind": {
+          "request": 4,
+          "response": 4,
+          "notification": 9,
+          "error": 0,
+          "unknown": 0
+        },
+        "parseErrors": 0,
+        "spec": {
+          "checked": 17,
+          "valid": 17,
+          "violations": 0,
+          "affectedMethods": []
+        },
+        "latency": {
+          "sampleSize": 4,
+          "p50": 20,
+          "p90": 34,
+          "p99": 39.39999999999999,
+          "max": 40,
+          "mean": 25
+        },
+        "insights": [
+          {
+            "kind": "hotspot",
+            "summary": "session/prompt consumed 40ms of total wall time",
+            "detail": "40% of 100ms sampled latency",
+            "methods": [
+              "session/prompt"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "mcp": {
+    "find_spec_violations": {
+      "protocol_version": 2,
+      "checked": 17,
+      "violations": [],
+      "advisories": []
+    },
+    "get_session_metadata": {
+      "metadata": {
+        "protocolVersion": 2,
+        "client": {
+          "name": null,
+          "title": null,
+          "version": null,
+          "platform": null
+        },
+        "agent": {
+          "name": null,
+          "version": null,
+          "authMethods": 0
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": false,
+          "fsWriteTextFile": false,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": false,
+          "loadSession": false
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": []
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      }
+    },
+    "get_latency_stats": {
+      "perMethod": [
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 9,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/request_permission",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 20,
+          "p99": 20,
+          "max": 20,
+          "totalLatencyMs": 20,
+          "latencies": [
+            20
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 40,
+          "p99": 40,
+          "max": 40,
+          "totalLatencyMs": 40,
+          "latencies": [
+            40
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 20,
+          "p99": 20,
+          "max": 20,
+          "totalLatencyMs": 20,
+          "latencies": [
+            20
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 20,
+          "p99": 20,
+          "max": 20,
+          "totalLatencyMs": 20,
+          "latencies": [
+            20
+          ]
+        }
+      ],
+      "sessionLatency": {
+        "sampleSize": 4,
+        "p50": 20,
+        "p90": 34,
+        "p99": 39.39999999999999,
+        "max": 40
+      },
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 40ms of total wall time",
+          "detail": "40% of 100ms sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    },
+    "get_session_summary": {
+      "metadata": {
+        "protocolVersion": 2,
+        "client": {
+          "name": null,
+          "title": null,
+          "version": null,
+          "platform": null
+        },
+        "agent": {
+          "name": null,
+          "version": null,
+          "authMethods": 0
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": false,
+          "fsWriteTextFile": false,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": false,
+          "loadSession": false
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": []
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      },
+      "totals": {
+        "messages": 17,
+        "direction": {
+          "editorToAgent": 4,
+          "agentToEditor": 13
+        },
+        "kind": {
+          "request": 4,
+          "response": 4,
+          "notification": 9,
+          "error": 0,
+          "unknown": 0
+        }
+      },
+      "latency": {
+        "sampleSize": 4,
+        "p50": 20,
+        "p90": 34,
+        "p99": 39.39999999999999,
+        "max": 40
+      },
+      "perMethod": [
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 9,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/request_permission",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 20,
+          "p99": 20,
+          "max": 20,
+          "totalLatencyMs": 20,
+          "latencies": [
+            20
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 40,
+          "p99": 40,
+          "max": 40,
+          "totalLatencyMs": 40,
+          "latencies": [
+            40
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 20,
+          "p99": 20,
+          "max": 20,
+          "totalLatencyMs": 20,
+          "latencies": [
+            20
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 20,
+          "p99": 20,
+          "max": 20,
+          "totalLatencyMs": 20,
+          "latencies": [
+            20
+          ]
+        }
+      ],
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 40ms of total wall time",
+          "detail": "40% of 100ms sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    }
+  }
+}

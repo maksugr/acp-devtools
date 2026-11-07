@@ -8,6 +8,9 @@
       "advisories": 1,
       "skipped": {
         "wrong-kind": 1
+      },
+      "byProtocolVersion": {
+        "1": 6
       }
     },
     "outcomes": [
@@ -231,7 +234,7 @@
       "params": "unresolved",
       "params.prompt": "spec array desc",
       "params.prompt.[]": "spec object desc",
-      "params.prompt.[].text": "spec string",
+      "params.prompt.[].text": "spec string desc",
       "params.prompt.[].type": "not-in-spec",
       "params.sessionId": "spec string desc"
     },

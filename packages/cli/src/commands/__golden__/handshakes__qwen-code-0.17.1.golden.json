@@ -3,6 +3,7 @@
     "validate": {
       "exitCode": 0,
       "output": {
+        "protocolVersion": 1,
         "checked": 4,
         "skipped": 1,
         "violations": [],
@@ -77,6 +78,7 @@
   },
   "mcp": {
     "find_spec_violations": {
+      "protocol_version": 1,
       "checked": 4,
       "violations": [],
       "advisories": [

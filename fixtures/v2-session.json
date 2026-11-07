@@ -1,0 +1,379 @@
+{
+    "version": 1,
+    "exportedAt": 1794045600000,
+    "tool": {
+        "name": "generate-v2-session",
+        "version": "2.4.0"
+    },
+    "session": {
+        "id": 0,
+        "name": "ACP v2 reference session (@agentclientprotocol/sdk 2.4.0)",
+        "agentCommand": "fixture-agent",
+        "clientName": "Fixture Client",
+        "startedAt": 1794045600000,
+        "endedAt": 1794045600340
+    },
+    "messages": [
+        {
+            "seq": 1,
+            "timestamp": 1794045600020,
+            "direction": "editor-to-agent",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"initialize\",\"params\":{\"protocolVersion\":2,\"info\":{\"name\":\"fixture-client\",\"title\":\"Fixture Client\",\"version\":\"0.1.0\"},\"capabilities\":{}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 0,
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": 2,
+                    "info": {
+                        "name": "fixture-client",
+                        "title": "Fixture Client",
+                        "version": "0.1.0"
+                    },
+                    "capabilities": {}
+                }
+            },
+            "kind": "request",
+            "method": "initialize",
+            "rpcId": 0
+        },
+        {
+            "seq": 2,
+            "timestamp": 1794045600040,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":0,\"result\":{\"protocolVersion\":2,\"info\":{\"name\":\"fixture-agent\",\"title\":\"Fixture Agent\",\"version\":\"0.1.0\"},\"capabilities\":{},\"authMethods\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 0,
+                "result": {
+                    "protocolVersion": 2,
+                    "info": {
+                        "name": "fixture-agent",
+                        "title": "Fixture Agent",
+                        "version": "0.1.0"
+                    },
+                    "capabilities": {},
+                    "authMethods": []
+                }
+            },
+            "kind": "response",
+            "rpcId": 0
+        },
+        {
+            "seq": 3,
+            "timestamp": 1794045600060,
+            "direction": "editor-to-agent",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"session/new\",\"params\":{\"cwd\":\"/home/dev/project\",\"mcpServers\":[]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "session/new",
+                "params": {
+                    "cwd": "/home/dev/project",
+                    "mcpServers": []
+                }
+            },
+            "kind": "request",
+            "method": "session/new",
+            "rpcId": 1
+        },
+        {
+            "seq": 4,
+            "timestamp": 1794045600080,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"sessionId\":\"sess_6f1c2a\"}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "sessionId": "sess_6f1c2a"
+                }
+            },
+            "kind": "response",
+            "rpcId": 1
+        },
+        {
+            "seq": 5,
+            "timestamp": 1794045600100,
+            "direction": "editor-to-agent",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"session/prompt\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"prompt\":[{\"type\":\"text\",\"text\":\"Make the greeting say \\\"hello, world\\\".\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "session/prompt",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "prompt": [
+                        {
+                            "type": "text",
+                            "text": "Make the greeting say \"hello, world\"."
+                        }
+                    ]
+                }
+            },
+            "kind": "request",
+            "method": "session/prompt",
+            "rpcId": 2
+        },
+        {
+            "seq": 6,
+            "timestamp": 1794045600120,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"state_update\",\"state\":\"running\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "state_update",
+                        "state": "running"
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 7,
+            "timestamp": 1794045600140,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"messageId\":\"msg_user_1\"}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "result": {
+                    "messageId": "msg_user_1"
+                }
+            },
+            "kind": "response",
+            "rpcId": 2
+        },
+        {
+            "seq": 8,
+            "timestamp": 1794045600160,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"agent_thought_chunk\",\"messageId\":\"msg_thought_1\",\"content\":{\"type\":\"text\",\"text\":\"The greeting lives in src/hello.ts.\"}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "agent_thought_chunk",
+                        "messageId": "msg_thought_1",
+                        "content": {
+                            "type": "text",
+                            "text": "The greeting lives in src/hello.ts."
+                        }
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 9,
+            "timestamp": 1794045600180,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\"call_edit_1\",\"title\":\"Edit src/hello.ts\",\"kind\":\"edit\",\"status\":\"pending\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "tool_call_update",
+                        "toolCallId": "call_edit_1",
+                        "title": "Edit src/hello.ts",
+                        "kind": "edit",
+                        "status": "pending"
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 10,
+            "timestamp": 1794045600200,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"session/request_permission\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"title\":\"Edit src/hello.ts?\",\"options\":[{\"optionId\":\"allow\",\"name\":\"Allow\",\"kind\":\"allow_once\"},{\"optionId\":\"reject\",\"name\":\"Reject\",\"kind\":\"reject_once\"}]}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 0,
+                "method": "session/request_permission",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "title": "Edit src/hello.ts?",
+                    "options": [
+                        {
+                            "optionId": "allow",
+                            "name": "Allow",
+                            "kind": "allow_once"
+                        },
+                        {
+                            "optionId": "reject",
+                            "name": "Reject",
+                            "kind": "reject_once"
+                        }
+                    ]
+                }
+            },
+            "kind": "request",
+            "method": "session/request_permission",
+            "rpcId": 0
+        },
+        {
+            "seq": 11,
+            "timestamp": 1794045600220,
+            "direction": "editor-to-agent",
+            "raw": "{\"jsonrpc\":\"2.0\",\"id\":0,\"result\":{\"outcome\":{\"outcome\":\"selected\",\"optionId\":\"allow\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "id": 0,
+                "result": {
+                    "outcome": {
+                        "outcome": "selected",
+                        "optionId": "allow"
+                    }
+                }
+            },
+            "kind": "response",
+            "rpcId": 0
+        },
+        {
+            "seq": 12,
+            "timestamp": 1794045600240,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\"call_edit_1\",\"status\":\"completed\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "tool_call_update",
+                        "toolCallId": "call_edit_1",
+                        "status": "completed"
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 13,
+            "timestamp": 1794045600260,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"messageId\":\"msg_agent_1\",\"content\":{\"type\":\"text\",\"text\":\"Updated the greeting \"}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "messageId": "msg_agent_1",
+                        "content": {
+                            "type": "text",
+                            "text": "Updated the greeting "
+                        }
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 14,
+            "timestamp": 1794045600280,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"messageId\":\"msg_agent_1\",\"content\":{\"type\":\"text\",\"text\":\"in `src/hello.ts` \"}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "messageId": "msg_agent_1",
+                        "content": {
+                            "type": "text",
+                            "text": "in `src/hello.ts` "
+                        }
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 15,
+            "timestamp": 1794045600300,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"agent_message_chunk\",\"messageId\":\"msg_agent_1\",\"content\":{\"type\":\"text\",\"text\":\"to say hello, world.\"}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "agent_message_chunk",
+                        "messageId": "msg_agent_1",
+                        "content": {
+                            "type": "text",
+                            "text": "to say hello, world."
+                        }
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 16,
+            "timestamp": 1794045600320,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"usage_update\",\"used\":18240,\"size\":200000,\"cost\":{\"amount\":0.031,\"currency\":\"USD\"}}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "usage_update",
+                        "used": 18240,
+                        "size": 200000,
+                        "cost": {
+                            "amount": 0.031,
+                            "currency": "USD"
+                        }
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        },
+        {
+            "seq": 17,
+            "timestamp": 1794045600340,
+            "direction": "agent-to-editor",
+            "raw": "{\"jsonrpc\":\"2.0\",\"method\":\"session/update\",\"params\":{\"sessionId\":\"sess_6f1c2a\",\"update\":{\"sessionUpdate\":\"state_update\",\"state\":\"idle\",\"stopReason\":\"end_turn\"}}}",
+            "payload": {
+                "jsonrpc": "2.0",
+                "method": "session/update",
+                "params": {
+                    "sessionId": "sess_6f1c2a",
+                    "update": {
+                        "sessionUpdate": "state_update",
+                        "state": "idle",
+                        "stopReason": "end_turn"
+                    }
+                }
+            },
+            "kind": "notification",
+            "method": "session/update"
+        }
+    ]
+}

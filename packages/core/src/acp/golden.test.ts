@@ -18,7 +18,7 @@ import { extractSessionMetadata } from './session-metadata.js';
 import { resolveSpecForMessage } from './spec-decoder.js';
 import { extractTextPreview, isUserPrompt } from './text.js';
 import type { CapturedMessage } from './types.js';
-import { validateAcpMessage, type ValidationResult } from './validate.js';
+import { validateMessages } from './validate.js';
 
 const FIXTURES = join(process.cwd(), 'fixtures');
 const PREVIEW_FRAMES = 150;
@@ -53,19 +53,6 @@ function loadFixtures(): Fixture[] {
     return out;
 }
 
-/** Validation the way the product runs it: each response with its request's method. */
-function validateSession(messages: CapturedMessage[]): Map<number, ValidationResult> {
-    const pairs = buildPairIndex(messages);
-    const methodBySeq = new Map(messages.map((m) => [m.seq, m.method]));
-    const out = new Map<number, ValidationResult>();
-    for (const m of messages) {
-        const pair = pairs.get(m.seq);
-        const pairedMethod = pair ? methodBySeq.get(pair.pairSeq) : undefined;
-        out.set(m.seq, validateAcpMessage(m, pairedMethod ? { pairedMethod } : {}));
-    }
-    return out;
-}
-
 /**
  * Validation outcome per frame, with frames that share the same outcome
  * (schema, errors, advisories or skip reason) grouped: synthetic fixtures
@@ -73,13 +60,15 @@ function validateSession(messages: CapturedMessage[]): Map<number, ValidationRes
  * group's errors changing, both show up in the diff.
  */
 function validationReport(messages: CapturedMessage[]) {
-    const results = validateSession(messages);
+    const results = validateMessages(messages);
     const summary = {
         checked: 0,
         valid: 0,
         invalid: 0,
         advisories: 0,
         skipped: {} as Record<string, number>,
+        // Frames checked against each protocol version's schema.
+        byProtocolVersion: {} as Record<string, number>,
     };
     const groups = new Map<string, { outcome: Record<string, unknown>; seqs: number[] }>();
     for (const m of messages) {
@@ -92,7 +81,10 @@ function validationReport(messages: CapturedMessage[]) {
             summary.checked += 1;
             summary[r.valid ? 'valid' : 'invalid'] += 1;
             summary.advisories += r.advisories?.length ?? 0;
+            const v = String(r.protocolVersion);
+            summary.byProtocolVersion[v] = (summary.byProtocolVersion[v] ?? 0) + 1;
             outcome = { schema: r.schemaName ?? '?', valid: r.valid };
+            if (r.protocolVersion !== 1) outcome.protocolVersion = r.protocolVersion;
             if (!r.valid) {
                 outcome.errors = r.errors.map((e) => `${e.path} ${e.keyword ?? ''}: ${e.message}`);
             }
@@ -123,12 +115,18 @@ function validationReport(messages: CapturedMessage[]) {
 function specReport(messages: CapturedMessage[]) {
     const pairs = buildPairIndex(messages);
     const methodBySeq = new Map(messages.map((m) => [m.seq, m.method]));
+    // The detail panel resolves fields with the version the frame was validated with.
+    const validation = validateMessages(messages);
     const out: Record<string, Record<string, Set<string>>> = {};
     for (const m of messages) {
         if (!m.payload) continue;
         const pair = pairs.get(m.seq);
         const pairedMethod = pair ? methodBySeq.get(pair.pairSeq) : undefined;
-        const resolver = resolveSpecForMessage(m, pairedMethod ? { pairedMethod } : undefined);
+        const protocolVersion = validation.get(m.seq)?.protocolVersion;
+        const resolver = resolveSpecForMessage(m, {
+            ...(pairedMethod ? { pairedMethod } : {}),
+            ...(protocolVersion ? { protocolVersion } : {}),
+        });
         if (!resolver) continue;
         const envelope = m.kind === 'response' ? 'result' : m.kind === 'error' ? 'error' : 'params';
         const root = (m.payload as unknown as Record<string, unknown>)[envelope];
@@ -199,8 +197,18 @@ function report(messages: CapturedMessage[]) {
     };
 }
 
+const fixtures = loadFixtures();
+
 describe('golden: analysis of every fixture session', () => {
-    for (const fixture of loadFixtures()) {
+    it('fixtures/v2-session.json is up to date with its generator', () => {
+        const committed = JSON.parse(readFileSync(join(FIXTURES, 'v2-session.json'), 'utf8')) as {
+            messages: CapturedMessage[];
+        };
+        const generated = fixtures.find((f) => f.name === 'generate-v2-session');
+        expect(generated?.messages).toEqual(committed.messages);
+    });
+
+    for (const fixture of fixtures) {
         it(fixture.name, async () => {
             const golden = JSON.stringify(report(fixture.messages), null, 2) + '\n';
             await expect(golden).toMatchFileSnapshot(

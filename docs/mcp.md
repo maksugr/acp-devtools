@@ -34,21 +34,21 @@ database schemas match.
 
 ## Tools
 
-| Tool                      | Returns                                                                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `list_sessions`           | newest-first list of saved sessions with structured metadata                                                                   |
-| `find_sessions_by_client` | sessions whose client name/version/platform matches a substring                                                                |
-| `get_session_metadata`    | client/agent info, capabilities, runtime mode/model                                                                            |
-| `get_latency_stats`       | per-method count + p50/p99/max latency + session-wide percentiles + auto-detected insights                                     |
-| `get_session_summary`     | one-call digest: metadata + totals + latency + per-method + insights                                                           |
-| `get_session_messages`    | paginated message slice, filterable by kind/method/direction                                                                   |
-| `get_message`             | single message by `(session_id, seq)`                                                                                          |
-| `get_paired`              | request↔response pair partner + latency                                                                                        |
-| `search_messages`         | substring search across raw frames                                                                                             |
-| `find_spec_violations`    | every frame that fails the ACP schema, plus `advisories` for valid frames missing a soon-required field                        |
-| `diff_sessions`           | align two sessions; added / removed frames + field-level payload changes                                                       |
-| `list_agent_shortcuts`    | the built-in agent shortcuts (`agent` values for `generate_editor_config`); same data as the CLI `acp-devtools agents`         |
-| `generate_editor_config`  | Zed/JetBrains config block to run an agent through the proxy, absolute path filled in (returns the text, the agent applies it) |
+| Tool                      | Returns                                                                                                                                                        |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_sessions`           | newest-first list of saved sessions with structured metadata                                                                                                   |
+| `find_sessions_by_client` | sessions whose client name/version/platform matches a substring                                                                                                |
+| `get_session_metadata`    | client/agent info, capabilities, runtime mode/model                                                                                                            |
+| `get_latency_stats`       | per-method count + p50/p99/max latency + session-wide percentiles + auto-detected insights                                                                     |
+| `get_session_summary`     | one-call digest: metadata + totals + latency + per-method + insights                                                                                           |
+| `get_session_messages`    | paginated message slice, filterable by kind/method/direction                                                                                                   |
+| `get_message`             | single message by `(session_id, seq)`                                                                                                                          |
+| `get_paired`              | request↔response pair partner + latency                                                                                                                        |
+| `search_messages`         | substring search across raw frames                                                                                                                             |
+| `find_spec_violations`    | every frame that fails the ACP schema of the session's protocol version (`protocol_version`), plus `advisories` for valid frames missing a soon-required field |
+| `diff_sessions`           | align two sessions; added / removed frames + field-level payload changes                                                                                       |
+| `list_agent_shortcuts`    | the built-in agent shortcuts (`agent` values for `generate_editor_config`); same data as the CLI `acp-devtools agents`                                         |
+| `generate_editor_config`  | Zed/JetBrains config block to run an agent through the proxy, absolute path filled in (returns the text, the agent applies it)                                 |
 
 Start with `get_session_summary` when you don't yet know what's wrong — it
 bundles metadata, totals, latency, and insights in one round-trip. Drill in with

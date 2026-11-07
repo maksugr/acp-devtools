@@ -8,6 +8,9 @@
       "advisories": 1,
       "skipped": {
         "wrong-kind": 1
+      },
+      "byProtocolVersion": {
+        "1": 4
       }
     },
     "outcomes": [
@@ -166,7 +169,7 @@
       "result.agentCapabilities.promptCapabilities": "spec object desc",
       "result.agentCapabilities.promptCapabilities.embeddedContext": "spec boolean desc",
       "result.agentCapabilities.promptCapabilities.image": "spec boolean desc",
-      "result.agentCapabilities.sessionCapabilities": "spec object",
+      "result.agentCapabilities.sessionCapabilities": "spec object desc",
       "result.agentCapabilities.sessionCapabilities.close": "spec object desc",
       "result.agentCapabilities.sessionCapabilities.fork": "spec object desc",
       "result.agentCapabilities.sessionCapabilities.list": "spec object desc",
@@ -190,7 +193,7 @@
       "params": "unresolved",
       "params.prompt": "spec array desc",
       "params.prompt.[]": "spec object desc",
-      "params.prompt.[].text": "spec string",
+      "params.prompt.[].text": "spec string desc",
       "params.prompt.[].type": "not-in-spec",
       "params.sessionId": "spec string desc"
     },

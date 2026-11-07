@@ -29,13 +29,13 @@ npm run precommit      # lint + format check + typecheck + test (also the git ho
 
 ## Try it on fixtures
 
-The repo ships seven demo sessions, each stressing a
+The repo ships eight demo sessions, each stressing a
 different surface — a 1392-message marathon, a spec-violating session, a
 streaming-heavy one, and so on. Seed them into your capture database and they
 show up in the inspector's session picker:
 
 ```bash
-npm run fixtures:seed          # generate + import all seven into captures.db
+npm run fixtures:seed          # generate + import all eight into captures.db
 acp-devtools ui                # open the inspector and pick one
 ```
 
@@ -145,6 +145,8 @@ fixtures/                          dev/test data (contributor-only)
   generate-streaming-heavy.mjs     1741 msg (1733 streaming chunks) — StreamCluster + BUSIEST
   generate-permission-flow.mjs     19 msg with 6 agent→editor requests — `agent-req` lane
   generate-protocol-edges.mjs      14 msg with parse errors + orphan frames — decoder edges
+  generate-v2-session.mjs          17 msg ACP v2 turn recorded from the SDK's reference client + agent
+  v2-session.json                  its committed output, used by tests and the v2 playground sample
 ```
 
 The `generate-*.mjs` scripts each emit a `SessionExport` JSON to stdout (or to
@@ -163,8 +165,10 @@ The CLI is bundled with **tsup**. `@acp-devtools/core` and `@acp-devtools/ui`
 are private workspace packages that never reach npm — `core` is inlined into the
 CLI bundle, `ui` is embedded as a static bundle at `dist/ui/`. The published
 `acp-devtools` tarball is exactly `dist/index.js` plus `dist/ui/`. Runtime deps
-pulled from npm are `better-sqlite3`, `ws`, `commander`,
-`@agentclientprotocol/sdk`, and `@modelcontextprotocol/sdk`.
+pulled from npm are `better-sqlite3`, `ws`, `commander`, `zod` and
+`@modelcontextprotocol/sdk`. The ACP JSON schemas are imported from
+`@agentclientprotocol/sdk` at build time and bundled, so the SDK is a dev
+dependency of `core` only.
 
 ## Releasing
 

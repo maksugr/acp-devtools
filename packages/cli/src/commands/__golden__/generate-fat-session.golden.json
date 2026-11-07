@@ -3,8 +3,9 @@
     "validate": {
       "exitCode": 1,
       "output": {
-        "checked": 13,
-        "skipped": 0,
+        "protocolVersion": 1,
+        "checked": 10,
+        "skipped": 2,
         "violations": [
           {
             "method": "initialize",
@@ -13,22 +14,9 @@
             "path": "/authMethods/0",
             "message": "must have required property 'name'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               2,
-              2,
-              2
-            ]
-          },
-          {
-            "method": "initialize",
-            "direction": "agent-to-editor",
-            "schemaName": "InitializeResponse",
-            "path": "/authMethods/0",
-            "message": "must have required property 'vars'",
-            "keyword": "required",
-            "frames": 1,
-            "firstSeqs": [
               2
             ]
           },
@@ -39,9 +27,8 @@
             "path": "/authMethods/0",
             "message": "must have required property 'type'",
             "keyword": "required",
-            "frames": 2,
+            "frames": 1,
             "firstSeqs": [
-              2,
               2
             ]
           },
@@ -64,22 +51,9 @@
             "path": "/authMethods/1",
             "message": "must have required property 'name'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               2,
-              2,
-              2
-            ]
-          },
-          {
-            "method": "initialize",
-            "direction": "agent-to-editor",
-            "schemaName": "InitializeResponse",
-            "path": "/authMethods/1",
-            "message": "must have required property 'vars'",
-            "keyword": "required",
-            "frames": 1,
-            "firstSeqs": [
               2
             ]
           },
@@ -90,9 +64,8 @@
             "path": "/authMethods/1",
             "message": "must have required property 'type'",
             "keyword": "required",
-            "frames": 2,
+            "frames": 1,
             "firstSeqs": [
-              2,
               2
             ]
           },
@@ -142,18 +115,6 @@
             "frames": 1,
             "firstSeqs": [
               7
-            ]
-          },
-          {
-            "method": "session/set_model",
-            "direction": "agent-to-editor",
-            "schemaName": "SetSessionModelResponse",
-            "path": "/",
-            "message": "must be object",
-            "keyword": "type",
-            "frames": 1,
-            "firstSeqs": [
-              9
             ]
           },
           {
@@ -216,8 +177,8 @@
               11,
               11,
               11,
-              12,
-              12
+              11,
+              11
             ]
           },
           {
@@ -232,8 +193,8 @@
               11,
               11,
               11,
-              12,
-              12
+              11,
+              11
             ]
           },
           {
@@ -248,8 +209,8 @@
               11,
               11,
               11,
-              12,
-              12
+              11,
+              11
             ]
           },
           {
@@ -259,13 +220,13 @@
             "path": "/update/content",
             "message": "must match exactly one schema in oneOf",
             "keyword": "oneOf",
-            "frames": 9,
+            "frames": 8,
             "firstSeqs": [
               11,
               11,
               11,
-              12,
-              12
+              11,
+              11
             ]
           },
           {
@@ -275,7 +236,7 @@
             "path": "/update/sessionUpdate",
             "message": "must be equal to constant",
             "keyword": "const",
-            "frames": 30,
+            "frames": 32,
             "firstSeqs": [
               11,
               11,
@@ -291,13 +252,12 @@
             "path": "/update",
             "message": "must have required property 'toolCallId'",
             "keyword": "required",
-            "frames": 6,
+            "frames": 4,
             "firstSeqs": [
               11,
               11,
               12,
-              12,
-              13
+              12
             ]
           },
           {
@@ -307,11 +267,12 @@
             "path": "/update",
             "message": "must have required property 'title'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 4,
             "firstSeqs": [
               11,
+              11,
               12,
-              13
+              12
             ]
           },
           {
@@ -321,11 +282,10 @@
             "path": "/update/content",
             "message": "must be array",
             "keyword": "type",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
-              12,
-              13
+              12
             ]
           },
           {
@@ -338,8 +298,8 @@
             "frames": 3,
             "firstSeqs": [
               11,
-              12,
-              13
+              11,
+              12
             ]
           },
           {
@@ -349,11 +309,36 @@
             "path": "/update",
             "message": "must have required property 'entries'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
-              12,
-              13
+              12
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'plan'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              11,
+              12
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'planId'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              11,
+              12
             ]
           },
           {
@@ -363,11 +348,10 @@
             "path": "/update",
             "message": "must have required property 'availableCommands'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
-              12,
-              13
+              12
             ]
           },
           {
@@ -377,11 +361,10 @@
             "path": "/update",
             "message": "must have required property 'currentModeId'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
-              12,
-              13
+              12
             ]
           },
           {
@@ -391,11 +374,10 @@
             "path": "/update",
             "message": "must have required property 'configOptions'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
-              12,
-              13
+              12
             ]
           },
           {
@@ -405,11 +387,10 @@
             "path": "/update",
             "message": "must have required property 'used'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
-              12,
-              13
+              12
             ]
           },
           {
@@ -419,11 +400,76 @@
             "path": "/update",
             "message": "must have required property 'size'",
             "keyword": "required",
-            "frames": 3,
+            "frames": 2,
             "firstSeqs": [
               11,
+              12
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'severity'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              11,
+              12
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'compactionId'",
+            "keyword": "required",
+            "frames": 4,
+            "firstSeqs": [
+              11,
+              11,
               12,
-              13
+              12
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'status'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              11,
+              12
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'sessionId'",
+            "keyword": "required",
+            "frames": 1,
+            "firstSeqs": [
+              11
+            ]
+          },
+          {
+            "method": "session/update",
+            "direction": "agent-to-editor",
+            "schemaName": "SessionNotification",
+            "path": "/update",
+            "message": "must have required property 'messageId'",
+            "keyword": "required",
+            "frames": 2,
+            "firstSeqs": [
+              11,
+              11
             ]
           },
           {
@@ -433,10 +479,9 @@
             "path": "/update",
             "message": "must match exactly one schema in oneOf",
             "keyword": "oneOf",
-            "frames": 2,
+            "frames": 1,
             "firstSeqs": [
-              11,
-              12
+              11
             ]
           }
         ],
@@ -464,15 +509,14 @@
         },
         "parseErrors": 0,
         "spec": {
-          "checked": 1391,
-          "valid": 710,
-          "violations": 29651,
+          "checked": 1389,
+          "valid": 709,
+          "violations": 51764,
           "affectedMethods": [
             "initialize",
             "session/new",
             "session/set_config_option",
             "session/set_mode",
-            "session/set_model",
             "session/update"
           ]
         },
@@ -515,26 +559,12 @@
   },
   "mcp": {
     "find_spec_violations": {
-      "checked": 1391,
+      "protocol_version": 1,
+      "checked": 1389,
       "violations": [
         {
           "method": "initialize",
           "errors": [
-            {
-              "path": "/authMethods/0",
-              "message": "must have required property 'name'",
-              "keyword": "required"
-            },
-            {
-              "path": "/authMethods/0",
-              "message": "must have required property 'vars'",
-              "keyword": "required"
-            },
-            {
-              "path": "/authMethods/0",
-              "message": "must have required property 'type'",
-              "keyword": "required"
-            },
             {
               "path": "/authMethods/0",
               "message": "must have required property 'name'",
@@ -554,21 +584,6 @@
               "path": "/authMethods/0",
               "message": "must match a schema in anyOf",
               "keyword": "anyOf"
-            },
-            {
-              "path": "/authMethods/1",
-              "message": "must have required property 'name'",
-              "keyword": "required"
-            },
-            {
-              "path": "/authMethods/1",
-              "message": "must have required property 'vars'",
-              "keyword": "required"
-            },
-            {
-              "path": "/authMethods/1",
-              "message": "must have required property 'type'",
-              "keyword": "required"
             },
             {
               "path": "/authMethods/1",
@@ -628,20 +643,6 @@
           "firstSeqs": [
             7,
             964
-          ]
-        },
-        {
-          "method": "session/set_model",
-          "errors": [
-            {
-              "path": "/",
-              "message": "must be object",
-              "keyword": "type"
-            }
-          ],
-          "frames": 1,
-          "firstSeqs": [
-            9
           ]
         },
         {
@@ -899,6 +900,26 @@
             },
             {
               "path": "/update",
+              "message": "must have required property 'plan'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'planId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
               "message": "must have required property 'availableCommands'",
               "keyword": "required"
             },
@@ -941,6 +962,211 @@
               "path": "/update",
               "message": "must have required property 'size'",
               "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'severity'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'title'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'compactionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'status'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'compactionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'sessionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'messageId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must be array,null",
+              "keyword": "type"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'messageId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'data'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'mimeType'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'name'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'uri'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'resource'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must have required property 'type'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/content",
+              "message": "must match exactly one schema in oneOf",
+              "keyword": "oneOf"
             },
             {
               "path": "/update/sessionUpdate",
@@ -1017,6 +1243,26 @@
             },
             {
               "path": "/update",
+              "message": "must have required property 'plan'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'planId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
               "message": "must have required property 'availableCommands'",
               "keyword": "required"
             },
@@ -1058,6 +1304,86 @@
             {
               "path": "/update",
               "message": "must have required property 'size'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'severity'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'title'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'compactionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'status'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'compactionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'content'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'sessionId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'messageId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update/sessionUpdate",
+              "message": "must be equal to constant",
+              "keyword": "const"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'messageId'",
+              "keyword": "required"
+            },
+            {
+              "path": "/update",
+              "message": "must have required property 'content'",
               "keyword": "required"
             },
             {

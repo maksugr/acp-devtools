@@ -83,9 +83,10 @@ The same check behind `acp-devtools validate` surfaces in three places:
   invalid frame. `N` is the ajv error count; the tooltip lists the first few.
 - **Detail → Spec tab** — for invalid frames, a card per ajv error with the
   keyword (`required`/`type`/`enum`), JSON-pointer path, and message. For valid
-  frames, the matched `$def` (e.g. `InitializeRequest`). For frames that can't
-  be validated (parse error, unknown method, response without a paired request)
-  the tab explains why instead of faking a green tick.
+  frames, the matched `$def` (e.g. `InitializeRequest`) and the protocol version
+  whose schema it came from. For frames that can't be validated (parse error,
+  unknown method, response without a paired request, unsupported protocol
+  version) the tab explains why instead of faking a green tick.
 - **Footer chip** — `spec ⚠ N` next to `p50`/`p99` aggregates non-conforming
   frames across the visible session (or `spec ✓` when clean); the tooltip lists
   affected methods.

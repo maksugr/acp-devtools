@@ -2,13 +2,16 @@
   "frames": 28,
   "validation": {
     "summary": {
-      "checked": 25,
-      "valid": 11,
-      "invalid": 14,
+      "checked": 23,
+      "valid": 10,
+      "invalid": 13,
       "advisories": 1,
       "skipped": {
-        "wrong-kind": 1,
-        "unknown-method": 2
+        "unknown-method": 4,
+        "wrong-kind": 1
+      },
+      "byProtocolVersion": {
+        "1": 23
       }
     },
     "outcomes": [
@@ -152,6 +155,10 @@
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'entries'",
           "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'plan'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'planId'",
+          "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'availableCommands'",
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'currentModeId'",
@@ -161,6 +168,47 @@
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'used'",
           "/update required: must have required property 'size'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'severity'",
+          "/update required: must have required property 'title'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'compactionId'",
+          "/update required: must have required property 'status'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'compactionId'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'sessionId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'messageId'",
+          "/update/content type: must be array,null",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'messageId'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'data'",
+          "/update/content required: must have required property 'mimeType'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'name'",
+          "/update/content required: must have required property 'uri'",
+          "/update/content required: must have required property 'type'",
+          "/update/content required: must have required property 'resource'",
+          "/update/content required: must have required property 'type'",
+          "/update/content oneOf: must match exactly one schema in oneOf",
           "/update/sessionUpdate const: must be equal to constant",
           "/update oneOf: must match exactly one schema in oneOf"
         ],
@@ -194,22 +242,20 @@
         ]
       },
       {
-        "schema": "SetSessionModelRequest",
-        "valid": true,
+        "method": "session/set_model",
+        "skipped": "unknown-method",
         "frames": 1,
         "firstSeqs": [
           12
         ]
       },
       {
-        "schema": "SetSessionModelResponse",
-        "valid": false,
-        "errors": [
-          "/ type: must be object"
-        ],
-        "frames": 1,
+        "method": null,
+        "skipped": "unknown-method",
+        "frames": 2,
         "firstSeqs": [
-          13
+          13,
+          23
         ]
       },
       {
@@ -246,6 +292,10 @@
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'entries'",
           "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'plan'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'planId'",
+          "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'availableCommands'",
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'currentModeId'",
@@ -255,6 +305,22 @@
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'used'",
           "/update required: must have required property 'size'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'severity'",
+          "/update required: must have required property 'title'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'compactionId'",
+          "/update required: must have required property 'status'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'compactionId'",
+          "/update required: must have required property 'content'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'sessionId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'messageId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'messageId'",
+          "/update required: must have required property 'content'",
           "/update/sessionUpdate const: must be equal to constant",
           "/update oneOf: must match exactly one schema in oneOf"
         ],
@@ -319,6 +385,10 @@
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'entries'",
           "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'plan'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'planId'",
+          "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'availableCommands'",
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'currentModeId'",
@@ -328,6 +398,22 @@
           "/update/sessionUpdate const: must be equal to constant",
           "/update required: must have required property 'used'",
           "/update required: must have required property 'size'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'severity'",
+          "/update required: must have required property 'title'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'compactionId'",
+          "/update required: must have required property 'status'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'compactionId'",
+          "/update required: must have required property 'content'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'sessionId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'messageId'",
+          "/update/sessionUpdate const: must be equal to constant",
+          "/update required: must have required property 'messageId'",
+          "/update required: must have required property 'content'",
           "/update/sessionUpdate const: must be equal to constant",
           "/update oneOf: must match exactly one schema in oneOf"
         ],
@@ -342,14 +428,6 @@
         "frames": 1,
         "firstSeqs": [
           22
-        ]
-      },
-      {
-        "method": null,
-        "skipped": "unknown-method",
-        "frames": 1,
-        "firstSeqs": [
-          23
         ]
       },
       {
@@ -555,7 +633,7 @@
       "params.prompt": "spec array desc",
       "params.prompt.[]": "spec object desc",
       "params.prompt.[].src": "not-in-spec",
-      "params.prompt.[].text": "spec string",
+      "params.prompt.[].text": "spec string desc",
       "params.prompt.[].type": "not-in-spec",
       "params.sessionId": "spec string desc"
     },
@@ -579,7 +657,7 @@
       "params.sessionId": "spec string desc",
       "params.update": "spec object desc",
       "params.update.content": "spec object desc",
-      "params.update.content.text": "spec string",
+      "params.update.content.text": "spec string desc",
       "params.update.params": "not-in-spec",
       "params.update.params.command": "not-in-spec",
       "params.update.sessionUpdate": "not-in-spec",
@@ -592,14 +670,6 @@
       "params.value": "spec boolean desc"
     },
     "SetSessionConfigOptionResponse": {
-      "result": "unresolved"
-    },
-    "SetSessionModelRequest": {
-      "params": "unresolved",
-      "params.modelId": "spec string desc",
-      "params.sessionId": "spec string desc"
-    },
-    "SetSessionModelResponse": {
       "result": "unresolved"
     },
     "SetSessionModeRequest": {

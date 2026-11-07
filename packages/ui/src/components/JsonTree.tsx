@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { SpecInfo } from '@acp-devtools/core/acp/spec-decoder/browser';
+import type { SpecInfo } from '@acp-devtools/core/acp/spec-decoder';
 import { cn } from '../lib/cn';
 import { SpecHint } from './SpecHint';
 

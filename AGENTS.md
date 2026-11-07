@@ -108,8 +108,10 @@ rules: [CONTRIBUTING.md § Security design rules](CONTRIBUTING.md#security-desig
   extensions, `import type` for types. Comments explain _why_, not _what_.
 - JSON-RPC ids are scoped per sender: an editor request and an agent request
   can share an id. Correlate by `(direction, id)`, never by id alone.
-- The ACP schema comes from `@agentclientprotocol/sdk` (`validate*.ts`,
-  `spec-decoder*.ts` — a Node and a browser entry each). SDK ≥ 2 moved it to
-  versioned paths (`schema/v1/…`, `schema/v2/…`).
+- ACP has two protocol versions in the wild (v1, and the v2 draft) with
+  different shapes. Anything that reads frames must pick the version per
+  session (`detectProtocolVersion`, `frameProtocolVersion` in
+  `acp/protocol-version.ts`); the schemas are bundled from
+  `@agentclientprotocol/sdk` in `acp/schemas.ts`.
 - Tests run with `TZ=UTC` under jsdom; CI covers Linux, macOS and Windows ×
   Node 22/24, so avoid POSIX-only paths and shell assumptions in tests.

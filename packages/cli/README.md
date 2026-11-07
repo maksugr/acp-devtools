@@ -4,7 +4,7 @@ A transparent stdio proxy between your editor and an ACP coding agent that
 captures every JSON-RPC frame, stores sessions in SQLite, and streams them
 to a local web inspector. See every request, response, and notification on
 a clickable timeline; replay or diff old sessions; validate captures
-against the official ACP schema; query the store from Claude Code over
+against the official ACP schema (v1 and v2); query the store from Claude Code over
 MCP.
 
 ## What's inside

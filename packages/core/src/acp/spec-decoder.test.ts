@@ -138,3 +138,26 @@ describe('resolveSpecForMessage', () => {
         expect(r?.typeName).toBe('SetSessionConfigOptionRequest');
     });
 });
+
+describe('resolveSpecForMessage — protocol versions', () => {
+    const v2Initialize: CapturedMessage = {
+        ...initializeRequest,
+        payload: {
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'initialize',
+            params: { protocolVersion: 2, info: { name: 'zed', version: '2.0.0' } },
+        } as unknown as CapturedMessage['payload'],
+    };
+
+    it('resolves fields with the requested version', () => {
+        const v2 = resolveSpecForMessage(v2Initialize, { protocolVersion: 2 });
+        expect(v2?.resolve(['params', 'info'])?.inSpec).toBe(true);
+        const v1 = resolveSpecForMessage(v2Initialize, { protocolVersion: 1 });
+        expect(v1?.resolve(['params', 'info'])?.inSpec).toBe(false);
+    });
+
+    it('returns null for a version without a schema', () => {
+        expect(resolveSpecForMessage(v2Initialize, { protocolVersion: 99 })).toBeNull();
+    });
+});
