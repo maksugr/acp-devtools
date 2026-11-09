@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { CapturedMessage } from '@acp-devtools/core';
+import { isRemovedFromSpecMethod } from '@acp-devtools/core/acp/removed-from-spec';
 import { resolveSpecForMessage } from '@acp-devtools/core/acp/spec-decoder';
 import { cn } from '../lib/cn';
 import { SpecHint } from './SpecHint';
@@ -153,8 +154,9 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
                 'this frame failed to parse as JSON-RPC — already surfaced in the Tree tab as a parse error',
             'no-method':
                 'no method available for validation (e.g. response without a paired request)',
-            'unknown-method':
-                'the ACP spec has no schema for this method — likely an extension or a future addition',
+            'unknown-method': isRemovedFromSpecMethod(validation.method, validation.protocolVersion)
+                ? 'this method was removed from the ACP spec (it was unstable); agents built against an older SDK still send it, so it is not validated'
+                : 'the ACP spec has no schema for this method — likely an extension or a future addition',
             'no-schema-for-kind':
                 'the spec has no schema for this kind of frame for this method (e.g. notification-only method)',
             'wrong-kind':

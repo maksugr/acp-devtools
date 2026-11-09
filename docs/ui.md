@@ -68,9 +68,11 @@ Selecting a row renders its full JSON-RPC frame in three tabs:
   **spec-aware**: when the method maps to a known ACP request/response/
   notification, the top shows the schema-def name (e.g. `ACP TYPE
 InitializeRequest`) and a one-line description. Each field carries a ⓘ hover
-  tooltip from the schema, and a `⚠ ext` badge marks anything under `_meta` or
-  fields not declared in the spec — handy for spotting editor-specific
-  extensions.
+  tooltip from the schema. A `⚠ ext` badge marks anything under `_meta`, and
+  `⚠ unknown` a field the spec doesn't declare — handy for spotting
+  editor-specific extensions. Fields that recent ACP versions dropped but agents
+  still send (such as `models` on `session/new`) get a grey `removed from spec`
+  badge instead; the frame stays valid.
 - **Raw** — the verbatim wire frame.
 - **Meta** — capture metadata (seq, timestamps, direction, sizes).
 - **Spec** — schema-validation result for the frame (see below).

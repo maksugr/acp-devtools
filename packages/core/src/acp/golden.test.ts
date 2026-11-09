@@ -138,6 +138,7 @@ function specReport(messages: CapturedMessage[]) {
                 ? 'unresolved'
                 : [
                       info.inSpec ? 'spec' : 'not-in-spec',
+                      info.removedFromSpec ? 'removed' : null,
                       info.isExtension ? 'ext' : null,
                       info.type ?? null,
                       info.description ? 'desc' : null,

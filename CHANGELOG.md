@@ -39,8 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `mcp/connect`, `mcp/disconnect` — are now skipped as unknown rather than
   validated. Fields dropped with them, such as the `models` block of
   `session/new` responses (replaced by `configOptions`) and the `env_var`
-  auth method, show as not in the spec in the inspector; frames that carry
-  them still validate, since the schemas don't reject unknown fields.
+  auth method, still validate, since the schemas don't reject unknown fields.
+  Agents built against older SDKs still send them, so the inspector marks
+  them `removed from spec` in grey rather than as unknown fields, and the Spec
+  tab of a dropped method says it was removed. The marking will go in 0.9.0.
 - A frame that fails a union type — say, a session update with malformed
   `content` — is reported with the errors of every variant it could have
   matched, so the new variants raise its error count in `validate` and

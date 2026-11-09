@@ -11,3 +11,4 @@ export * from './sparkline.js';
 export * from './spec-decoder.js';
 export * from './timeline-layout.js';
 export * from './protocol-version.js';
+export * from './removed-from-spec.js';

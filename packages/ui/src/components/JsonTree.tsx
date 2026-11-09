@@ -143,7 +143,13 @@ function KeyLabel({ name, spec }: { name: string; spec: SpecInfo | null }) {
             <span className={cn(isIndex ? 'text-ink-muted' : 'text-ink-secondary')}>
                 {isIndex ? `${name}:` : `"${name}":`}
             </span>
-            {spec && !spec.inSpec && (
+            {spec && !spec.inSpec && spec.removedFromSpec && (
+                <SpecBadge
+                    tone="removed"
+                    explanation="Removed from the ACP spec — an unstable field a recent schema version dropped. Agents built against an older SDK still send it; the frame stays valid."
+                />
+            )}
+            {spec && !spec.inSpec && !spec.removedFromSpec && (
                 <SpecBadge
                     tone={spec.isExtension ? 'extension' : 'unknown'}
                     explanation={
@@ -207,24 +213,38 @@ function DescriptionBlock({
     );
 }
 
-function SpecBadge({ tone, explanation }: { tone: 'extension' | 'unknown'; explanation: string }) {
-    const cls =
-        tone === 'extension'
-            ? 'border-accent-warn/40 bg-accent-warn/10 text-accent-warn'
-            : 'border-accent-error/40 bg-accent-error/10 text-accent-error';
+const BADGE: Record<SpecBadgeTone, { cls: string; hint: 'warn' | 'error' | 'info'; text: string }> =
+    {
+        extension: {
+            cls: 'border-accent-warn/40 bg-accent-warn/10 text-accent-warn',
+            hint: 'warn',
+            text: '⚠ ext',
+        },
+        unknown: {
+            cls: 'border-accent-error/40 bg-accent-error/10 text-accent-error',
+            hint: 'error',
+            text: '⚠ unknown',
+        },
+        removed: {
+            cls: 'border-line-strong bg-surface-elev text-ink-muted',
+            hint: 'info',
+            text: 'removed from spec',
+        },
+    };
+
+type SpecBadgeTone = 'extension' | 'unknown' | 'removed';
+
+function SpecBadge({ tone, explanation }: { tone: SpecBadgeTone; explanation: string }) {
+    const { cls, hint, text } = BADGE[tone];
     return (
-        <SpecHint
-            label={<span className="font-sans">{explanation}</span>}
-            tone={tone === 'extension' ? 'warn' : 'error'}
-            focusable
-        >
+        <SpecHint label={<span className="font-sans">{explanation}</span>} tone={hint} focusable>
             <span
                 className={cn(
                     'inline-flex items-center rounded-sm border px-1 font-mono text-[9px] uppercase tracking-widest',
                     cls,
                 )}
             >
-                {tone === 'extension' ? '⚠ ext' : '⚠ unknown'}
+                {text}
             </span>
         </SpecHint>
     );

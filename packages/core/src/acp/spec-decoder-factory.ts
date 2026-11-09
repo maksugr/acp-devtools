@@ -4,6 +4,7 @@
 // `createSpecDecoder` picks the right one per message. `spec-decoder.ts` binds
 // it to the bundled schemas.
 
+import { isRemovedFromSpecField } from './removed-from-spec.js';
 import type { CapturedMessage } from './types.js';
 
 interface SchemaShape {
@@ -52,6 +53,11 @@ export interface SpecInfo {
     type?: string;
     /** Enum allowed values, when the schema constrains this field. */
     enumValues?: unknown[];
+    /**
+     * True for a field the current schema no longer has but an earlier
+     * version did (see `removed-from-spec.ts`). Implies `inSpec: false`.
+     */
+    removedFromSpec?: boolean;
 }
 
 export interface MessageSpecResolver {
@@ -106,7 +112,7 @@ export function createSpecDecoder(
         if (cached) return cached;
         const schema = schemas[version];
         if (!schema) return null;
-        const fresh = createSchemaDecoder(schema as SchemaShape);
+        const fresh = createSchemaDecoder(schema as SchemaShape, version);
         decoders.set(version, fresh);
         return fresh;
     };
@@ -125,7 +131,7 @@ export function createSpecDecoder(
     };
 }
 
-function createSchemaDecoder(schema: SchemaShape): SchemaDecoder {
+function createSchemaDecoder(schema: SchemaShape, protocolVersion: number): SchemaDecoder {
     const defs = schema.$defs ?? {};
     const methodIndex = new Map<string, MethodSlots>();
     for (const [name, def] of Object.entries(defs)) {
@@ -332,7 +338,11 @@ function createSchemaDecoder(schema: SchemaShape): SchemaDecoder {
                         return { inSpec: false, isExtension: true };
                     }
                     const next = current.properties?.[segment];
-                    if (!next) return { inSpec: false, isExtension };
+                    if (!next) {
+                        return isRemovedFromSpecField(defName, inner, protocolVersion)
+                            ? { inSpec: false, isExtension, removedFromSpec: true }
+                            : { inSpec: false, isExtension };
+                    }
                     current = next;
                 }
                 // Terminal resolve — pass the actual value so unions surface

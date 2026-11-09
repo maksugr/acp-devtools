@@ -215,9 +215,9 @@
       "result.authMethods.[].id": "spec string desc",
       "result.authMethods.[].name": "spec string desc",
       "result.authMethods.[].type": "not-in-spec",
-      "result.authMethods.[].vars": "not-in-spec",
-      "result.authMethods.[].vars.[]": "not-in-spec",
-      "result.authMethods.[].vars.[].name": "not-in-spec",
+      "result.authMethods.[].vars": "not-in-spec removed",
+      "result.authMethods.[].vars.[]": "not-in-spec removed",
+      "result.authMethods.[].vars.[].name": "not-in-spec removed",
       "result.protocolVersion": "spec integer desc"
     },
     "NewSessionRequest": {

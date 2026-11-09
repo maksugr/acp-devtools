@@ -104,3 +104,20 @@ describe('JsonTree expand / collapse', () => {
         expect(screen.getByText('"deep"')).toBeInTheDocument();
     });
 });
+
+describe('JsonTree spec badges', () => {
+    const value = { models: { current: 'a' }, mystery: 1, kept: true };
+    const getSpec = (path: string[]) => {
+        const key = path[path.length - 1];
+        if (key === 'models') return { inSpec: false, isExtension: false, removedFromSpec: true };
+        if (key === 'mystery') return { inSpec: false, isExtension: false };
+        return { inSpec: true, isExtension: false };
+    };
+
+    it('marks a field the spec dropped as removed, not unknown', () => {
+        render(<JsonTree value={value} getSpec={getSpec} />);
+        expect(screen.getAllByText('removed from spec')).toHaveLength(1);
+        // Only the genuinely undeclared field keeps the red badge.
+        expect(screen.getAllByText('⚠ unknown')).toHaveLength(1);
+    });
+});
