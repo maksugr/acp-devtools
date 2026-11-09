@@ -14,6 +14,9 @@
 //   node fixtures/generate-protocol-edges.mjs --out /tmp/edges.json
 //   acp-devtools import /tmp/edges.json
 import { writeFileSync } from 'node:fs';
+import { seededRandom } from './random.mjs';
+
+const random = seededRandom(925125407);
 
 const OUT_PATH = process.argv.includes('--out')
     ? process.argv[process.argv.indexOf('--out') + 1]
@@ -59,7 +62,7 @@ function pushRaw(direction, raw, parseError) {
 }
 
 function advance(min, max) {
-    ts += min + Math.floor(Math.random() * (max - min));
+    ts += min + Math.floor(random() * (max - min));
 }
 
 // ── 1. Failed initialize — agent errors out on the handshake ───────────

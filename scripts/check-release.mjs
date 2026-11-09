@@ -9,7 +9,7 @@
 // the current version plus an `[Unreleased]` heading.
 //
 // With --base <ref>:
-//   - a PR that touches shipped files (anything under packages/ except tests)
+//   - a PR that touches shipped files (anything under packages/ except tests and their golden snapshots)
 //     must bump the version, unless --allow-no-bump (the `no-release` label);
 //   - a bumped version must be strictly greater than the base, have a
 //     CHANGELOG section with entries, and leave `[Unreleased]` empty (entries
@@ -53,6 +53,8 @@ function git(...a) {
 function isShipped(file) {
     if (!file.startsWith('packages/')) return false;
     if (/\.test\.(ts|tsx|js|mjs)$/.test(file)) return false;
+    // Golden snapshots belong to the tests next to them.
+    if (file.includes('/__golden__/')) return false;
     return true;
 }
 

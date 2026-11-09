@@ -7,7 +7,7 @@ import {
     defaultCapturesDbPath,
     extractTextPreview,
     openExistingDatabase,
-    validateAcpMessage,
+    validateMessages,
 } from '@acp-devtools/core';
 import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 import { colorDirection, colorKind, colorLatency } from '../lib/palette.js';
@@ -133,21 +133,14 @@ export function registerInspectCommand(program: Command): void {
                 // hide the response and we couldn't show latency on the request).
                 const all = [...session.messages()];
                 const pairs = buildPairIndex(all);
-                const seqToMethod = new Map<number, string>();
-                for (const m of all) {
-                    if (m.method) seqToMethod.set(m.seq, m.method);
-                }
+                const validation = opts.spec ? validateMessages(all) : null;
                 const tableBuf: TableRow[] = [];
                 for (const m of all) {
                     if (!passes(m, filter)) continue;
                     if (tableBuf.length >= limit) break;
                     let specCell = '';
-                    if (opts.spec) {
-                        const pair = pairs.get(m.seq);
-                        const pairedMethod = pair ? seqToMethod.get(pair.pairSeq) : undefined;
-                        const valOpts: Parameters<typeof validateAcpMessage>[1] = {};
-                        if (pairedMethod !== undefined) valOpts.pairedMethod = pairedMethod;
-                        const result = validateAcpMessage(m, valOpts);
+                    const result = validation?.get(m.seq);
+                    if (result) {
                         if (result.skipped) specCell = '';
                         else if (result.valid) specCell = '✓';
                         else specCell = `⚠${result.errors.length}`;

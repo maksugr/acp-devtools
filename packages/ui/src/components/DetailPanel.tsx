@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { CapturedMessage } from '@acp-devtools/core';
-import { resolveSpecForMessage } from '@acp-devtools/core/acp/spec-decoder/browser';
+import { isRemovedFromSpecMethod } from '@acp-devtools/core/acp/removed-from-spec';
+import { resolveSpecForMessage } from '@acp-devtools/core/acp/spec-decoder';
 import { cn } from '../lib/cn';
 import { SpecHint } from './SpecHint';
 import {
@@ -32,11 +33,17 @@ export function DetailPanel({
     const tab = useMessagesStore((s) => s.detailTab);
     const setTab = useMessagesStore((s) => s.setDetailTab);
 
+    // Read the frame with the same protocol version its validation used, so
+    // field hints and the ⚠ SPEC badge come from the same schema.
+    const protocolVersion = validation?.protocolVersion;
     const resolver = useMemo(() => {
         if (!message) return null;
         const pairedMethod = pairedRequest?.method ?? undefined;
-        return resolveSpecForMessage(message, pairedMethod ? { pairedMethod } : undefined);
-    }, [message, pairedRequest]);
+        return resolveSpecForMessage(message, {
+            ...(pairedMethod ? { pairedMethod } : {}),
+            ...(protocolVersion !== undefined ? { protocolVersion } : {}),
+        });
+    }, [message, pairedRequest, protocolVersion]);
 
     if (!message) {
         return (
@@ -147,12 +154,14 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
                 'this frame failed to parse as JSON-RPC — already surfaced in the Tree tab as a parse error',
             'no-method':
                 'no method available for validation (e.g. response without a paired request)',
-            'unknown-method':
-                'the ACP spec has no schema for this method — likely an extension or a future addition',
+            'unknown-method': isRemovedFromSpecMethod(validation.method, validation.protocolVersion)
+                ? 'this method was removed from the ACP spec (it was unstable); agents built against an older SDK still send it, so it is not validated'
+                : 'the ACP spec has no schema for this method — likely an extension or a future addition',
             'no-schema-for-kind':
                 'the spec has no schema for this kind of frame for this method (e.g. notification-only method)',
             'wrong-kind':
                 'no per-method ACP schema applies (e.g. JSON-RPC error envelope, parse failure)',
+            'unsupported-protocol-version': `the session negotiated ACP v${validation.protocolVersion ?? '?'}, which acp-devtools has no schema for`,
         };
         return (
             <div className="space-y-2 font-mono text-[11px]">
@@ -172,7 +181,7 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
                     </span>
                     <span className="text-ink-muted">
                         matched <span className="text-ink-secondary">{validation.schemaName}</span>{' '}
-                        from the ACP schema
+                        from the ACP v{validation.protocolVersion ?? 1} schema
                     </span>
                 </div>
                 <AdvisoryBlock advisories={validation.advisories} />
@@ -187,7 +196,8 @@ function SpecView({ validation }: { validation: ValidationResult | undefined }) 
                     {validation.errors.length === 1 ? '' : 's'}
                 </span>
                 <span className="text-ink-muted">
-                    against <span className="text-ink-secondary">{validation.schemaName}</span>
+                    against <span className="text-ink-secondary">{validation.schemaName}</span> (ACP
+                    v{validation.protocolVersion ?? 1})
                 </span>
             </div>
             <ul className="space-y-1.5">

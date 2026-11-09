@@ -1,0 +1,418 @@
+{
+  "cli": {
+    "validate": {
+      "exitCode": 0,
+      "output": {
+        "protocolVersion": 1,
+        "checked": 31,
+        "skipped": 0,
+        "violations": [],
+        "advisories": []
+      }
+    },
+    "stats": {
+      "exitCode": 0,
+      "output": {
+        "sessionName": "handshakes/junie-26.6.15.json",
+        "clientName": "WebStorm 2026.1.2",
+        "agentCommand": "/Users/dev/.local/bin/junie --acp=true",
+        "startedAt": 1781793155738,
+        "total": 31,
+        "direction": {
+          "editorToAgent": 10,
+          "agentToEditor": 21
+        },
+        "kind": {
+          "request": 10,
+          "response": 10,
+          "notification": 11,
+          "error": 0,
+          "unknown": 0
+        },
+        "parseErrors": 0,
+        "spec": {
+          "checked": 31,
+          "valid": 31,
+          "violations": 0,
+          "affectedMethods": []
+        },
+        "latency": {
+          "sampleSize": 10,
+          "p50": 2.5,
+          "p90": 8677.799999999996,
+          "p99": 16938.18,
+          "max": 17856,
+          "mean": 2680
+        },
+        "insights": [
+          {
+            "kind": "hotspot",
+            "summary": "session/prompt consumed 25.5s of total wall time",
+            "detail": "95% of 26.8s sampled latency",
+            "methods": [
+              "session/prompt"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "mcp": {
+    "find_spec_violations": {
+      "protocol_version": 1,
+      "checked": 31,
+      "violations": [],
+      "advisories": []
+    },
+    "get_session_metadata": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": "JetBrains.WebStorm",
+          "title": "WebStorm 2026.1.2",
+          "version": "2026.1.2",
+          "platform": "intellij"
+        },
+        "agent": {
+          "name": "@jetbrains/junie",
+          "version": "26.6.15 (1966.53)",
+          "authMethods": 0
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": true
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": [
+            "usage",
+            "ide"
+          ]
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": {
+            "proxies": [
+              {
+                "apiType": {
+                  "provider": "openai"
+                },
+                "proxy": {
+                  "url": "http://127.0.0.1:50000",
+                  "headers": {
+                    "proxy_key": "<REDACTED>",
+                    "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                  }
+                }
+              },
+              {
+                "apiType": {
+                  "provider": "anthropic"
+                },
+                "proxy": {
+                  "url": "http://127.0.0.1:50001",
+                  "headers": {
+                    "proxy_key": "<REDACTED>",
+                    "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                  }
+                }
+              },
+              {
+                "apiType": {
+                  "provider": "google"
+                },
+                "proxy": {
+                  "url": "http://127.0.0.1:50002",
+                  "headers": {
+                    "proxy_key": "<REDACTED>",
+                    "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "get_latency_stats": {
+      "perMethod": [
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 11,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/set_config_option",
+          "kind": "request",
+          "count": 6,
+          "sampleSize": 6,
+          "p50": 1.5,
+          "p99": 2.95,
+          "max": 3,
+          "totalLatencyMs": 10,
+          "latencies": [
+            1,
+            1,
+            1,
+            2,
+            2,
+            3
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 2,
+          "sampleSize": 2,
+          "p50": 12757,
+          "p99": 17754.02,
+          "max": 17856,
+          "totalLatencyMs": 25514,
+          "latencies": [
+            7658,
+            17856
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 192,
+          "p99": 192,
+          "max": 192,
+          "totalLatencyMs": 192,
+          "latencies": [
+            192
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 1079,
+          "p99": 1079,
+          "max": 1079,
+          "totalLatencyMs": 1079,
+          "latencies": [
+            1079
+          ]
+        }
+      ],
+      "sessionLatency": {
+        "sampleSize": 10,
+        "p50": 2.5,
+        "p90": 8677.799999999996,
+        "p99": 16938.18,
+        "max": 17856
+      },
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 25.5s of total wall time",
+          "detail": "95% of 26.8s sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    },
+    "get_session_summary": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": "JetBrains.WebStorm",
+          "title": "WebStorm 2026.1.2",
+          "version": "2026.1.2",
+          "platform": "intellij"
+        },
+        "agent": {
+          "name": "@jetbrains/junie",
+          "version": "26.6.15 (1966.53)",
+          "authMethods": 0
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": true
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": [
+            "usage",
+            "ide"
+          ]
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": {
+            "proxies": [
+              {
+                "apiType": {
+                  "provider": "openai"
+                },
+                "proxy": {
+                  "url": "http://127.0.0.1:50000",
+                  "headers": {
+                    "proxy_key": "<REDACTED>",
+                    "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                  }
+                }
+              },
+              {
+                "apiType": {
+                  "provider": "anthropic"
+                },
+                "proxy": {
+                  "url": "http://127.0.0.1:50001",
+                  "headers": {
+                    "proxy_key": "<REDACTED>",
+                    "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                  }
+                }
+              },
+              {
+                "apiType": {
+                  "provider": "google"
+                },
+                "proxy": {
+                  "url": "http://127.0.0.1:50002",
+                  "headers": {
+                    "proxy_key": "<REDACTED>",
+                    "X-IntelliJ-Proxy-Agent-ID": "<REDACTED>"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "totals": {
+        "messages": 31,
+        "direction": {
+          "editorToAgent": 10,
+          "agentToEditor": 21
+        },
+        "kind": {
+          "request": 10,
+          "response": 10,
+          "notification": 11,
+          "error": 0,
+          "unknown": 0
+        }
+      },
+      "latency": {
+        "sampleSize": 10,
+        "p50": 2.5,
+        "p90": 8677.799999999996,
+        "p99": 16938.18,
+        "max": 17856
+      },
+      "perMethod": [
+        {
+          "method": "session/update",
+          "kind": "notification",
+          "count": 11,
+          "sampleSize": 0,
+          "p50": null,
+          "p99": null,
+          "max": null,
+          "totalLatencyMs": null,
+          "latencies": []
+        },
+        {
+          "method": "session/set_config_option",
+          "kind": "request",
+          "count": 6,
+          "sampleSize": 6,
+          "p50": 1.5,
+          "p99": 2.95,
+          "max": 3,
+          "totalLatencyMs": 10,
+          "latencies": [
+            1,
+            1,
+            1,
+            2,
+            2,
+            3
+          ]
+        },
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 2,
+          "sampleSize": 2,
+          "p50": 12757,
+          "p99": 17754.02,
+          "max": 17856,
+          "totalLatencyMs": 25514,
+          "latencies": [
+            7658,
+            17856
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 192,
+          "p99": 192,
+          "max": 192,
+          "totalLatencyMs": 192,
+          "latencies": [
+            192
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 1079,
+          "p99": 1079,
+          "max": 1079,
+          "totalLatencyMs": 1079,
+          "latencies": [
+            1079
+          ]
+        }
+      ],
+      "insights": [
+        {
+          "kind": "hotspot",
+          "summary": "session/prompt consumed 25.5s of total wall time",
+          "detail": "95% of 26.8s sampled latency",
+          "methods": [
+            "session/prompt"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
     "name": "@acp-devtools/core",
-    "version": "0.6.3",
+    "version": "0.7.0",
     "private": true,
     "description": "Core ACP proxy, parser, and types for acp-devtools",
     "type": "module",
@@ -65,17 +65,17 @@
             "types": "./dist/acp/spec-decoder.d.ts",
             "import": "./dist/acp/spec-decoder.js"
         },
-        "./acp/spec-decoder/browser": {
-            "types": "./dist/acp/spec-decoder-browser.d.ts",
-            "import": "./dist/acp/spec-decoder-browser.js"
-        },
         "./acp/validate": {
             "types": "./dist/acp/validate.d.ts",
             "import": "./dist/acp/validate.js"
         },
-        "./acp/validate/browser": {
-            "types": "./dist/acp/validate-browser.d.ts",
-            "import": "./dist/acp/validate-browser.js"
+        "./acp/protocol-version": {
+            "types": "./dist/acp/protocol-version.d.ts",
+            "import": "./dist/acp/protocol-version.js"
+        },
+        "./acp/removed-from-spec": {
+            "types": "./dist/acp/removed-from-spec.d.ts",
+            "import": "./dist/acp/removed-from-spec.js"
         },
         "./agents": {
             "types": "./dist/agents/index.d.ts",
@@ -102,12 +102,12 @@
         "clean": "rimraf dist *.tsbuildinfo"
     },
     "dependencies": {
-        "@agentclientprotocol/sdk": "^0.22.1",
         "ajv": "^8.20.0",
         "better-sqlite3": "^12.10.0",
         "ws": "^8.20.1"
     },
     "devDependencies": {
+        "@agentclientprotocol/sdk": "^2.4.0",
         "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^22.10.0",
         "@types/ws": "^8.18.1"

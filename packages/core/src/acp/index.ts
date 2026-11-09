@@ -10,4 +10,5 @@ export * from './perf-insights.js';
 export * from './sparkline.js';
 export * from './spec-decoder.js';
 export * from './timeline-layout.js';
-export { AGENT_METHODS, CLIENT_METHODS, PROTOCOL_VERSION } from '@agentclientprotocol/sdk';
+export * from './protocol-version.js';
+export * from './removed-from-spec.js';

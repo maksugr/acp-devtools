@@ -1,3 +1,4 @@
+import { detectProtocolVersion } from './protocol-version.js';
 import type { CapturedMessage, JsonRpcId } from './types.js';
 
 export interface ClientInfo {
@@ -160,18 +161,6 @@ function extractAgentCapabilities(initResponse: CapturedMessage | null): AgentCa
     };
 }
 
-function extractProtocolVersion(
-    initRequest: CapturedMessage | null,
-    initResponse: CapturedMessage | null,
-): number | null {
-    const source = initResponse ?? initRequest;
-    if (!source) return null;
-    const root = asRecord(source.payload);
-    const inner = asRecord(root?.['result']) ?? asRecord(root?.['params']);
-    const v = inner?.['protocolVersion'];
-    return typeof v === 'number' ? v : null;
-}
-
 function extractRuntime(messages: CapturedMessage[]): RuntimeState {
     let currentMode: string | null = null;
     let modeChanges = 0;
@@ -241,7 +230,7 @@ export function extractSessionMetadata(messages: CapturedMessage[]): SessionMeta
     const initReq = findInitializeRequest(messages);
     const initRsp = findInitializeResponse(messages, initReq?.rpcId);
     return {
-        protocolVersion: extractProtocolVersion(initReq, initRsp),
+        protocolVersion: detectProtocolVersion(messages),
         client: extractClient(initReq),
         agent: extractAgent(initRsp),
         clientCapabilities: extractClientCapabilities(initReq),

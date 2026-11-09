@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-11-07
+
+### Added
+
+- **ACP v2 validation.** Each session is checked against the schema of the
+  protocol version it negotiated in `initialize` — v1, or the v2 draft —
+  instead of always v1, so v2 traffic is no longer reported as violating v1.
+  The version comes from the agent's last `initialize` answer (an editor may
+  re-initialize to fall back); `initialize` frames are read with the version
+  they declare, and captures without an `initialize` are read as v1.
+    - `validate` names the version in its summary line; `--json` adds
+      `protocolVersion`.
+    - The MCP `find_spec_violations` tool returns `protocol_version`.
+    - The inspector's Spec tab names the schema version it used, and field hints
+      in the detail panel follow the same version.
+- A recorded ACP v2 turn, `fixtures/v2-session.json`, generated from the
+  SDK's reference client and agent by `fixtures/generate-v2-session.mjs`. It
+  backs the tests and a v2 sample in the playground.
+
+### Changed
+
+- **Schemas from `@agentclientprotocol/sdk` 2.4.0** (was 0.22.1), including
+  their unstable parts, as before. In v1 this adds the `notice`,
+  `compaction_update`, `compaction_summary_chunk`, `plan_update`,
+  `plan_removed`, `subagent_update`, `session_message` and
+  `session_message_chunk` session updates and the `auth/status`,
+  `session/archive`, `session/unarchive`, `session/status`,
+  `session/set_title`, `proxy/initialize` and `proxy/successor` methods.
+  Methods the spec dropped — `session/set_model`, `nes/*`, `document/*`,
+  `mcp/connect`, `mcp/disconnect` — are now skipped as unknown rather than
+  validated. Fields dropped with them, such as the `models` block of
+  `session/new` responses (replaced by `configOptions`) and the `env_var`
+  auth method, still validate, since the schemas don't reject unknown fields.
+  Agents built against older SDKs still send them, so the inspector marks
+  them `removed from spec` in grey rather than as unknown fields, and the Spec
+  tab of a dropped method says it was removed. The marking will go in 0.9.0.
+- A frame that fails a union type — say, a session update with malformed
+  `content` — is reported with the errors of every variant it could have
+  matched, so the new variants raise its error count in `validate` and
+  `stats`. Which frames are invalid is unchanged: in the 13 recorded agent
+  sessions every frame validates exactly as before.
+- **The SDK is no longer a runtime dependency.** The schemas are bundled into
+  the CLI, so installing `acp-devtools` no longer pulls
+  `@agentclientprotocol/sdk` and its peer dependencies. The package grows by
+  about 150 KB (two schemas); the inspector's bundle by about 56 KB gzipped.
+
 ## [0.6.3] — 2026-11-06
 
 ### Fixed
@@ -246,7 +292,8 @@ performance dashboard, multi-session diff, mock-agent / mock-editor for CI,
 read-only MCP server, JSON export / import. See `packages/cli/README.md` and
 the root `README.md` for the full feature inventory.
 
-[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/maksugr/acp-devtools/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/maksugr/acp-devtools/compare/v0.6.3...v0.7.0
 [0.6.3]: https://github.com/maksugr/acp-devtools/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/maksugr/acp-devtools/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/maksugr/acp-devtools/compare/v0.6.0...v0.6.1

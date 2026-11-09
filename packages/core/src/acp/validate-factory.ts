@@ -1,10 +1,11 @@
-// Pure validator factory — accepts a schema object and returns an
-// environment-agnostic `validateAcpMessage` function. Lives separately from
-// `validate.ts` so the Node entry point (CLI) can load the schema via
-// `createRequire` and the browser entry point (UI) can use Vite's native
-// JSON-import — same factory either way.
+// Validator factory: checks captured frames against the ACP JSON schema of
+// the protocol version they were sent with. One compiled schema per version;
+// `validate.ts` binds it to the bundled schemas. Environment-agnostic, so the
+// CLI and the browser UI share it.
 
 import Ajv2020Import, { type ValidateFunction, type ErrorObject } from 'ajv/dist/2020.js';
+import { buildPairIndex } from './method-stats.js';
+import { detectProtocolVersion, frameProtocolVersion } from './protocol-version.js';
 import type { CapturedMessage } from './types.js';
 
 interface AjvOptions {
@@ -47,7 +48,8 @@ export type ValidationSkipReason =
     | 'no-method'
     | 'unknown-method'
     | 'no-schema-for-kind'
-    | 'wrong-kind';
+    | 'wrong-kind'
+    | 'unsupported-protocol-version';
 
 export interface ValidationResult {
     valid: boolean;
@@ -59,15 +61,38 @@ export interface ValidationResult {
     advisories?: ValidationAdvisory[];
     skipped?: ValidationSkipReason;
     schemaName?: string;
+    /** The ACP method the frame belongs to (a response's is its request's). */
+    method?: string;
+    /** The protocol version the frame was read with. */
+    protocolVersion?: number;
 }
 
 export interface ValidateOptions {
+    /** For a response, the method of the request it answers. */
     pairedMethod?: string;
+    /**
+     * ACP protocol version to validate against (see `frameProtocolVersion`).
+     * Defaults to 1. A version without a bundled schema is skipped with
+     * `unsupported-protocol-version`.
+     */
+    protocolVersion?: number;
 }
 
 export interface AcpValidator {
     validateAcpMessage(msg: CapturedMessage, opts?: ValidateOptions): ValidationResult;
-    knownAcpMethods(): string[];
+    /**
+     * Validate every frame of a session, pairing responses with their requests
+     * and reading each frame with the session's negotiated protocol version.
+     * Keyed by `seq`.
+     */
+    validateMessages(messages: readonly CapturedMessage[]): Map<number, ValidationResult>;
+    /** Sorted list of every method the given protocol version's schema knows. */
+    knownAcpMethods(protocolVersion?: number): string[];
+}
+
+interface SchemaValidator {
+    validate(msg: CapturedMessage, method: string): ValidationResult;
+    knownMethods(): string[];
 }
 
 interface MethodSlots {
@@ -90,6 +115,7 @@ interface SchemaShape {
 }
 
 const SCHEMA_ID = 'acp';
+const DEFAULT_PROTOCOL_VERSION = 1;
 
 // The spec marks a field that is optional today but slated to become
 // mandatory with this exact phrasing in its description (e.g. `agentInfo`,
@@ -107,15 +133,68 @@ function toError(e: ErrorObject): ValidationError {
 }
 
 /**
- * Build a validator bound to the given ACP schema. The factory compiles
- * per-def validators lazily on first use so initial cost is just an ajv
- * instance plus the schema add.
- *
- * Caller is responsible for sourcing the schema — Node entry points use
- * `createRequire` (`validate.ts`); browser entry points let Vite handle the
- * JSON import (`validate-browser.ts`).
+ * Build a validator over one ACP schema per protocol version. Each version's
+ * schema is indexed on first use and its per-def validators compiled lazily,
+ * so the initial cost is one ajv instance per version actually seen.
  */
-export function createAcpValidator(schema: SchemaShape): AcpValidator {
+export function createAcpValidator(
+    schemas: Readonly<Partial<Record<number, object>>>,
+): AcpValidator {
+    const validators = new Map<number, SchemaValidator>();
+    const validatorFor = (version: number): SchemaValidator | null => {
+        const cached = validators.get(version);
+        if (cached) return cached;
+        const schema = schemas[version];
+        if (!schema) return null;
+        const fresh = createSchemaValidator(schema as SchemaShape);
+        validators.set(version, fresh);
+        return fresh;
+    };
+
+    function validateAcpMessage(
+        msg: CapturedMessage,
+        opts: ValidateOptions = {},
+    ): ValidationResult {
+        if (!msg.payload) return { valid: true, errors: [], skipped: 'parse-error' };
+        if (msg.kind === 'unknown') return { valid: true, errors: [], skipped: 'wrong-kind' };
+        const method = msg.method ?? opts.pairedMethod;
+        if (!method) return { valid: true, errors: [], skipped: 'no-method' };
+        const protocolVersion = opts.protocolVersion ?? DEFAULT_PROTOCOL_VERSION;
+        const validator = validatorFor(protocolVersion);
+        const result: ValidationResult = validator
+            ? validator.validate(msg, method)
+            : { valid: true, errors: [], skipped: 'unsupported-protocol-version' };
+        result.method = method;
+        result.protocolVersion = protocolVersion;
+        return result;
+    }
+
+    function validateMessages(messages: readonly CapturedMessage[]): Map<number, ValidationResult> {
+        const pairs = buildPairIndex([...messages]);
+        const methodBySeq = new Map<number, string>();
+        for (const m of messages) if (m.method) methodBySeq.set(m.seq, m.method);
+        const sessionVersion = detectProtocolVersion(messages);
+        const out = new Map<number, ValidationResult>();
+        for (const m of messages) {
+            const pair = pairs.get(m.seq);
+            const pairedMethod = pair ? methodBySeq.get(pair.pairSeq) : undefined;
+            const opts: ValidateOptions = {
+                protocolVersion: frameProtocolVersion(m, sessionVersion, pairedMethod),
+            };
+            if (pairedMethod !== undefined) opts.pairedMethod = pairedMethod;
+            out.set(m.seq, validateAcpMessage(m, opts));
+        }
+        return out;
+    }
+
+    function knownAcpMethods(protocolVersion = DEFAULT_PROTOCOL_VERSION): string[] {
+        return validatorFor(protocolVersion)?.knownMethods() ?? [];
+    }
+
+    return { validateAcpMessage, validateMessages, knownAcpMethods };
+}
+
+function createSchemaValidator(schema: SchemaShape): SchemaValidator {
     const ajv = new Ajv2020({ strict: false, allErrors: true, validateFormats: false });
     ajv.addSchema(schema as object, SCHEMA_ID);
 
@@ -150,16 +229,7 @@ export function createAcpValidator(schema: SchemaShape): AcpValidator {
         return fresh;
     };
 
-    function validateAcpMessage(
-        msg: CapturedMessage,
-        opts: ValidateOptions = {},
-    ): ValidationResult {
-        if (!msg.payload) return { valid: true, errors: [], skipped: 'parse-error' };
-        if (msg.kind === 'unknown') return { valid: true, errors: [], skipped: 'wrong-kind' };
-
-        const method = msg.method ?? opts.pairedMethod;
-        if (!method) return { valid: true, errors: [], skipped: 'no-method' };
-
+    function validate(msg: CapturedMessage, method: string): ValidationResult {
         const slots = methodIndex.get(method);
         if (!slots) return { valid: true, errors: [], skipped: 'unknown-method' };
 
@@ -215,9 +285,9 @@ export function createAcpValidator(schema: SchemaShape): AcpValidator {
         return out;
     }
 
-    function knownAcpMethods(): string[] {
+    function knownMethods(): string[] {
         return [...methodIndex.keys()].sort();
     }
 
-    return { validateAcpMessage, knownAcpMethods };
+    return { validate, knownMethods };
 }

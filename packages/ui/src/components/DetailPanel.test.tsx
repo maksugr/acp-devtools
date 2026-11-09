@@ -144,3 +144,40 @@ describe('DetailPanel — spec advisories', () => {
         expect(specTab.textContent).toMatch(/1/);
     });
 });
+
+describe('DetailPanel — Spec tab for a method the spec dropped', () => {
+    it('says the method was removed from the spec instead of calling it an extension', () => {
+        useMessagesStore.setState({ detailTab: 'spec' });
+        render(
+            <DetailPanel
+                message={msg({ method: 'session/set_model' })}
+                validation={{
+                    valid: true,
+                    errors: [],
+                    skipped: 'unknown-method',
+                    method: 'session/set_model',
+                    protocolVersion: 1,
+                }}
+            />,
+        );
+        expect(screen.getByText(/removed from the ACP spec/i)).toBeInTheDocument();
+        expect(screen.queryByText(/likely an extension/i)).toBeNull();
+    });
+
+    it('keeps the extension wording for a method the spec never had', () => {
+        useMessagesStore.setState({ detailTab: 'spec' });
+        render(
+            <DetailPanel
+                message={msg({ method: '_zed/custom' })}
+                validation={{
+                    valid: true,
+                    errors: [],
+                    skipped: 'unknown-method',
+                    method: '_zed/custom',
+                    protocolVersion: 1,
+                }}
+            />,
+        );
+        expect(screen.getByText(/likely an extension/i)).toBeInTheDocument();
+    });
+});

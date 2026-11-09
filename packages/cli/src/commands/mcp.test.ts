@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -649,14 +649,46 @@ describe('MCP server — tools/call', () => {
                 arguments: { session_id: sessionId },
             });
             const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                protocol_version: number | null;
                 checked: number;
                 violations: Array<unknown>;
                 advisories: Array<unknown>;
             };
+            expect(body.protocol_version).toBe(1);
             expect(body.checked).toBeGreaterThan(0);
             expect(Array.isArray(body.violations)).toBe(true);
             // Default seed carries clientInfo + agentInfo → no advisories.
             expect(body.advisories).toEqual([]);
+        } finally {
+            await close();
+        }
+    });
+
+    it('find_spec_violations reads an ACP v2 session with the v2 schema', async () => {
+        const fixture = JSON.parse(
+            readFileSync(join(process.cwd(), 'fixtures', 'v2-session.json'), 'utf8'),
+        ) as { messages: CapturedMessage[] };
+        const db = openDatabase(dbPath);
+        const session = Session.start(db, { name: 'acp-v2', agentCommand: 'fixture-agent' });
+        for (const m of fixture.messages) session.record(m);
+        session.close();
+        const v2Id = session.info.id;
+        db.close();
+
+        const { client, close } = await withClient();
+        try {
+            const res = await client.callTool({
+                name: 'find_spec_violations',
+                arguments: { session_id: v2Id },
+            });
+            const body = parseJsonContent((res.content as Array<{ text?: unknown }>)[0]?.text) as {
+                protocol_version: number | null;
+                checked: number;
+                violations: Array<unknown>;
+            };
+            expect(body.protocol_version).toBe(2);
+            expect(body.checked).toBe(fixture.messages.length);
+            expect(body.violations).toEqual([]);
         } finally {
             await close();
         }

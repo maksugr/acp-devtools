@@ -12,7 +12,7 @@ import {
     type PerformanceInsight,
     Session,
     type SessionRecord,
-    validateAcpMessage,
+    validateMessages,
 } from '@acp-devtools/core';
 import { type Styler, colorEnabled, createStyler } from '../lib/style.js';
 import { colorKind, colorLatency } from '../lib/palette.js';
@@ -132,28 +132,18 @@ export function computeStats(info: SessionRecord, messages: CapturedMessage[]): 
     // Schema validation rollup. Counts checked frames (skipped ones don't
     // count toward valid OR violations), violation count, and the unique set
     // of methods that produced at least one violation.
-    const seqToMethod = new Map<number, string>();
-    for (const m of messages) {
-        if (m.method) seqToMethod.set(m.seq, m.method);
-    }
     let specChecked = 0;
     let specValid = 0;
     let specViolations = 0;
     const affectedMethods = new Set<string>();
-    for (const m of messages) {
-        const pair = pairs.get(m.seq);
-        const pairedMethod = pair ? seqToMethod.get(pair.pairSeq) : undefined;
-        const opts: Parameters<typeof validateAcpMessage>[1] = {};
-        if (pairedMethod !== undefined) opts.pairedMethod = pairedMethod;
-        const result = validateAcpMessage(m, opts);
+    for (const result of validateMessages(messages).values()) {
         if (result.skipped) continue;
         specChecked += 1;
         if (result.valid) {
             specValid += 1;
         } else {
             specViolations += result.errors.length;
-            const method = m.method ?? pairedMethod;
-            if (method) affectedMethods.add(method);
+            if (result.method) affectedMethods.add(result.method);
         }
     }
 

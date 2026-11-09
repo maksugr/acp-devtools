@@ -1,12 +1,10 @@
-// Pure spec-decoder factory — accepts a schema object and returns an
-// environment-agnostic resolver that maps `(message, path)` to schema
-// metadata (description, type name, in-spec / extension flag). Used by the
-// UI `JsonTree` for hover-tooltips and the `⚠ ext` badge.
-//
-// Same two-entry-point pattern as `validate-factory.ts`: Node uses
-// `spec-decoder.ts` (createRequire), browser uses `spec-decoder-browser.ts`
-// (Vite JSON import).
+// Spec-decoder factory: maps `(message, path)` to schema metadata
+// (description, type name, in-spec / extension flag) for the UI `JsonTree`
+// hover tooltips and its `⚠ ext` badge. One decoder per ACP protocol version;
+// `createSpecDecoder` picks the right one per message. `spec-decoder.ts` binds
+// it to the bundled schemas.
 
+import { isRemovedFromSpecField } from './removed-from-spec.js';
 import type { CapturedMessage } from './types.js';
 
 interface SchemaShape {
@@ -55,6 +53,11 @@ export interface SpecInfo {
     type?: string;
     /** Enum allowed values, when the schema constrains this field. */
     enumValues?: unknown[];
+    /**
+     * True for a field the current schema no longer has but an earlier
+     * version did (see `removed-from-spec.ts`). Implies `inSpec: false`.
+     */
+    removedFromSpec?: boolean;
 }
 
 export interface MessageSpecResolver {
@@ -73,6 +76,12 @@ export interface MessageSpecResolver {
 export interface ResolveMessageOptions {
     /** When this message is a response or error, the paired request's method. */
     pairedMethod?: string;
+    /**
+     * ACP protocol version to read the message with (see
+     * `frameProtocolVersion`). Defaults to 1. Versions without a schema
+     * resolve to `null`.
+     */
+    protocolVersion?: number;
 }
 
 export interface AcpSpecDecoder {
@@ -80,16 +89,49 @@ export interface AcpSpecDecoder {
         message: CapturedMessage,
         opts?: ResolveMessageOptions,
     ): MessageSpecResolver | null;
-    /** Sorted list of every method known to the schema (for diagnostics). */
+    /** Sorted list of every method the given protocol version's schema knows. */
+    knownMethods(protocolVersion?: number): string[];
+}
+
+interface SchemaDecoder {
+    resolveForMessage(message: CapturedMessage, pairedMethod?: string): MessageSpecResolver | null;
     knownMethods(): string[];
 }
 
 /**
- * Build a spec decoder bound to the given ACP schema. The factory builds the
- * `method → def` index up-front; per-field lookups are linear in the path
- * length and effectively O(1) amortised (≤5 segments in practice).
+ * Build a spec decoder over one schema per protocol version. Each version's
+ * `method → def` index is built on first use; per-field lookups are linear in
+ * the path length (≤5 segments in practice).
  */
-export function createSpecDecoder(schema: SchemaShape): AcpSpecDecoder {
+export function createSpecDecoder(
+    schemas: Readonly<Partial<Record<number, object>>>,
+): AcpSpecDecoder {
+    const decoders = new Map<number, SchemaDecoder>();
+    const decoderFor = (version: number): SchemaDecoder | null => {
+        const cached = decoders.get(version);
+        if (cached) return cached;
+        const schema = schemas[version];
+        if (!schema) return null;
+        const fresh = createSchemaDecoder(schema as SchemaShape, version);
+        decoders.set(version, fresh);
+        return fresh;
+    };
+    return {
+        resolveForMessage(message, opts = {}) {
+            return (
+                decoderFor(opts.protocolVersion ?? 1)?.resolveForMessage(
+                    message,
+                    opts.pairedMethod,
+                ) ?? null
+            );
+        },
+        knownMethods(protocolVersion = 1) {
+            return decoderFor(protocolVersion)?.knownMethods() ?? [];
+        },
+    };
+}
+
+function createSchemaDecoder(schema: SchemaShape, protocolVersion: number): SchemaDecoder {
     const defs = schema.$defs ?? {};
     const methodIndex = new Map<string, MethodSlots>();
     for (const [name, def] of Object.entries(defs)) {
@@ -296,7 +338,11 @@ export function createSpecDecoder(schema: SchemaShape): AcpSpecDecoder {
                         return { inSpec: false, isExtension: true };
                     }
                     const next = current.properties?.[segment];
-                    if (!next) return { inSpec: false, isExtension };
+                    if (!next) {
+                        return isRemovedFromSpecField(defName, inner, protocolVersion)
+                            ? { inSpec: false, isExtension, removedFromSpec: true }
+                            : { inSpec: false, isExtension };
+                    }
                     current = next;
                 }
                 // Terminal resolve — pass the actual value so unions surface
@@ -316,9 +362,9 @@ export function createSpecDecoder(schema: SchemaShape): AcpSpecDecoder {
 
     function resolveForMessage(
         message: CapturedMessage,
-        opts: ResolveMessageOptions = {},
+        pairedMethod?: string,
     ): MessageSpecResolver | null {
-        const defName = pickDef(message, opts.pairedMethod);
+        const defName = pickDef(message, pairedMethod);
         if (!defName) return null;
         const _envelope = envelopeKey(message.kind);
         if (!_envelope) return null;

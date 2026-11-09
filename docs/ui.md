@@ -68,9 +68,11 @@ Selecting a row renders its full JSON-RPC frame in three tabs:
   **spec-aware**: when the method maps to a known ACP request/response/
   notification, the top shows the schema-def name (e.g. `ACP TYPE
 InitializeRequest`) and a one-line description. Each field carries a ⓘ hover
-  tooltip from the schema, and a `⚠ ext` badge marks anything under `_meta` or
-  fields not declared in the spec — handy for spotting editor-specific
-  extensions.
+  tooltip from the schema. A `⚠ ext` badge marks anything under `_meta`, and
+  `⚠ unknown` a field the spec doesn't declare — handy for spotting
+  editor-specific extensions. Fields that recent ACP versions dropped but agents
+  still send (such as `models` on `session/new`) get a grey `removed from spec`
+  badge instead; the frame stays valid.
 - **Raw** — the verbatim wire frame.
 - **Meta** — capture metadata (seq, timestamps, direction, sizes).
 - **Spec** — schema-validation result for the frame (see below).
@@ -83,9 +85,10 @@ The same check behind `acp-devtools validate` surfaces in three places:
   invalid frame. `N` is the ajv error count; the tooltip lists the first few.
 - **Detail → Spec tab** — for invalid frames, a card per ajv error with the
   keyword (`required`/`type`/`enum`), JSON-pointer path, and message. For valid
-  frames, the matched `$def` (e.g. `InitializeRequest`). For frames that can't
-  be validated (parse error, unknown method, response without a paired request)
-  the tab explains why instead of faking a green tick.
+  frames, the matched `$def` (e.g. `InitializeRequest`) and the protocol version
+  whose schema it came from. For frames that can't be validated (parse error,
+  unknown method, response without a paired request, unsupported protocol
+  version) the tab explains why instead of faking a green tick.
 - **Footer chip** — `spec ⚠ N` next to `p50`/`p99` aggregates non-conforming
   frames across the visible session (or `spec ✓` when clean); the tooltip lists
   affected methods.

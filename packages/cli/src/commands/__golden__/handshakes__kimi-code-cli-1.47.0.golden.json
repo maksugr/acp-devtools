@@ -1,0 +1,298 @@
+{
+  "cli": {
+    "validate": {
+      "exitCode": 0,
+      "output": {
+        "protocolVersion": 1,
+        "checked": 4,
+        "skipped": 2,
+        "violations": [],
+        "advisories": [
+          {
+            "method": "initialize",
+            "schemaName": "InitializeRequest",
+            "path": "clientInfo",
+            "message": "missing clientInfo — will be required in a future ACP version",
+            "frames": 1,
+            "firstSeqs": [
+              1
+            ]
+          }
+        ]
+      }
+    },
+    "stats": {
+      "exitCode": 0,
+      "output": {
+        "sessionName": "handshakes/kimi-code-cli-1.47.0.json",
+        "clientName": null,
+        "agentCommand": "uvx kimi-cli acp",
+        "startedAt": 1781269411683,
+        "total": 6,
+        "direction": {
+          "editorToAgent": 3,
+          "agentToEditor": 3
+        },
+        "kind": {
+          "request": 3,
+          "response": 1,
+          "notification": 0,
+          "error": 2,
+          "unknown": 0
+        },
+        "parseErrors": 0,
+        "spec": {
+          "checked": 4,
+          "valid": 4,
+          "violations": 0,
+          "affectedMethods": []
+        },
+        "latency": {
+          "sampleSize": 3,
+          "p50": 875,
+          "p90": 875,
+          "p99": 875,
+          "max": 875,
+          "mean": 875
+        },
+        "insights": [
+          {
+            "kind": "errors",
+            "summary": "2 methods returned an error",
+            "detail": "session/new, session/prompt",
+            "methods": [
+              "session/new",
+              "session/prompt"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "mcp": {
+    "find_spec_violations": {
+      "protocol_version": 1,
+      "checked": 4,
+      "violations": [],
+      "advisories": [
+        {
+          "method": "initialize",
+          "path": "clientInfo",
+          "message": "missing clientInfo — will be required in a future ACP version",
+          "frames": 1,
+          "firstSeqs": [
+            1
+          ]
+        }
+      ]
+    },
+    "get_session_metadata": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": null,
+          "title": null,
+          "version": null,
+          "platform": null
+        },
+        "agent": {
+          "name": "Kimi Code CLI",
+          "version": "1.47.0",
+          "authMethods": 1
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": []
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      }
+    },
+    "get_latency_stats": {
+      "perMethod": [
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 875,
+          "p99": 875,
+          "max": 875,
+          "totalLatencyMs": 875,
+          "latencies": [
+            875
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 875,
+          "p99": 875,
+          "max": 875,
+          "totalLatencyMs": 875,
+          "latencies": [
+            875
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 875,
+          "p99": 875,
+          "max": 875,
+          "totalLatencyMs": 875,
+          "latencies": [
+            875
+          ]
+        }
+      ],
+      "sessionLatency": {
+        "sampleSize": 3,
+        "p50": 875,
+        "p90": 875,
+        "p99": 875,
+        "max": 875
+      },
+      "insights": [
+        {
+          "kind": "errors",
+          "summary": "2 methods returned an error",
+          "detail": "session/new, session/prompt",
+          "methods": [
+            "session/new",
+            "session/prompt"
+          ]
+        }
+      ]
+    },
+    "get_session_summary": {
+      "metadata": {
+        "protocolVersion": 1,
+        "client": {
+          "name": null,
+          "title": null,
+          "version": null,
+          "platform": null
+        },
+        "agent": {
+          "name": "Kimi Code CLI",
+          "version": "1.47.0",
+          "authMethods": 1
+        },
+        "clientCapabilities": {
+          "fsReadTextFile": true,
+          "fsWriteTextFile": true,
+          "terminal": false,
+          "authTerminal": false,
+          "authGateway": false
+        },
+        "agentCapabilities": {
+          "prompt": true,
+          "loadSession": true
+        },
+        "runtime": {
+          "currentMode": null,
+          "modeChanges": 0,
+          "currentModel": null,
+          "modelChanges": 0,
+          "availableCommands": []
+        },
+        "extensions": {
+          "jetbrainsProxyConfig": null
+        }
+      },
+      "totals": {
+        "messages": 6,
+        "direction": {
+          "editorToAgent": 3,
+          "agentToEditor": 3
+        },
+        "kind": {
+          "request": 3,
+          "response": 1,
+          "notification": 0,
+          "error": 2,
+          "unknown": 0
+        }
+      },
+      "latency": {
+        "sampleSize": 3,
+        "p50": 875,
+        "p90": 875,
+        "p99": 875,
+        "max": 875
+      },
+      "perMethod": [
+        {
+          "method": "session/prompt",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 875,
+          "p99": 875,
+          "max": 875,
+          "totalLatencyMs": 875,
+          "latencies": [
+            875
+          ]
+        },
+        {
+          "method": "session/new",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 875,
+          "p99": 875,
+          "max": 875,
+          "totalLatencyMs": 875,
+          "latencies": [
+            875
+          ]
+        },
+        {
+          "method": "initialize",
+          "kind": "request",
+          "count": 1,
+          "sampleSize": 1,
+          "p50": 875,
+          "p99": 875,
+          "max": 875,
+          "totalLatencyMs": 875,
+          "latencies": [
+            875
+          ]
+        }
+      ],
+      "insights": [
+        {
+          "kind": "errors",
+          "summary": "2 methods returned an error",
+          "detail": "session/new, session/prompt",
+          "methods": [
+            "session/new",
+            "session/prompt"
+          ]
+        }
+      ]
+    }
+  }
+}

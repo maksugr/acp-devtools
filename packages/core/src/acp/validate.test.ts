@@ -1,6 +1,16 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CapturedMessage } from './types.js';
-import { knownAcpMethods, validateAcpMessage } from './validate.js';
+import { knownAcpMethods, validateAcpMessage, validateMessages } from './validate.js';
+
+// Real ACP v2 traffic recorded from the SDK's reference client and agent
+// (fixtures/generate-v2-session.mjs).
+const v2Session = (
+    JSON.parse(readFileSync(join(process.cwd(), 'fixtures/v2-session.json'), 'utf8')) as {
+        messages: CapturedMessage[];
+    }
+).messages;
 
 function mk(overrides: Partial<CapturedMessage> = {}): CapturedMessage {
     return {
@@ -204,6 +214,91 @@ describe('soon-required advisories', () => {
     });
 });
 
+describe('validateAcpMessage — protocol versions', () => {
+    const v2Initialize = v2Session.find((m) => m.method === 'initialize')!;
+
+    it('validates against the requested version and reports it', () => {
+        const r = validateAcpMessage(v2Initialize, { protocolVersion: 2 });
+        expect(r).toMatchObject({
+            valid: true,
+            schemaName: 'InitializeRequest',
+            protocolVersion: 2,
+        });
+    });
+
+    it('flags a v2 frame read with the v1 schema', () => {
+        // A v2 prompt response carries `messageId` and no `stopReason`, which
+        // v1 requires.
+        const promptResponse = v2Session.find(
+            (m) =>
+                m.kind === 'response' &&
+                (m.payload as { result?: { messageId?: unknown } }).result?.messageId !== undefined,
+        )!;
+        const opts = { pairedMethod: 'session/prompt' };
+        expect(validateAcpMessage(promptResponse, { ...opts, protocolVersion: 2 }).valid).toBe(
+            true,
+        );
+        expect(validateAcpMessage(promptResponse, { ...opts, protocolVersion: 1 }).valid).toBe(
+            false,
+        );
+    });
+
+    it('defaults to v1', () => {
+        expect(validateAcpMessage(mk()).protocolVersion).toBe(1);
+    });
+
+    it('skips a version it has no schema for', () => {
+        const r = validateAcpMessage(mk(), { protocolVersion: 99 });
+        expect(r).toMatchObject({
+            valid: true,
+            skipped: 'unsupported-protocol-version',
+            protocolVersion: 99,
+        });
+    });
+});
+
+describe('validateMessages', () => {
+    it('reads a v2 session with the v2 schema, every frame valid', () => {
+        const results = validateMessages(v2Session);
+        expect(results.size).toBe(v2Session.length);
+        for (const r of results.values()) {
+            expect(r.skipped).toBeUndefined();
+            expect(r.valid).toBe(true);
+            expect(r.protocolVersion).toBe(2);
+        }
+    });
+
+    it("gives each response its request's method", () => {
+        const results = validateMessages(v2Session);
+        const permissionReply = v2Session.find(
+            (m) =>
+                m.kind === 'response' &&
+                m.direction === 'editor-to-agent' &&
+                (m.payload as { result?: { outcome?: unknown } })?.result?.outcome,
+        )!;
+        expect(results.get(permissionReply.seq)).toMatchObject({
+            method: 'session/request_permission',
+            schemaName: 'RequestPermissionResponse',
+        });
+    });
+
+    it('reads a session without initialize as v1', () => {
+        const prompt = mk({
+            method: 'session/prompt',
+            payload: {
+                jsonrpc: '2.0',
+                id: 1,
+                method: 'session/prompt',
+                params: { sessionId: 's', prompt: [{ type: 'text', text: 'hi' }] },
+            },
+        });
+        expect(validateMessages([prompt]).get(1)).toMatchObject({
+            valid: true,
+            protocolVersion: 1,
+        });
+    });
+});
+
 describe('knownAcpMethods', () => {
     it('lists at least the core handshake + session lifecycle methods', () => {
         const names = new Set(knownAcpMethods());
@@ -211,5 +306,15 @@ describe('knownAcpMethods', () => {
         expect(names.has('session/new')).toBe(true);
         expect(names.has('session/prompt')).toBe(true);
         expect(names.has('session/update')).toBe(true);
+    });
+
+    it("follows each version's method set", () => {
+        const v1 = new Set(knownAcpMethods(1));
+        const v2 = new Set(knownAcpMethods(2));
+        expect(v1.has('fs/read_text_file')).toBe(true);
+        expect(v2.has('fs/read_text_file')).toBe(false);
+        expect(v2.has('auth/login')).toBe(true);
+        expect(v2.has('tool_call/cancel')).toBe(true);
+        expect(knownAcpMethods(99)).toEqual([]);
     });
 });

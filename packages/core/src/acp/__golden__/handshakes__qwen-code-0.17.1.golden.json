@@ -1,0 +1,212 @@
+{
+  "frames": 5,
+  "validation": {
+    "summary": {
+      "checked": 4,
+      "valid": 4,
+      "invalid": 0,
+      "advisories": 1,
+      "skipped": {
+        "wrong-kind": 1
+      },
+      "byProtocolVersion": {
+        "1": 4
+      }
+    },
+    "outcomes": [
+      {
+        "schema": "InitializeRequest",
+        "valid": true,
+        "advisories": [
+          "clientInfo"
+        ],
+        "frames": 1,
+        "firstSeqs": [
+          1
+        ]
+      },
+      {
+        "schema": "NewSessionRequest",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          2
+        ]
+      },
+      {
+        "schema": "PromptRequest",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          3
+        ]
+      },
+      {
+        "schema": "InitializeResponse",
+        "valid": true,
+        "frames": 1,
+        "firstSeqs": [
+          4
+        ]
+      },
+      {
+        "method": null,
+        "skipped": "wrong-kind",
+        "frames": 1,
+        "firstSeqs": [
+          5
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "protocolVersion": 1,
+    "client": {
+      "name": null,
+      "title": null,
+      "version": null,
+      "platform": null
+    },
+    "agent": {
+      "name": "qwen-code",
+      "version": "0.17.1",
+      "authMethods": 1
+    },
+    "clientCapabilities": {
+      "fsReadTextFile": true,
+      "fsWriteTextFile": true,
+      "terminal": false,
+      "authTerminal": false,
+      "authGateway": false
+    },
+    "agentCapabilities": {
+      "prompt": true,
+      "loadSession": true
+    },
+    "runtime": {
+      "currentMode": null,
+      "modeChanges": 0,
+      "currentModel": null,
+      "modelChanges": 0,
+      "availableCommands": []
+    },
+    "extensions": {
+      "jetbrainsProxyConfig": null
+    }
+  },
+  "perMethod": [
+    {
+      "method": "session/prompt",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 3331,
+      "p99": 3331,
+      "max": 3331,
+      "totalLatencyMs": 3331
+    },
+    {
+      "method": "session/new",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 0,
+      "p50": null,
+      "p99": null,
+      "max": null,
+      "totalLatencyMs": null
+    },
+    {
+      "method": "initialize",
+      "kind": "request",
+      "count": 1,
+      "sampleSize": 1,
+      "p50": 3329,
+      "p99": 3329,
+      "max": 3329,
+      "totalLatencyMs": 3329
+    }
+  ],
+  "insights": [
+    {
+      "kind": "hotspot",
+      "summary": "session/prompt consumed 3.33s of total wall time",
+      "methods": [
+        "session/prompt"
+      ]
+    },
+    {
+      "kind": "errors",
+      "summary": "1 method returned an error",
+      "methods": [
+        "session/prompt"
+      ]
+    }
+  ],
+  "redactedFields": 0,
+  "previews": [
+    "1",
+    "2",
+    "3 [prompt] ping",
+    "4",
+    "5"
+  ],
+  "spec": {
+    "InitializeRequest": {
+      "params": "unresolved",
+      "params.clientCapabilities": "spec object desc",
+      "params.clientCapabilities.fs": "spec object desc",
+      "params.clientCapabilities.fs.readTextFile": "spec boolean desc",
+      "params.clientCapabilities.fs.writeTextFile": "spec boolean desc",
+      "params.protocolVersion": "spec integer desc"
+    },
+    "InitializeResponse": {
+      "result": "unresolved",
+      "result.agentCapabilities": "spec object desc",
+      "result.agentCapabilities.loadSession": "spec boolean desc",
+      "result.agentCapabilities.mcpCapabilities": "spec object desc",
+      "result.agentCapabilities.mcpCapabilities.http": "spec boolean desc",
+      "result.agentCapabilities.mcpCapabilities.sse": "spec boolean desc",
+      "result.agentCapabilities.promptCapabilities": "spec object desc",
+      "result.agentCapabilities.promptCapabilities.audio": "spec boolean desc",
+      "result.agentCapabilities.promptCapabilities.embeddedContext": "spec boolean desc",
+      "result.agentCapabilities.promptCapabilities.image": "spec boolean desc",
+      "result.agentCapabilities.sessionCapabilities": "spec object desc",
+      "result.agentCapabilities.sessionCapabilities.list": "spec object desc",
+      "result.agentCapabilities.sessionCapabilities.resume": "spec object desc",
+      "result.agentInfo": "spec object desc",
+      "result.agentInfo.name": "spec string desc",
+      "result.agentInfo.title": "spec string desc",
+      "result.agentInfo.version": "spec string desc",
+      "result.authMethods": "spec array desc",
+      "result.authMethods.[]": "spec object desc",
+      "result.authMethods.[]._meta": "spec ext object desc",
+      "result.authMethods.[]._meta.args": "not-in-spec ext",
+      "result.authMethods.[]._meta.args.[]": "not-in-spec ext",
+      "result.authMethods.[]._meta.type": "not-in-spec ext",
+      "result.authMethods.[].description": "spec string desc",
+      "result.authMethods.[].id": "spec string desc",
+      "result.authMethods.[].name": "spec string desc",
+      "result.protocolVersion": "spec integer desc"
+    },
+    "NewSessionRequest": {
+      "params": "unresolved",
+      "params.cwd": "spec string desc",
+      "params.mcpServers": "spec array desc"
+    },
+    "PromptRequest": {
+      "params": "unresolved",
+      "params.prompt": "spec array desc",
+      "params.prompt.[]": "spec object desc",
+      "params.prompt.[].text": "spec string desc",
+      "params.prompt.[].type": "not-in-spec",
+      "params.sessionId": "spec string desc"
+    },
+    "PromptResponse": {
+      "error": "unresolved",
+      "error.code": "not-in-spec",
+      "error.data": "not-in-spec",
+      "error.data.details": "not-in-spec",
+      "error.message": "not-in-spec"
+    }
+  }
+}
